@@ -1,0 +1,21 @@
+<div>
+  <h2>Iniciar Sesión</h2>
+
+  <form (submit)="login(); $event.preventDefault()">
+    <div class="form-group">
+      <label>Email:</label>
+      <input type="text" [(ngModel)]="email" name="email" required>
+    </div>
+
+    <div class="form-group">
+      <label>Password:</label>
+      <input type="password" [(ngModel)]="password" name="password" required>
+    </div>
+
+    <button type="submit">Log In</button>
+  </form>
+
+  <button type="button" (click)="goToHome()">Volver al home</button>
+
+  <p>{{ message }}</p>
+</div>
