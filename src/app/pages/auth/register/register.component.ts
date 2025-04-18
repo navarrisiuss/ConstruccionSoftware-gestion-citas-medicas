@@ -1,0 +1,68 @@
+import {Component} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {Router} from '@angular/router';
+import {Patient} from '../../../models/patient.model';
+import {Gender} from '../../../models/gender.enum';
+import {NgIf} from '@angular/common';
+
+@Component({
+  selector: 'app-register',
+  imports: [
+    FormsModule,
+    NgIf
+  ],
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.css'
+})
+export class RegisterComponent {
+  constructor(private router: Router) {
+  }
+
+  name: string = '';
+  paternalLastName: string = '';
+  maternalLastName: string = '';
+  email: string = '';
+  password: string = '';
+  rut: string = '';
+  birthDate: string = ''; // En formulario será string, luego se convierte a Date
+  phone: string = '';
+  address: string = '';
+  gender: Gender = Gender.Male; // Valor por defecto
+
+  Gender = Gender; // ¡Importante!
+
+  successMessage: string = '';
+
+  register() {
+    const patient = new Patient(
+      this.name,
+      this.paternalLastName,
+      this.maternalLastName,
+      this.email,
+      this.password,
+      this.rut,
+      new Date(this.birthDate), // string a Date
+      this.phone,
+      this.address,
+      this.gender
+    );
+    this.resetForm();
+  }
+
+  resetForm() {
+    this.name = '';
+    this.paternalLastName = '';
+    this.maternalLastName = '';
+    this.email = '';
+    this.password = '';
+    this.rut = '';
+    this.birthDate = '';
+    this.phone = '';
+    this.address = '';
+    this.gender = Gender.Male;
+  }
+
+  backToHome() {
+    this.router.navigate(['/home']).then(r => r);
+  }
+}

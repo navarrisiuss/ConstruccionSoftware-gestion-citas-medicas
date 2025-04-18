@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {AuthService} from '../../services/auth.service';
-import {Patient} from '../../models/patient.model';
+import {AuthService} from '../../../services/auth.service';
+import {Patient} from '../../../models/patient.model';
 
 @Component({
   selector: 'app-patient-dashboard',
@@ -20,6 +20,10 @@ export class PatientDashboardComponent implements OnInit {
     if (user instanceof Patient) {
       this.currentUser = user;
     }
+  }
+
+  goToNewAppointment() {
+    this.router.navigate(['/appointment-form']).then(r => r);
   }
 
   logout() {

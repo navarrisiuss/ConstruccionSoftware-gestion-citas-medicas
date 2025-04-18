@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { Assistant } from '../../models/assistant.model';
+import { AuthService } from '../../../services/auth.service';
+import { Assistant } from '../../../models/assistant.model';
 
 @Component({
   selector: 'app-assistant-dashboard',
@@ -25,4 +25,7 @@ export class AssistantDashboardComponent implements OnInit {
     this.router.navigate(['/login']).then(r => r);
   }
 
+  goToRegisterPatient() {
+    this.router.navigate(['/register-patient']).then(r => r);
+  }
 }

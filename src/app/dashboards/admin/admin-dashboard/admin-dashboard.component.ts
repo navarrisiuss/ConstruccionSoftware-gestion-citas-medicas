@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../../../services/auth.service';
-import { Admin } from '../../../models/admin.model';
+import {Component, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {AuthService} from '../../../services/auth.service';
+import {Admin} from '../../../models/admin.model';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -12,7 +12,8 @@ import { Admin } from '../../../models/admin.model';
 export class AdminDashboardComponent implements OnInit {
   currentUser!: Admin | null;
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(private router: Router, private authService: AuthService) {
+  }
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
@@ -20,12 +21,13 @@ export class AdminDashboardComponent implements OnInit {
       this.currentUser = user;
     }
   }
+
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']).then(r => r);
   }
 
-  registerPhysician() {
+  goToRegisterPhysician() {
     this.router.navigate(['/register-physician']).then(r => r);
   }
 }

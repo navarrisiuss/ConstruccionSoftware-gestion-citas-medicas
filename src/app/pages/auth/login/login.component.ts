@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Admin } from '../../models/admin.model';
-import { Physician } from '../../models/physician.model';
-import { Assistant } from '../../models/assistant.model';
-import { Patient } from '../../models/patient.model';
-import { AuthService } from '../../services/auth.service';
+import { Admin } from '../../../models/admin.model';
+import { Physician } from '../../../models/physician.model';
+import { Assistant } from '../../../models/assistant.model';
+import { Patient } from '../../../models/patient.model';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -28,8 +28,19 @@ export class LoginComponent {
     new Admin("admin", "admin", "admin", "admin@admin.com", '1234'),
     new Physician("medico", "medico", "medico", "medico@medico.com", '1234', "odontologo"),
     new Assistant("asistente", "asistente", "asistente", "asistente@asistente.com", '1234'),
-    new Patient("paciente", "paciente", "paciente", "paciente@paciente.com", '1234'),
-  ];
+    new Patient(
+      "paciente",
+      "paciente",
+      "paciente",
+      "paciente@paciente.com",
+      '1234',
+      "123456789-0",
+      new Date("2000-05-18"),
+      "+564211155",
+      "Calle Pepito 123",
+      0
+    )
+];
 
   login() {
     const foundUser = this.users.find(user =>
@@ -53,6 +64,10 @@ export class LoginComponent {
     } else {
       this.message = 'Invalid username or password';
     }
+  }
+
+  goToRegister() {
+    this.router.navigate(['/register']).then(r => r);
   }
 
   goToHome() {

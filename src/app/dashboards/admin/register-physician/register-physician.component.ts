@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
-import {Physician} from '../../../../models/physician.model';
+import {Component} from '@angular/core';
+import {Physician} from '../../../models/physician.model';
 import {FormsModule} from '@angular/forms';
 import {NgIf} from '@angular/common';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-register-physician',
@@ -13,6 +14,9 @@ import {NgIf} from '@angular/common';
   styleUrl: './register-physician.component.css'
 })
 export class RegisterPhysicianComponent {
+  constructor(private router: Router) {
+  }
+
   name: string = '';
   paternalLastName: string = '';
   maternalLastName: string = '';
@@ -48,5 +52,9 @@ export class RegisterPhysicianComponent {
     this.email = '';
     this.password = '';
     this.specialty = '';
+  }
+
+  backToDashboard() {
+    this.router.navigate(['/admin-dashboard']).then(r => r);
   }
 }
