@@ -1,33 +1,27 @@
-import {Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
-import {AuthService} from '../../../services/auth.service';
-import {Patient} from '../../../models/patient.model';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-patient-dashboard',
-  imports: [],
   templateUrl: './patient-dashboard.component.html',
-  styleUrl: './patient-dashboard.component.css'
+  styleUrls: ['./patient-dashboard.component.css']
 })
 export class PatientDashboardComponent implements OnInit {
-  currentUser!: Patient | null;
+  currentUser: any = null; // Cambiar a 'any'
 
-  constructor(private router: Router, private authService: AuthService) {
+  constructor(private router: Router, private authService: AuthService) {}
+
+  ngOnInit(): void {
+    this.currentUser = this.authService.getCurrentUser(); // Obtener el usuario del servicio
   }
 
-  ngOnInit() {
-    const user = this.authService.getCurrentUser();
-    if (user instanceof Patient) {
-      this.currentUser = user;
-    }
+  goToNewAppointment(): void {
+    this.router.navigate(['/new-appointment']); // Navegar al formulario de nueva cita
   }
 
-  goToNewAppointment() {
-    this.router.navigate(['/appointment-form']).then(r => r);
-  }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']).then(r => r);
+  logout(): void {
+    this.authService.logout(); // Eliminar el usuario de la sesión
+    this.router.navigate(['/home']); // Navegar a la página de inicio o login
   }
 }

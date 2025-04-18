@@ -5,6 +5,8 @@ import {Patient} from '../../../models/patient.model';
 import {Gender} from '../../../models/gender.enum';
 import {NgIf} from '@angular/common';
 
+import {PatientService} from '../../../services/patient.service';
+
 @Component({
   selector: 'app-register',
   imports: [
@@ -15,9 +17,9 @@ import {NgIf} from '@angular/common';
   styleUrl: './register.component.css'
 })
 export class RegisterComponent {
-  constructor(private router: Router) {
+  constructor(private router: Router, private patientService: PatientService) {
   }
-
+  patient = new Patient('', '', '', '', '', '', new Date(), '', '', 0);
   name: string = '';
   paternalLastName: string = '';
   maternalLastName: string = '';
@@ -34,7 +36,7 @@ export class RegisterComponent {
   successMessage: string = '';
 
   register() {
-    const patient = new Patient(
+    this.patient = new Patient(
       this.name,
       this.paternalLastName,
       this.maternalLastName,
@@ -46,8 +48,21 @@ export class RegisterComponent {
       this.address,
       this.gender
     );
+    this.sendHTTPPetition()
     this.resetForm();
   }
+
+  sendHTTPPetition() {
+    this.patientService.registerPatient(this.patient).subscribe({
+      next: (response) => {
+        console.log('Paciente registrado exitosamente:', response);
+      },
+      error: (error) => {
+        console.error('Error registrando paciente:', error);
+      }
+    });
+  }
+
 
   resetForm() {
     this.name = '';

@@ -1,4 +1,4 @@
 <h1>patient-dashboard works!</h1>
-<p>Bienvenido, {{ currentUser?.getFullName() }}</p>
+<p>Bienvenido, {{ currentUser?.name }} {{ currentUser?.paternalLastName }} {{ currentUser?.maternalLastName }}</p>
 <button (click)="goToNewAppointment()">Agendar Cita</button>
 <button (click)="logout()">Cerrar sesión</button>

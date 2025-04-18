@@ -1,0 +1,17 @@
+{
+  "patients": [
+    {
+      "id": "50f4",
+      "name": "a",
+      "paternalLastName": "a",
+      "maternalLastName": "a",
+      "email": "a",
+      "password": "a",
+      "rut": "a",
+      "birthDate": "2025-04-01T00:00:00.000Z",
+      "phone": "a",
+      "address": "a",
+      "gender": 0
+    }
+  ]
+}
