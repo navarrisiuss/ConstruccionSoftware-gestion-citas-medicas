@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { Admin } from '../../models/admin.model';
+import { AuthService } from '../../../services/auth.service';
+import { Admin } from '../../../models/admin.model';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -23,5 +23,9 @@ export class AdminDashboardComponent implements OnInit {
   logout() {
     this.authService.logout();
     this.router.navigate(['/login']).then(r => r);
+  }
+
+  registerPhysician() {
+    this.router.navigate(['/register-physician']).then(r => r);
   }
 }

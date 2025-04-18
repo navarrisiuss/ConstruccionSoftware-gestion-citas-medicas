@@ -5,13 +5,7 @@ export class Person {
     private maternalLastName: string,
     private email: string,
     private password: string
-  ) {
-    this.name = name;
-    this.paternalLastName = paternalLastName;
-    this.maternalLastName = maternalLastName;
-    this.email = email;
-    this.password = password;
-  }
+  ) {}
 
   isValid(): boolean {
     return this.name.length > 0 && this.paternalLastName.length > 0 && this.maternalLastName.length > 0 && this.email.length > 0 && this.password.length > 0;

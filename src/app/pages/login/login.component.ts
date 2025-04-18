@@ -26,7 +26,7 @@ export class LoginComponent {
 
   users = [
     new Admin("admin", "admin", "admin", "admin@admin.com", '1234'),
-    new Physician("medico", "medico", "medico", "medico@medico.com", '1234'),
+    new Physician("medico", "medico", "medico", "medico@medico.com", '1234', "odontologo"),
     new Assistant("asistente", "asistente", "asistente", "asistente@asistente.com", '1234'),
     new Patient("paciente", "paciente", "paciente", "paciente@paciente.com", '1234'),
   ];
