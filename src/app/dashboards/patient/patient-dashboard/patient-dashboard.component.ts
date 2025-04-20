@@ -17,7 +17,7 @@ export class PatientDashboardComponent implements OnInit {
   }
 
   goToNewAppointment(): void {
-    this.router.navigate(['/new-appointment']); // Navegar al formulario de nueva cita
+    this.router.navigate(['/appointment-form']); // Navegar al formulario de nueva cita
   }
 
   logout(): void {
