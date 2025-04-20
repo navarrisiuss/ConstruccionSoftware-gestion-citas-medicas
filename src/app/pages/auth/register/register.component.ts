@@ -154,10 +154,11 @@ export class RegisterComponent {
         console.log('Paciente registrado exitosamente:', response);
       },
       error: (error) => {
-        console.error('Error al registrar paciente:', error);
+        console.error('Error registrando paciente:', error);
       }
     });
   }
+
 
   resetForm() {
     this.name = '';

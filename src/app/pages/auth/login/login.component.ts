@@ -1,76 +1,50 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Admin } from '../../../models/admin.model';
-import { Physician } from '../../../models/physician.model';
-import { Assistant } from '../../../models/assistant.model';
-import { Patient } from '../../../models/patient.model';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [
-    FormsModule
-  ],
+  imports: [FormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  constructor(private router: Router, private authService: AuthService) {}
-
   email: string = '';
   password: string = '';
   message: string = '';
 
-  // Lista de usuarios de ejemplo
-
-  users = [
-    new Admin("admin", "admin", "admin", "admin@admin.com", '1234'),
-    new Physician("medico", "medico", "medico", "medico@medico.com", '1234', "odontologo"),
-    new Assistant("asistente", "asistente", "asistente", "asistente@asistente.com", '1234'),
-    new Patient(
-      "paciente",
-      "paciente",
-      "paciente",
-      "paciente@paciente.com",
-      '1234',
-      "123456789-0",
-      new Date("2000-05-18"),
-      "+564211155",
-      "Calle Pepito 123",
-      0
-    )
-];
+  constructor(private router: Router, private authService: AuthService) {}
 
   login() {
-    const foundUser = this.users.find(user =>
-      user.getEmail() === this.email && user.getPassword() === this.password
-    );
+    this.authService.login(this.email, this.password).subscribe(
+      (response) => {
+        if (response.length > 0) {
+          const usuario: any = response[0]; // Cambiado a 'any'
 
-    // Si se encuentra un usuario se guarda y redirige a su respectivo dashboard
-    if (foundUser) {
-
-      this.authService.setCurrentUser(foundUser);
-
-      if (foundUser instanceof Admin) {
-        this.router.navigate(['/admin-dashboard']).then(r => r);
-      } else if (foundUser instanceof Physician) {
-        this.router.navigate(['/physician-dashboard']).then(r => r);
-      } else if (foundUser instanceof Assistant) {
-        this.router.navigate(['/assistant-dashboard']).then(r => r);
-      } else {
-        this.router.navigate(['/patient-dashboard']).then(r => r);
+          if (usuario.password === this.password) {
+            this.message = 'Login exitoso!';
+            this.authService.setCurrentUser(usuario); // Guardar usuario con 'any'
+            this.router.navigate(['patient-dashboard']);
+          } else {
+            this.message = 'Contraseña incorrecta.';
+          }
+        } else {
+          this.message = 'Email no encontrado.';
+        }
+      },
+      (error) => {
+        console.error(error);
+        this.message = 'Error en el servidor.';
       }
-    } else {
-      this.message = 'Invalid username or password';
-    }
+    );
   }
 
   goToRegister() {
-    this.router.navigate(['/register']).then(r => r);
+    this.router.navigate(['/register']).then((r) => r);
   }
 
   goToHome() {
-    this.router.navigate(['/home']).then(r => r);
+    this.router.navigate(['/home']).then((r) => r);
   }
 }

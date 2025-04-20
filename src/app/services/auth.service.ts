@@ -1,32 +1,36 @@
 import { Injectable } from '@angular/core';
-import { Person } from '../models/person.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUser: Person | null = null;
-  private storageKey = 'currentUser'; // clave para guardar en localStorage
+  private currentUser: any = null; // Cambiado a 'any'
+  private storageKey = 'currentUser'; // Clave para guardar en localStorage
 
-  constructor() {
-    // Al cargar el servicio, intenta leer del localStorage
-    const savedUser = localStorage.getItem(this.storageKey);
-    if (savedUser) {
-      this.currentUser = JSON.parse(savedUser);
-    }
+  constructor(private http: HttpClient) {}
+
+  private apiUrl = 'http://localhost:3000/patients'; // Endpoint
+
+  login(email: string, password: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}?email=${email}`); // Usar 'any' aquí también
   }
 
-  setCurrentUser(user: Person) {
-    this.currentUser = user;
-    localStorage.setItem(this.storageKey, JSON.stringify(user)); // Guardamos en localStorage
-  }
-
-  getCurrentUser(): Person | null {
+  // Obtener el usuario actual
+  getCurrentUser(): any {
     return this.currentUser;
   }
 
+  // Log out del usuario
   logout() {
     this.currentUser = null;
     localStorage.removeItem(this.storageKey); // Eliminamos del localStorage
+  }
+
+  // Método para guardar el usuario en localStorage
+  setCurrentUser(user: any) { // Cambiar a 'any'
+    this.currentUser = user;
+    localStorage.setItem(this.storageKey, JSON.stringify(user));
   }
 }
