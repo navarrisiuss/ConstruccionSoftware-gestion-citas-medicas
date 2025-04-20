@@ -1,4 +1,6 @@
-<h1>assistant-dashboard works!</h1>
-<p>Bienvenido, {{ currentUser?.getFullName() }}</p>
-<button (click)="logout()">Cerrar sesión</button>
-<button (click)="goToRegisterPatient()">Registrar Paciente</button>
+<div class="container">
+    <h1>Assistant Dashboard</h1>
+    <p>Bienvenido, {{ currentUser?.getFullName() }}</p>
+    <button (click)="logout()">Cerrar sesión</button>
+    <button (click)="goToRegisterPatient()">Registrar Paciente</button>
+  </div>

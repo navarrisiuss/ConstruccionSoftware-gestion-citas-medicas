@@ -1,5 +1,6 @@
-<h1>admin-dashboard works!</h1>
-<p>Bienvenido, {{ currentUser?.getFullName() }}</p>
-<button (click)="goToRegisterPhysician()">Registrar Medico</button>
-<button (click)="logout()">Cerrar sesión</button>
-
+<div class="container">
+    <h1>Admin Dashboard</h1>
+    <p>Bienvenido, {{ currentUser?.getFullName() }}</p>
+    <button (click)="goToRegisterPhysician()">Registrar Médico</button>
+    <button (click)="logout()">Cerrar sesión</button>
+  </div>
