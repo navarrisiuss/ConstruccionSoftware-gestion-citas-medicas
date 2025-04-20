@@ -23,6 +23,7 @@ export class LoginComponent {
           const usuario: any = response[0]; // Cambiado a 'any'
 
           if (usuario.password === this.password) {
+            console.log('Usuario autenticado:', usuario);
             this.message = 'Login exitoso!';
             this.authService.setCurrentUser(usuario); // Guardar usuario con 'any'
             this.router.navigate(['patient-dashboard']);
