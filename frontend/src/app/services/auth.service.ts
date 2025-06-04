@@ -11,7 +11,7 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  private apiUrl = 'http://localhost:3000/patients'; // Endpoint
+  private apiUrl = 'http://localhost:3000/api/auth';// Endpoint
 
   login(email: string, password: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}?email=${email}`); // Usar 'any' aquí también
