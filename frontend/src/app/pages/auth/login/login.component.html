@@ -1,4 +1,4 @@
-<div>
+<div class="login-container">
   <h2>Iniciar Sesión</h2>
 
   <form (submit)="login(); $event.preventDefault()">
@@ -13,9 +13,10 @@
     </div>
 
     <button type="submit">Log In</button>
+    <button type="button" (click)="goToRegister()">Registrarse</button>
+    <button type="button" (click)="goToHome()">Volver al home</button>
   </form>
-  <button type="button" (click)="goToRegister()">Registrarse</button>
-  <button type="button" (click)="goToHome()">Volver al home</button>
-
   <p>{{ message }}</p>
 </div>
+<div class="login-image">
+  

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/package",
   "name": "gestion-citas-medicas",
   "version": "1.0.0",
   "description": "Sistema de gestión de citas médicas",
