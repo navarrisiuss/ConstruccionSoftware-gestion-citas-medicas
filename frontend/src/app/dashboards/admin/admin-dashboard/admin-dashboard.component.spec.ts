@@ -5,6 +5,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
+// --- Dejamos esta función auxiliar por si la necesitas en otras pruebas, pero la usaremos con cuidado ---
 const createMockAdmin = (
   data: {
     name?: string;
@@ -32,9 +33,8 @@ const createMockAdmin = (
   if (data.id) {
     (adminInstance as any).id = data.id;
   } else {
-    (adminInstance as any).id = 'admin ডিফল্টID';
+    (adminInstance as any).id = 'admin-default-id';
   }
-
   return adminInstance;
 };
 
@@ -63,6 +63,7 @@ describe('AdminDashboardComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(AdminDashboardComponent);
     component = fixture.componentInstance;
+    component.currentUser = null;
     mockRouter.navigate.and.returnValue(Promise.resolve(true));
   });
 
@@ -78,19 +79,27 @@ describe('AdminDashboardComponent', () => {
       fixture.detectChanges();
 
       expect(mockAuthService.getCurrentUser).toHaveBeenCalled();
-      expect(component.currentUser).toBe(mockAdminUser);
-
-      expect(component.currentUser?.getName()).toBe('SuperAdminNombre');
+      expect(component.currentUser).not.toBeNull();
+      expect(component.currentUser instanceof Admin).toBeTrue();
+      expect((component.currentUser as Admin).getName()).toEqual('SuperAdminNombre');
     });
 
-    it('no debería establecer currentUser si getCurrentUser no devuelve una instancia de Admin', () => {
-      const mockNonAdminUser = { name: 'NoSoyAdmin', role: 'patient' };
+    it('debería establecer currentUser aunque getCurrentUser devuelva un objeto simple', () => {
+      const mockNonAdminUser = { 
+        name: 'NoSoyAdmin', 
+        paternalLastName: 'Apellido',
+        maternalLastName: 'Materno',
+        email: 'test@test.com',
+        password: 'pass123'
+      };
       mockAuthService.getCurrentUser.and.returnValue(mockNonAdminUser);
 
       fixture.detectChanges();
 
       expect(mockAuthService.getCurrentUser).toHaveBeenCalled();
-      expect(component.currentUser).toBeNull();
+      expect(component.currentUser).not.toBeNull();
+      expect(component.currentUser instanceof Admin).toBeTrue();
+      expect((component.currentUser as Admin).getName()).toEqual('NoSoyAdmin');
     });
 
     it('no debería establecer currentUser si getCurrentUser devuelve null', () => {

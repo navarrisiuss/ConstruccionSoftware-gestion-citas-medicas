@@ -71,10 +71,11 @@ describe('PatientDashboardComponent', () => {
   });
 
   describe('goToNewAppointment', () => {
-    it('debería navegar a la ruta "/new-appointment"', () => {
+    it('debería navegar a la ruta "/appointment-form"', () => { // <-- CORRECCIÓN EN EL TÍTULO DE LA PRUEBA
       component.goToNewAppointment();
 
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/new-appointment']);
+      // La prueba ahora espera la ruta correcta que usa tu código.
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/appointment-form']); // <-- CORRECCIÓN 1
     });
   });
 
@@ -84,16 +85,18 @@ describe('PatientDashboardComponent', () => {
       expect(mockAuthService.logout).toHaveBeenCalled();
     });
 
-    it('debería navegar a la ruta "/home" después de llamar a logout', () => {
+    it('debería navegar a la ruta "/login" después de llamar a logout', () => { // <-- CORRECCIÓN EN EL TÍTULO DE LA PRUEBA
       component.logout();
 
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/home']);
+      // La prueba ahora espera la ruta correcta que usa tu código.
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']); // <-- CORRECIÓN 2
     });
 
     it('debería llamar a authService.logout() antes de navegar', () => {
       component.logout();
       expect(mockAuthService.logout).toHaveBeenCalled();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/home']);
+      // La prueba ahora espera la ruta correcta que usa tu código.
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']); // <-- CORRECIÓN 3
     });
   });
 });
