@@ -1,1 +1,98 @@
-<p>register-assistant works!</p>
+<div class="register-container">
+    <div class="header">
+      <h2>Registrar Asistente</h2>
+      <button type="button" class="back-btn" (click)="backToDashboard()">
+        ← Volver al Dashboard
+      </button>
+    </div>
+  
+    <form (submit)="registerAssistant(); $event.preventDefault()" class="assistant-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Nombre *</label>
+          <input 
+            type="text" 
+            id="name"
+            [(ngModel)]="name" 
+            name="name" 
+            required
+            [class.error]="!name.trim() && errorMessage"
+            placeholder="Ingrese el nombre">
+        </div>
+  
+        <div class="form-group">
+          <label for="paternalLastName">Apellido Paterno *</label>
+          <input 
+            type="text" 
+            id="paternalLastName"
+            [(ngModel)]="paternalLastName" 
+            name="paternalLastName" 
+            required
+            [class.error]="!paternalLastName.trim() && errorMessage"
+            placeholder="Ingrese apellido paterno">
+        </div>
+      </div>
+  
+      <div class="form-row">
+        <div class="form-group">
+          <label for="maternalLastName">Apellido Materno</label>
+          <input 
+            type="text" 
+            id="maternalLastName"
+            [(ngModel)]="maternalLastName" 
+            name="maternalLastName"
+            placeholder="Ingrese apellido materno">
+        </div>
+  
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input 
+            type="email" 
+            id="email"
+            [(ngModel)]="email" 
+            name="email" 
+            required
+            [class.error]="!email.trim() && errorMessage"
+            placeholder="asistente@ejemplo.com">
+        </div>
+      </div>
+  
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Contraseña *</label>
+          <input 
+            type="password" 
+            id="password"
+            [(ngModel)]="password" 
+            name="password" 
+            required
+            [class.error]="password.length < 6 && errorMessage"
+            placeholder="Mínimo 6 caracteres">
+        </div>
+  
+        <div class="form-group">
+          <!-- Campo vacío para mantener el layout de 2 columnas -->
+        </div>
+      </div>
+  
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="submit-btn"
+          [disabled]="isLoading">
+          <span *ngIf="!isLoading">Registrar Asistente</span>
+          <span *ngIf="isLoading">Registrando...</span>
+        </button>
+      </div>
+  
+      <!-- Mensajes de estado -->
+      <div class="messages">
+        <p *ngIf="successMessage" class="success-message">
+          ✓ {{ successMessage }}
+        </p>
+        <p *ngIf="errorMessage" class="error-message">
+          ✗ {{ errorMessage }}
+        </p>
+      </div>
+    </form>
+  </div>

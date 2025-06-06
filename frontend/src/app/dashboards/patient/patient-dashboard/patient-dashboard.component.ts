@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { NgIf } from '@angular/common'; // Agregar NgIf
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-patient-dashboard',
   templateUrl: './patient-dashboard.component.html',
-  styleUrls: ['./patient-dashboard.component.css'],
+  styleUrl: './patient-dashboard.component.css'
 })
 export class PatientDashboardComponent implements OnInit {
   currentUser: any = null;
@@ -16,15 +17,27 @@ export class PatientDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.currentUser = user;
+      console.log('Usuario paciente:', this.currentUser); // Para verificar datos
+    }
   }
 
   goToNewAppointment(): void {
-    this.router.navigate(['/new-appointment']);
+    this.router.navigate(['/appointment-form']);
+  }
+
+  goToAppointmentHistory(): void {
+    this.router.navigate(['/patient-appointment-history']);
+  }
+
+  goToHelpChat(): void {
+    this.router.navigate(['/patient-help-chat']);
   }
 
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/home']);
+    this.router.navigate(['/login']);
   }
 }

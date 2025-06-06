@@ -1,43 +1,225 @@
-body {
-  font-family: Arial, sans-serif;
+.container {
+  background-image: url('/assets/7.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 200vw rgba(0, 0, 0, 0.1);
+  min-height: 100vh;
+  width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
 }
 
-.container {
-  max-width: 600px;
-  margin: 50px auto;
-  padding: 20px;
-  background: linear-gradient(135deg, #f9f9f9, #e9ecef);
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2vh 3vw;
+  background-color: rgba(40, 167, 69, 0.9); /* Color verde distintivo para médico */
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 2vw;
+  font-size: 1.1rem;
+}
+
+.logout-btn {
+  padding: 1vh 2vw;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 1vw;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+
+.dashboard-content {
+  padding: 3vh 3vw;
+  display: flex;
+  flex-direction: column;
+  gap: 3vh;
+}
+
+.welcome-section {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 2vw;
+  padding: 3vh 2vw;
   text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  margin-bottom: 2vh;
+}
+
+.welcome-message {
+  font-size: 2rem;
+  color: #28a745;
+  font-weight: bold;
+  margin-bottom: 1vh;
+}
+
+.role-badge {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  padding: 0.5vh 1vw;
+  border-radius: 1vw;
+  font-size: 1rem;
+  margin-left: 1vw;
+}
+
+.description {
+  font-size: 1.3rem;
+  color: #6c757d;
+  font-style: italic;
+  margin: 0;
+  font-weight: bold;
+}
+
+.section {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 2vw;
+  padding: 3vh 2vw;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.section h2 {
+  color: #28a745;
+  font-size: 2rem;
+  margin-bottom: 2vh;
+  text-align: center;
+  border-bottom: 2px solid #28a745;
+  padding-bottom: 1vh;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2vh 2vw;
+  justify-items: center;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3vh 2vw;
+  border: none;
+  border-radius: 1.5vw;
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: white;
+  transition: all 0.3s ease;
+  min-width: 250px;
+  min-height: 130px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.action-btn .icon {
+  font-size: 3rem;
+  margin-bottom: 1vh;
+}
+
+.action-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Colores específicos para cada tipo de botón */
+.schedule {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.patients {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.history {
+  background: linear-gradient(135deg, #6f42c1, #e83e8c);
 }
 
 h1 {
   font-size: 2.5rem;
-  color: #007bff;
-  margin-bottom: 20px;
+  color: white;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-p {
-  font-size: 1.2rem;
-  color: #333;
-  margin-bottom: 30px;
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 2vh;
+    text-align: center;
+  }
+  
+  .user-info {
+    flex-direction: column;
+    gap: 1vh;
+  }
+  
+  .button-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-btn {
+    min-width: 100%;
+  }
+  
+  .welcome-message {
+    font-size: 1.5rem;
+  }
+  
+  .role-badge {
+    display: block;
+    margin: 1vh 0 0 0;
+  }
 }
 
-button {
-  padding: 15px 30px;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #dc3545;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition:
-    background-color 0.3s ease,
-    transform 0.2s ease;
+/* Efectos adicionales */
+.action-btn:active {
+  transform: scale(0.98);
 }
 
-button:hover {
-  background-color: #c82333;
-  transform: scale(1.05);
+.section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Efectos de hover específicos para médicos */
+.schedule:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+}
+
+.patients:hover {
+  background: linear-gradient(135deg, #20c997, #17a2b8);
+}
+
+.history:hover {
+  background: linear-gradient(135deg, #e83e8c, #dc3545);
 }

@@ -9,7 +9,13 @@ export class AuthService {
   private currentUser: any = null;
   private storageKey = 'currentUser';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    // Cargar usuario desde localStorage al inicializar
+    const storedUser = localStorage.getItem(this.storageKey);
+    if (storedUser) {
+      this.currentUser = JSON.parse(storedUser);
+    }
+  }
 
   private apiUrl = 'http://localhost:3000/api/auth';
 
@@ -29,5 +35,23 @@ export class AuthService {
   setCurrentUser(user: any) {
     this.currentUser = user;
     localStorage.setItem(this.storageKey, JSON.stringify(user));
+  }
+
+  getUserRole(): string {
+    if (!this.currentUser) return '';
+    
+    if (this.currentUser.role === 'admin' || this.currentUser.email?.includes('@admin.')) {
+      return 'admin';
+    }
+    
+    if (this.currentUser.specialty) {
+      return 'physician';
+    }
+    
+    if (this.currentUser.role === 'assistant') {
+      return 'assistant';
+    }
+    
+    return 'patient';
   }
 }

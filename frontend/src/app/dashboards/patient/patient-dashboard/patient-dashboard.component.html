@@ -1,16 +1,41 @@
 <div class="container">
-  <div class="encabezado">
-    <h1>Patient Dashboard</h1>
-    <button (click)="logout()">Cerrar sesión</button>
+  <div class="header">
+    <h1>Panel de Paciente</h1>
+    <div class="user-info">
+      <span>Bienvenido, {{ currentUser?.name }} {{ currentUser?.paternalLastName }} {{ currentUser?.maternalLastName }}</span>
+      <button (click)="logout()" class="logout-btn">Cerrar sesión</button>
+    </div>
   </div>
-  <div class="contenido">
-    <p>
-      Bienvenido, {{ currentUser?.name }} {{ currentUser?.paternalLastName }}
-      {{ currentUser?.maternalLastName }}
-    </p>
-    <button (click)="goToNewAppointment()">Agendar Cita</button>
-    <button (click)="goToNewAppointment()">Historial Citas</button>
-    <button (click)="goToNewAppointment()">Chat de ayuda</button>
+
+  <div class="dashboard-content">
+    <!-- Mensaje de bienvenida -->
+    <div class="welcome-section">
+      <p class="welcome-message">
+        Hola, {{ currentUser?.name }}! 
+        <span class="role-badge">Paciente</span>
+      </p>
+      <p class="description">
+        Gestiona tus citas médicas y accede a tus servicios de salud
+      </p>
+    </div>
+
+    <!-- Sección de Servicios para Pacientes -->
+    <div class="section">
+      <h2>Servicios Disponibles</h2>
+      <div class="button-grid">
+        <button (click)="goToNewAppointment()" class="action-btn schedule">
+          <i class="icon">📅➕</i>
+          <span>Agendar Cita</span>
+        </button>
+        <button (click)="goToAppointmentHistory()" class="action-btn history">
+          <i class="icon">📋</i>
+          <span>Historial de Citas</span>
+        </button>
+        <button (click)="goToHelpChat()" class="action-btn chat">
+          <i class="icon">💬</i>
+          <span>Chat de Ayuda</span>
+        </button>
+      </div>
+    </div>
   </div>
-  <div class="imagen"></div>
 </div>

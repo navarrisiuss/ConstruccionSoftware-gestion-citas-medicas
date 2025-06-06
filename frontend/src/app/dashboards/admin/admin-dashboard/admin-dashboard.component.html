@@ -1,6 +1,65 @@
 <div class="container">
-  <h1>Admin Dashboard</h1>
-  <p>Bienvenido, {{ currentUser?.getFullName() }}</p>
-  <button (click)="goToRegisterPhysician()">Registrar Médico</button>
-  <button (click)="logout()">Cerrar sesión</button>
+  <div class="header">
+    <h1>Panel de Administración</h1>
+    <div class="user-info">
+      <span>Bienvenido, {{ currentUser?.getFullName() }}</span>
+      <button (click)="logout()" class="logout-btn">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <div class="section">
+      <h2>Gestión de Personal</h2>
+      <div class="button-grid">
+        <button (click)="goToRegisterPhysician()" class="action-btn physician">
+          <i class="icon">👨‍⚕️</i>
+          <span>Registrar Médico</span>
+        </button>
+        <button (click)="goToRegisterAssistant()" class="action-btn assistant">
+          <i class="icon">👩‍💼</i>
+          <span>Registrar Asistente</span>
+        </button>
+        <button (click)="goToPhysiciansView()" class="action-btn view">
+          <i class="icon">📋</i>
+          <span>Ver Médicos</span>
+        </button>
+        <button (click)="goToAssistantsView()" class="action-btn view">
+          <i class="icon">📋</i>
+          <span>Ver Asistentes</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Gestión de Pacientes y Citas</h2>
+      <div class="button-grid">
+        <button (click)="goToManagePatients()" class="action-btn patients">
+          <i class="icon">👥</i>
+          <span>Gestionar Pacientes</span>
+        </button>
+        <button (click)="goToManageAppointments()" class="action-btn appointments">
+          <i class="icon">📅</i>
+          <span>Gestionar Citas</span>
+        </button>
+        <button (click)="goToMedicalSchedule()" class="action-btn schedule">
+          <i class="icon">🗓️</i>
+          <span>Agenda Médica</span>
+        </button>
+        <button (click)="goToMedicalHistory()" class="action-btn history">
+          <i class="icon">📄</i>
+          <span>Historial Médico</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Reportes y Análisis</h2>
+      <div class="button-grid">
+        <button (click)="goToReports()" class="action-btn reports">
+          <i class="icon">📊</i>
+          <span>Generar Reportes</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

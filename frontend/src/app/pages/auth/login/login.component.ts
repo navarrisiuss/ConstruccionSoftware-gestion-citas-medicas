@@ -20,15 +20,30 @@ export class LoginComponent {
   ) {}
 
   login() {
-    this.authService.login(this.email, this.password).subscribe(
-      (response) => {
+    this.authService.login(this.email, this.password).subscribe({
+      next: (response: any[]) => {
         if (response.length > 0) {
           const usuario: any = response[0];
 
           if (usuario.password === this.password) {
             this.message = 'Login exitoso!';
             this.authService.setCurrentUser(usuario);
-            this.router.navigate(['patient-dashboard']);
+            
+            // Redirigir según el rol del usuario
+            const userRole = this.authService.getUserRole();
+            switch(userRole) {
+              case 'admin':
+                this.router.navigate(['/admin-dashboard']);
+                break;
+              case 'physician':
+                this.router.navigate(['/physician-dashboard']);
+                break;
+              case 'assistant':
+                this.router.navigate(['/assistant-dashboard']);
+                break;
+              default:
+                this.router.navigate(['/patient-dashboard']);
+            }
           } else {
             this.message = 'Contraseña incorrecta.';
           }
@@ -36,11 +51,11 @@ export class LoginComponent {
           this.message = 'Email no encontrado.';
         }
       },
-      (error) => {
+      error: (error: any) => {
         console.error(error);
         this.message = 'Error en el servidor.';
       }
-    );
+    });
   }
 
   goToRegister() {
