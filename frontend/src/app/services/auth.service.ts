@@ -6,31 +6,52 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUser: any = null; // Cambiado a 'any'
-  private storageKey = 'currentUser'; // Clave para guardar en localStorage
+  private currentUser: any = null;
+  private storageKey = 'currentUser';
 
-  constructor(private http: HttpClient) {}
-
-  private apiUrl = 'http://localhost:3000/api/auth';// Endpoint
-
-  login(email: string, password: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}?email=${email}`); // Usar 'any' aquí también
+  constructor(private http: HttpClient) {
+    // Cargar usuario desde localStorage al inicializar
+    const storedUser = localStorage.getItem(this.storageKey);
+    if (storedUser) {
+      this.currentUser = JSON.parse(storedUser);
+    }
   }
 
-  // Obtener el usuario actual
+  private apiUrl = 'http://localhost:3000/api/auth';
+
+  login(email: string, password: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}?email=${email}`);
+  }
+
   getCurrentUser(): any {
     return this.currentUser;
   }
 
-  // Log out del usuario
   logout() {
     this.currentUser = null;
-    localStorage.removeItem(this.storageKey); // Eliminamos del localStorage
+    localStorage.removeItem(this.storageKey);
   }
 
-  // Método para guardar el usuario en localStorage
-  setCurrentUser(user: any) { // Cambiar a 'any'
+  setCurrentUser(user: any) {
     this.currentUser = user;
     localStorage.setItem(this.storageKey, JSON.stringify(user));
+  }
+
+  getUserRole(): string {
+    if (!this.currentUser) return '';
+    
+    if (this.currentUser.role === 'admin' || this.currentUser.email?.includes('@admin.')) {
+      return 'admin';
+    }
+    
+    if (this.currentUser.specialty) {
+      return 'physician';
+    }
+    
+    if (this.currentUser.role === 'assistant') {
+      return 'assistant';
+    }
+    
+    return 'patient';
   }
 }

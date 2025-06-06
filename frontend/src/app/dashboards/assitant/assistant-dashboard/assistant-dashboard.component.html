@@ -1,6 +1,52 @@
 <div class="container">
-    <h1>Assistant Dashboard</h1>
-    <p>Bienvenido, {{ currentUser?.getFullName() }}</p>
-    <button (click)="logout()">Cerrar sesión</button>
-    <button (click)="goToRegisterPatient()">Registrar Paciente</button>
+  <div class="header">
+    <h1>Panel de Asistente</h1>
+    <div class="user-info">
+      <span>Bienvenido, {{ currentUser?.name }} {{ currentUser?.paternalLastName }} {{ currentUser?.maternalLastName }}</span>
+      <button (click)="logout()" class="logout-btn">Cerrar sesión</button>
+    </div>
   </div>
+
+  <div class="dashboard-content">
+    <!-- Mensaje de bienvenida -->
+    <div class="welcome-section">
+      <p class="welcome-message">
+        Hola, {{ currentUser?.name }}! 
+        <span class="role-badge">Asistente Médico</span>
+      </p>
+      <p class="description">
+        Gestiona pacientes y citas médicas de manera eficiente
+      </p>
+    </div>
+
+    <!-- Sección de Gestión de Pacientes -->
+    <div class="section">
+      <h2>Gestión de Pacientes</h2>
+      <div class="button-grid">
+        <button (click)="goToRegisterPatient()" class="action-btn register-patient">
+          <i class="icon">👤➕</i>
+          <span>Registrar Paciente</span>
+        </button>
+        <button (click)="goToManagePatients()" class="action-btn manage-patients">
+          <i class="icon">👥</i>
+          <span>Gestionar Pacientes</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sección de Gestión de Citas -->
+    <div class="section">
+      <h2>Gestión de Citas Médicas</h2>
+      <div class="button-grid">
+        <button (click)="goToScheduleAppointment()" class="action-btn schedule">
+          <i class="icon">📅➕</i>
+          <span>Agendar Cita</span>
+        </button>
+        <button (click)="goToManageAppointments()" class="action-btn appointments">
+          <i class="icon">📋</i>
+          <span>Gestionar Citas</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
