@@ -4,8 +4,6 @@ import { Component } from '@angular/core';
   selector: 'app-register-assistant',
   imports: [],
   templateUrl: './register-assistant.component.html',
-  styleUrl: './register-assistant.component.css'
+  styleUrl: './register-assistant.component.css',
 })
-export class RegisterAssistantComponent {
-
-}
+export class RegisterAssistantComponent {}

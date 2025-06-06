@@ -28,11 +28,11 @@ exports.createPatient = async (req, res) => {
 };
 exports.createPatient = async (req, res) => {
   try {
-    console.log('Datos recibidos:', req.body);  // Añade esto para ver los datos
+    console.log('Datos recibidos:', req.body);  
     const newPatientId = await Patient.create(req.body);
     res.status(201).json({ id: newPatientId, ...req.body });
   } catch (error) {
-    console.error('ERROR AL CREAR PACIENTE:', error);  // Mejora el log de error
+    console.error('ERROR AL CREAR PACIENTE:', error);  
     res.status(500).json({ message: error.message, stack: error.stack });
   }
 };

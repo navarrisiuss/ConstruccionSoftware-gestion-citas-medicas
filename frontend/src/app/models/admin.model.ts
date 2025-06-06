@@ -2,7 +2,13 @@ import { Person } from './person.model';
 import { Physician } from './physician.model';
 
 export class Admin extends Person {
-  constructor(name: string, paternalLastName: string, maternalLastName: string, email: string, password: string) {
+  constructor(
+    name: string,
+    paternalLastName: string,
+    maternalLastName: string,
+    email: string,
+    password: string
+  ) {
     super(name, paternalLastName, maternalLastName, email, password);
   }
 
@@ -10,8 +16,7 @@ export class Admin extends Person {
     let valid: boolean = false;
 
     if (physician.isValid()) {
-      // Logic to register a physician
-      valid = true
+      valid = true;
     }
     return valid;
   }

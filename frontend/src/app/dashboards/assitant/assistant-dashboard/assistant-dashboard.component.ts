@@ -7,12 +7,15 @@ import { Assistant } from '../../../models/assistant.model';
   selector: 'app-assistant-dashboard',
   imports: [],
   templateUrl: './assistant-dashboard.component.html',
-  styleUrl: './assistant-dashboard.component.css'
+  styleUrl: './assistant-dashboard.component.css',
 })
 export class AssistantDashboardComponent implements OnInit {
   currentUser!: Assistant | null;
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
@@ -22,10 +25,10 @@ export class AssistantDashboardComponent implements OnInit {
   }
   logout() {
     this.authService.logout();
-    this.router.navigate(['/login']).then(r => r);
+    this.router.navigate(['/login']).then((r) => r);
   }
 
   goToRegisterPatient() {
-    this.router.navigate(['/register-patient']).then(r => r);
+    this.router.navigate(['/register-patient']).then((r) => r);
   }
 }

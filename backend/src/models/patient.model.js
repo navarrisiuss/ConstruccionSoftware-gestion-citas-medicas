@@ -13,10 +13,10 @@ const Patient = {
   
   create: async (patient) => {
     try {
-      // Formatear la fecha correctamente
+
       let birthDate = patient.birthDate;
       if (birthDate && birthDate.includes('T')) {
-        // Si tiene formato ISO, extraer solo la parte de la fecha
+
         birthDate = birthDate.split('T')[0];
       }
       

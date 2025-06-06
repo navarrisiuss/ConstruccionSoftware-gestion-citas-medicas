@@ -5,32 +5,42 @@
   <form (submit)="registerPhysician(); $event.preventDefault()">
     <div>
       <label>Nombre:</label>
-      <input type="text" [(ngModel)]="name" name="name" required>
+      <input type="text" [(ngModel)]="name" name="name" required />
     </div>
 
     <div>
       <label>Apellido Paterno:</label>
-      <input type="text" [(ngModel)]="paternalLastName" name="paternalLastName" required>
+      <input
+        type="text"
+        [(ngModel)]="paternalLastName"
+        name="paternalLastName"
+        required
+      />
     </div>
 
     <div>
       <label>Apellido Materno:</label>
-      <input type="text" [(ngModel)]="maternalLastName" name="maternalLastName" required>
+      <input
+        type="text"
+        [(ngModel)]="maternalLastName"
+        name="maternalLastName"
+        required
+      />
     </div>
 
     <div>
       <label>Email:</label>
-      <input type="email" [(ngModel)]="email" name="email" required>
+      <input type="email" [(ngModel)]="email" name="email" required />
     </div>
 
     <div>
       <label>Contraseña:</label>
-      <input type="password" [(ngModel)]="password" name="password" required>
+      <input type="password" [(ngModel)]="password" name="password" required />
     </div>
 
     <div>
       <label>Especialidad:</label>
-      <input type="text" [(ngModel)]="specialty" name="specialty" required>
+      <input type="text" [(ngModel)]="specialty" name="specialty" required />
     </div>
 
     <button type="submit">Registrar Médico</button>
@@ -39,4 +49,3 @@
   <button type="button" (click)="backToDashboard()">Volver</button>
   <p *ngIf="successMessage">{{ successMessage }}</p>
 </div>
-

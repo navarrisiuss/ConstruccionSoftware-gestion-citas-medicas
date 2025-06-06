@@ -7,7 +7,8 @@ export class Assistant extends Person {
     paternalLastName: string,
     maternalLastName: string,
     email: string,
-    password: string) {
+    password: string
+  ) {
     super(name, paternalLastName, maternalLastName, email, password);
   }
 

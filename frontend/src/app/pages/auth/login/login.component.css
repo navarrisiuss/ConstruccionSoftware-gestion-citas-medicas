@@ -2,7 +2,7 @@
   text-align: center;
   background-image: url('/assets/7.png');
   color: #fff;
-  box-shadow: 0 4vw 10vh rgba(0, 0, 0, 0.2);;
+  box-shadow: 0 4vw 10vh rgba(0, 0, 0, 0.2);
   height: 100vh;
   width: 50vw;
   display: flex;
@@ -13,7 +13,6 @@
   right: 0;
   margin: 0;
   padding: 0;
-  
 }
 
 .login-image {
@@ -28,91 +27,89 @@
   margin: 0;
   padding: 0;
 }
-  h2 {
-    font-size: 2.5rem;
-    background-color: #096775;
-    width: 20vw;
-    height: 7vh;
-    border-radius: 2vw;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2vw 5vh rgba(0, 0, 0, 0.3);
-    color: #fff;
-    text-shadow: 1vh 1vw 2vw rgba(0, 0, 0, 0.5);
-    font-family: 'Arial', sans-serif;
-    margin: 0 auto;
-    padding: 1vh;
-    margin-bottom: 6vh;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    
-  }
-  
-  .form-group {
-    margin: 0 auto;
-    margin-bottom: 3vh;
-    display: flex;
-    flex-direction: column;
-    background-color: #096775;
-    border-radius: 2vw;
-    width: 30vw; /* Ancho más amplio para mejor visibilidad */
-  }
-  
-  label {
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-  
-  input {
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #000708; /* Borde con color de la clínica */
-    border-radius: 1vw; /* Más redondeado para coincidir con tu estilo */
-    width: 100%;
-    box-sizing: border-box;
-    
-    /* Colores que combinan con tu tema */
-    background-color: #ffffff; /* Fondo semi-transparente */
-    color: #096775; /* Texto del color de la clínica */
+h2 {
+  font-size: 2.5rem;
+  background-color: #096775;
+  width: 20vw;
+  height: 7vh;
+  border-radius: 2vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2vw 5vh rgba(0, 0, 0, 0.3);
+  color: #fff;
+  text-shadow: 1vh 1vw 2vw rgba(0, 0, 0, 0.5);
+  font-family: 'Arial', sans-serif;
+  margin: 0 auto;
+  padding: 1vh;
+  margin-bottom: 6vh;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.form-group {
+  margin: 0 auto;
+  margin-bottom: 3vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #096775;
+  border-radius: 2vw;
+  width: 30vw;
+}
+
+label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #000708;
+  border-radius: 1vw;
+  width: 100%;
+  box-sizing: border-box;
+
+  background-color: #ffffff;
+  color: #096775;
 }
 
 input:focus {
-    background-color: #ffffff;
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 1vh rgba(9, 103, 117, 0.5); /* Sombra con color de la clínica */
+  background-color: #ffffff;
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 1vh rgba(9, 103, 117, 0.5);
 }
 
 input::placeholder {
-    color: #096775;
-    opacity: 0.6;
+  color: #096775;
+  opacity: 0.6;
 }
-  
-  button {
-    width: 45%;
-    padding: 2vh;
-    font-size: 16px;
-    color: #fff;
-    background-color: #096775;
-    border: none;
-    border-radius: 3vh;
-    cursor: pointer;
-    margin-top: 3vh;
-    margin-left: 2vw;
-  }
-  
-  button[type="button"] {
-    background-color: #096775;
-  }
-  
-  button:hover {
-    background-color: #138496;
-    transform: scale(1.05);
-  }
-  
-  p {
-    text-align: center;
-    color: red;
-    font-weight: bold;
-  }
+
+button {
+  width: 45%;
+  padding: 2vh;
+  font-size: 16px;
+  color: #fff;
+  background-color: #096775;
+  border: none;
+  border-radius: 3vh;
+  cursor: pointer;
+  margin-top: 3vh;
+  margin-left: 2vw;
+}
+
+button[type='button'] {
+  background-color: #096775;
+}
+
+button:hover {
+  background-color: #138496;
+  transform: scale(1.05);
+}
+
+p {
+  text-align: center;
+  color: red;
+  font-weight: bold;
+}

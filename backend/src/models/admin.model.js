@@ -17,10 +17,10 @@ const Admin = {
     
     create: async (admin) => {
         try {
-        // Formatear la fecha correctamente
+
         let birthDate = admin.birthDate;
         if (birthDate && birthDate.includes('T')) {
-            // Si tiene formato ISO, extraer solo la parte de la fecha
+
             birthDate = birthDate.split('T')[0];
         }
         console.log('Fecha formateada:', birthDate);

@@ -3,7 +3,7 @@ div.container {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: inset 0 0 0 200vw rgba(0, 0, 0, 0.10);
+  box-shadow: inset 0 0 0 200vw rgba(0, 0, 0, 0.1);
   height: 100vh;
   width: 100vw;
   position: fixed;
@@ -33,11 +33,11 @@ div.contenido {
   justify-content: center;
   align-items: center;
   flex: 1;
-  margin-top: -10vh; /* Espacio para el encabezado fijo */
-  margin-right: 40vw; /* Espacio para la imagen de fondo */
+  margin-top: -10vh;
+  margin-right: 40vw;
 }
 
-div.imagen{
+div.imagen {
   height: 50vh;
   width: 30vw;
   position: fixed;
@@ -64,7 +64,6 @@ h1 {
   justify-content: center;
 }
 
-/* Botón del encabezado (Cerrar sesión) */
 div.encabezado button {
   width: auto;
   padding: 1vh 2vw;
@@ -80,7 +79,6 @@ div.encabezado button:hover {
   transform: scale(1.05);
 }
 
-/* Botón del contenido (Agendar Cita) */
 div.contenido button {
   display: block;
   width: 20vw;
@@ -92,7 +90,9 @@ div.contenido button {
   border: none;
   border-radius: 3vh;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
 }
 
 div.contenido button:hover {

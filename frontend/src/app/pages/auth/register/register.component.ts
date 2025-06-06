@@ -1,24 +1,23 @@
-import {Component} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {Router} from '@angular/router';
-import {Patient} from '../../../models/patient.model';
-import {Gender} from '../../../models/gender.enum';
-import {NgIf} from '@angular/common';
+import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Patient } from '../../../models/patient.model';
+import { Gender } from '../../../models/gender.enum';
+import { NgIf } from '@angular/common';
 
-import {PatientService} from '../../../services/patient.service';
+import { PatientService } from '../../../services/patient.service';
 
 @Component({
   selector: 'app-register',
-  imports: [
-    FormsModule,
-    NgIf
-  ],
+  imports: [FormsModule, NgIf],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  styleUrl: './register.component.css',
 })
 export class RegisterComponent {
-  constructor(private router: Router, private patientService: PatientService) {
-  }
+  constructor(
+    private router: Router,
+    private patientService: PatientService
+  ) {}
   patient = new Patient('', '', '', '', '', '', new Date(), '', '', 0);
   name: string = '';
   paternalLastName: string = '';
@@ -26,12 +25,12 @@ export class RegisterComponent {
   email: string = '';
   password: string = '';
   rut: string = '';
-  birthDate: string = ''; // En formulario será string, luego se convierte a Date
+  birthDate: string = '';
   phone: string = '';
   address: string = '';
-  gender: Gender = Gender.Male; // Valor por defecto
+  gender: Gender = Gender.Male;
 
-  Gender = Gender; // ¡Importante!
+  Gender = Gender;
 
   successMessage: string = '';
 
@@ -43,12 +42,12 @@ export class RegisterComponent {
       this.email,
       this.password,
       this.rut,
-      new Date(this.birthDate), // string a Date
+      new Date(this.birthDate),
       this.phone,
       this.address,
       this.gender
     );
-    this.sendHTTPPetition()
+    this.sendHTTPPetition();
     this.resetForm();
   }
 
@@ -59,10 +58,9 @@ export class RegisterComponent {
       },
       error: (error) => {
         console.error('Error registrando paciente:', error);
-      }
+      },
     });
   }
-
 
   resetForm() {
     this.name = '';
@@ -78,6 +76,6 @@ export class RegisterComponent {
   }
 
   backToHome() {
-    this.router.navigate(['/home']).then(r => r);
+    this.router.navigate(['/home']).then((r) => r);
   }
 }

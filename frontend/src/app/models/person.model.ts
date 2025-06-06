@@ -8,10 +8,15 @@ export class Person {
   ) {}
 
   isValid(): boolean {
-    return this.name.length > 0 && this.paternalLastName.length > 0 && this.maternalLastName.length > 0 && this.email.length > 0 && this.password.length > 0;
+    return (
+      this.name.length > 0 &&
+      this.paternalLastName.length > 0 &&
+      this.maternalLastName.length > 0 &&
+      this.email.length > 0 &&
+      this.password.length > 0
+    );
   }
 
-  // Getters
   getName(): string {
     return this.name;
   }
@@ -35,8 +40,6 @@ export class Person {
   getPassword(): string {
     return this.password;
   }
-
-  // Setters
 
   setName(name: string) {
     this.name = name;

@@ -1,17 +1,16 @@
-import {Component} from '@angular/core';
-import {Router} from '@angular/router';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-appointment-form',
   imports: [],
   templateUrl: './appointment-form.component.html',
-  styleUrl: './appointment-form.component.css'
+  styleUrl: './appointment-form.component.css',
 })
 export class AppointmentFormComponent {
-  constructor(private router: Router) {
-  }
+  constructor(private router: Router) {}
 
   goToPatientDashboard() {
-    this.router.navigate(['/patient-dashboard']).then(r => r);
+    this.router.navigate(['/patient-dashboard']).then((r) => r);
   }
 }

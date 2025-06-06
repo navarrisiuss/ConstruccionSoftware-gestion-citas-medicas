@@ -1,5 +1,5 @@
-import {Person} from './person.model';
-import {Gender} from './gender.enum'
+import { Person } from './person.model';
+import { Gender } from './gender.enum';
 
 export class Patient extends Person {
   private rut: string;
@@ -18,7 +18,8 @@ export class Patient extends Person {
     birthDate: Date,
     phone: string,
     address: string,
-    gender: Gender) {
+    gender: Gender
+  ) {
     super(name, paternalLastName, maternalLastName, email, password);
     this.rut = rut;
     this.birthDate = birthDate;

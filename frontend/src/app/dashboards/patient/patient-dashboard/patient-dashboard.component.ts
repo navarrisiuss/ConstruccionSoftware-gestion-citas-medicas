@@ -5,23 +5,26 @@ import { AuthService } from '../../../services/auth.service';
 @Component({
   selector: 'app-patient-dashboard',
   templateUrl: './patient-dashboard.component.html',
-  styleUrls: ['./patient-dashboard.component.css']
+  styleUrls: ['./patient-dashboard.component.css'],
 })
 export class PatientDashboardComponent implements OnInit {
-  currentUser: any = null; // Cambiar a 'any'
+  currentUser: any = null;
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser(); // Obtener el usuario del servicio
+    this.currentUser = this.authService.getCurrentUser();
   }
 
   goToNewAppointment(): void {
-    this.router.navigate(['/new-appointment']); // Navegar al formulario de nueva cita
+    this.router.navigate(['/new-appointment']);
   }
 
   logout(): void {
-    this.authService.logout(); // Eliminar el usuario de la sesión
-    this.router.navigate(['/home']); // Navegar a la página de inicio o login
+    this.authService.logout();
+    this.router.navigate(['/home']);
   }
 }

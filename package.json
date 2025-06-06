@@ -10,9 +10,14 @@
     "frontend": "cd frontend && ng serve --open"
   },
   "devDependencies": {
-    "concurrently": "^8.2.0"
+    "@types/jasmine": "^5.1.8",
+    "concurrently": "^8.2.0",
+    "prettier": "^3.5.3"
   },
   "dependencies": {
+    "@angular/common": "^20.0.1",
+    "@angular/forms": "^20.0.1",
+    "@angular/router": "^20.0.1",
     "gestion-citas-medicas": "file:"
   }
 }

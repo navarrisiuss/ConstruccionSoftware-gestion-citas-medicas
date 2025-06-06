@@ -1,21 +1,17 @@
-import {Component} from '@angular/core';
-import {Physician} from '../../../models/physician.model';
-import {FormsModule} from '@angular/forms';
-import {NgIf} from '@angular/common';
-import {Router} from '@angular/router';
+import { Component } from '@angular/core';
+import { Physician } from '../../../models/physician.model';
+import { FormsModule } from '@angular/forms';
+import { NgIf } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register-physician',
-  imports: [
-    FormsModule,
-    NgIf
-  ],
+  imports: [FormsModule, NgIf],
   templateUrl: './register-physician.component.html',
-  styleUrl: './register-physician.component.css'
+  styleUrl: './register-physician.component.css',
 })
 export class RegisterPhysicianComponent {
-  constructor(private router: Router) {
-  }
+  constructor(private router: Router) {}
 
   name: string = '';
   paternalLastName: string = '';
@@ -36,16 +32,13 @@ export class RegisterPhysicianComponent {
       this.specialty
     );
 
-    // Guardar en localStorage
     const physicians = JSON.parse(localStorage.getItem('physicians') || '[]');
     physicians.push(newPhysician);
     localStorage.setItem('physicians', JSON.stringify(physicians));
 
-    // Mostrar mensaje
     this.successMessage = '¡Médico registrado exitosamente!';
-    console.table(newPhysician)
+    console.table(newPhysician);
 
-    // Limpiar formulario
     this.name = '';
     this.paternalLastName = '';
     this.maternalLastName = '';
@@ -55,6 +48,6 @@ export class RegisterPhysicianComponent {
   }
 
   backToDashboard() {
-    this.router.navigate(['/admin-dashboard']).then(r => r);
+    this.router.navigate(['/admin-dashboard']).then((r) => r);
   }
 }

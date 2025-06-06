@@ -3,12 +3,14 @@
     <h1>Patient Dashboard</h1>
     <button (click)="logout()">Cerrar sesión</button>
   </div>
-  <div class="contenido">   
-    <p>Bienvenido, {{ currentUser?.name }} {{ currentUser?.paternalLastName }} {{ currentUser?.maternalLastName }}</p>
+  <div class="contenido">
+    <p>
+      Bienvenido, {{ currentUser?.name }} {{ currentUser?.paternalLastName }}
+      {{ currentUser?.maternalLastName }}
+    </p>
     <button (click)="goToNewAppointment()">Agendar Cita</button>
     <button (click)="goToNewAppointment()">Historial Citas</button>
     <button (click)="goToNewAppointment()">Chat de ayuda</button>
-    </div>
-  <div class="imagen">
-    </div>
   </div>
+  <div class="imagen"></div>
+</div>
