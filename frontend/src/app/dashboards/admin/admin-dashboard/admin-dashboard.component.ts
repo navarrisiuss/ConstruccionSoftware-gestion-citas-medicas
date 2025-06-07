@@ -36,16 +36,20 @@ export class AdminDashboardComponent implements OnInit {
 
   // Gestión de personal médico
   goToRegisterPhysician() {
-    this.router.navigate(['/register-physician']).then(r => r);
+    this.router.navigate(['/register-physician'], { 
+      queryParams: { from: 'dashboard' } 
+    }).then(r => r);
   }
 
   goToRegisterAssistant() {
-    this.router.navigate(['/register-assistant']).then(r => r);
+    this.router.navigate(['/register-assistant'], { 
+      queryParams: { from: 'dashboard' } 
+    }).then(r => r);
   }
 
   // Gestión de pacientes
   goToManagePatients() {
-    this.router.navigate(['/manage-patients']).then(r => r);
+    this.router.navigate(['/admin/manage-patients']);
   }
 
   // Gestión de citas
@@ -70,11 +74,10 @@ export class AdminDashboardComponent implements OnInit {
 
   // Vista de médicos
   goToPhysiciansView() {
-    this.router.navigate(['/physicians-view']).then(r => r);
+    this.router.navigate(['/admin/manage-physicians']);
   }
-
-  // Vista de asistentes
+  
   goToAssistantsView() {
-    this.router.navigate(['/assistants-view']).then(r => r);
+    this.router.navigate(['/admin/manage-assistants']);
   }
 }

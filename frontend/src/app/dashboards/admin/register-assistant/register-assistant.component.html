@@ -1,98 +1,107 @@
-<div class="register-container">
-    <div class="header">
-      <h2>Registrar Asistente</h2>
-      <button type="button" class="back-btn" (click)="backToDashboard()">
-        ← Volver al Dashboard
-      </button>
+<div class="register-container" [attr.data-mode]="isEditMode ? 'edit' : 'create'">
+  <div class="header">
+    <h2>{{ isEditMode ? 'Editar Asistente' : 'Registrar Asistente' }}</h2>
+    <button type="button" class="back-btn" (click)="backToDashboard()">
+      {{ getBackButtonText() }}
+    </button>
+  </div>
+
+  <form (submit)="registerAssistant(); $event.preventDefault()" class="assistant-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Nombre *</label>
+        <input 
+          type="text" 
+          id="name"
+          [(ngModel)]="name" 
+          name="name" 
+          required
+          [disabled]="isLoading"
+          placeholder="Ingrese el nombre">
+      </div>
+
+      <div class="form-group">
+        <label for="paternalLastName">Apellido Paterno *</label>
+        <input 
+          type="text" 
+          id="paternalLastName"
+          [(ngModel)]="paternalLastName" 
+          name="paternalLastName" 
+          required
+          [disabled]="isLoading"
+          placeholder="Ingrese apellido paterno">
+      </div>
     </div>
-  
-    <form (submit)="registerAssistant(); $event.preventDefault()" class="assistant-form">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="name">Nombre *</label>
-          <input 
-            type="text" 
-            id="name"
-            [(ngModel)]="name" 
-            name="name" 
-            required
-            [class.error]="!name.trim() && errorMessage"
-            placeholder="Ingrese el nombre">
-        </div>
-  
-        <div class="form-group">
-          <label for="paternalLastName">Apellido Paterno *</label>
-          <input 
-            type="text" 
-            id="paternalLastName"
-            [(ngModel)]="paternalLastName" 
-            name="paternalLastName" 
-            required
-            [class.error]="!paternalLastName.trim() && errorMessage"
-            placeholder="Ingrese apellido paterno">
-        </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="maternalLastName">Apellido Materno</label>
+        <input 
+          type="text" 
+          id="maternalLastName"
+          [(ngModel)]="maternalLastName" 
+          name="maternalLastName"
+          [disabled]="isLoading"
+          placeholder="Ingrese apellido materno">
       </div>
-  
-      <div class="form-row">
-        <div class="form-group">
-          <label for="maternalLastName">Apellido Materno</label>
-          <input 
-            type="text" 
-            id="maternalLastName"
-            [(ngModel)]="maternalLastName" 
-            name="maternalLastName"
-            placeholder="Ingrese apellido materno">
-        </div>
-  
-        <div class="form-group">
-          <label for="email">Email *</label>
-          <input 
-            type="email" 
-            id="email"
-            [(ngModel)]="email" 
-            name="email" 
-            required
-            [class.error]="!email.trim() && errorMessage"
-            placeholder="asistente@ejemplo.com">
-        </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input 
+          type="email" 
+          id="email"
+          [(ngModel)]="email" 
+          name="email" 
+          required
+          [disabled]="isLoading"
+          placeholder="asistente@ejemplo.com">
       </div>
-  
-      <div class="form-row">
-        <div class="form-group">
-          <label for="password">Contraseña *</label>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="password">
+          {{ isEditMode ? 'Nueva Contraseña (opcional)' : 'Contraseña *' }}
+        </label>
+        <div class="password-container">
           <input 
             type="password" 
             id="password"
             [(ngModel)]="password" 
             name="password" 
-            required
-            [class.error]="password.length < 6 && errorMessage"
-            placeholder="Mínimo 6 caracteres">
+            [required]="!isEditMode"
+            [disabled]="isLoading"
+            [placeholder]="isEditMode ? 'Dejar vacío para mantener actual' : 'Mínimo 6 caracteres'">
+          <button 
+            type="button" 
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [disabled]="isLoading">
+            👁️
+          </button>
         </div>
-  
-        <div class="form-group">
-          <!-- Campo vacío para mantener el layout de 2 columnas -->
-        </div>
+        <small *ngIf="isEditMode" class="help-text">
+          Deja este campo vacío si no deseas cambiar la contraseña
+        </small>
       </div>
-  
-      <div class="form-actions">
-        <button 
-          type="submit" 
-          class="submit-btn"
-          [disabled]="isLoading">
-          <span *ngIf="!isLoading">Registrar Asistente</span>
-          <span *ngIf="isLoading">Registrando...</span>
-        </button>
+
+      <div class="form-group">
+        <!-- Campo vacío para mantener el layout de 2 columnas -->
       </div>
-  
-      <!-- Mensajes de estado -->
-      <div class="messages">
-        <p *ngIf="successMessage" class="success-message">
-          ✓ {{ successMessage }}
-        </p>
-        <p *ngIf="errorMessage" class="error-message">
-          ✗ {{ errorMessage }}
-        </p>
-      </div>
-    </form>
-  </div>
+    </div>
+
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="submit-btn"
+        [disabled]="isLoading">
+        <span *ngIf="!isLoading">
+          {{ isEditMode ? 'Actualizar Asistente' : 'Registrar Asistente' }}
+        </span>
+        <span *ngIf="isLoading">
+          {{ isEditMode ? 'Actualizando...' : 'Registrando...' }}
+        </span>
+      </button>
+    </div>
+  </form>
+</div>

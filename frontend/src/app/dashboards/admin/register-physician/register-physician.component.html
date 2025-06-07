@@ -1,8 +1,8 @@
-<div class="register-container">
+<div class="register-container" [attr.data-mode]="isEditMode ? 'edit' : 'create'">
   <div class="header">
-    <h2>Registrar Médico</h2>
+    <h2>{{ isEditMode ? 'Editar Médico' : 'Registrar Médico' }}</h2>
     <button type="button" class="back-btn" (click)="backToDashboard()">
-      ← Volver al Dashboard
+      {{ getBackButtonText() }}
     </button>
   </div>
 
@@ -16,6 +16,7 @@
           [(ngModel)]="name" 
           name="name" 
           required
+          [disabled]="isLoading"
           [class.error]="!name.trim() && errorMessage"
           placeholder="Ingrese el nombre">
       </div>
@@ -28,6 +29,7 @@
           [(ngModel)]="paternalLastName" 
           name="paternalLastName" 
           required
+          [disabled]="isLoading"
           [class.error]="!paternalLastName.trim() && errorMessage"
           placeholder="Ingrese apellido paterno">
       </div>
@@ -41,6 +43,7 @@
           id="maternalLastName"
           [(ngModel)]="maternalLastName" 
           name="maternalLastName"
+          [disabled]="isLoading"
           placeholder="Ingrese apellido materno">
       </div>
 
@@ -52,6 +55,7 @@
           [(ngModel)]="email" 
           name="email" 
           required
+          [disabled]="isLoading"
           [class.error]="!isValidEmail(email) && errorMessage"
           placeholder="medico@ejemplo.com">
       </div>
@@ -59,15 +63,30 @@
 
     <div class="form-row">
       <div class="form-group">
-        <label for="password">Contraseña *</label>
-        <input 
-          type="password" 
-          id="password"
-          [(ngModel)]="password" 
-          name="password" 
-          required
-          [class.error]="password.length < 8 && errorMessage"
-          placeholder="Mínimo 8 caracteres">
+        <label for="password">
+          {{ isEditMode ? 'Nueva Contraseña (opcional)' : 'Contraseña *' }}
+        </label>
+        <div class="password-container">
+          <input 
+            type="password" 
+            id="password"
+            [(ngModel)]="password" 
+            name="password" 
+            [required]="!isEditMode"
+            [disabled]="isLoading"
+            [class.error]="password.length < 6 && errorMessage"
+            [placeholder]="isEditMode ? 'Dejar vacío para mantener actual' : 'Mínimo 6 caracteres'">
+          <button 
+            type="button" 
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [disabled]="isLoading">
+            👁️
+          </button>
+        </div>
+        <small *ngIf="isEditMode" class="help-text">
+          Deja este campo vacío si no deseas cambiar la contraseña
+        </small>
       </div>
 
       <div class="form-group">
@@ -77,6 +96,7 @@
           [(ngModel)]="specialty" 
           name="specialty" 
           required
+          [disabled]="isLoading"
           [class.error]="!specialty.trim() && errorMessage">
           <option value="">Seleccione una especialidad</option>
           <option *ngFor="let spec of specialties" [value]="spec">
@@ -91,19 +111,13 @@
         type="submit" 
         class="submit-btn"
         [disabled]="isLoading">
-        <span *ngIf="!isLoading">Registrar Médico</span>
-        <span *ngIf="isLoading">Registrando...</span>
+        <span *ngIf="!isLoading">
+          {{ isEditMode ? 'Actualizar Médico' : 'Registrar Médico' }}
+        </span>
+        <span *ngIf="isLoading">
+          {{ isEditMode ? 'Actualizando...' : 'Registrando...' }}
+        </span>
       </button>
-    </div>
-
-    <!-- Mensajes de estado -->
-    <div class="messages">
-      <p *ngIf="successMessage" class="success-message">
-        ✓ {{ successMessage }}
-      </p>
-      <p *ngIf="errorMessage" class="error-message">
-        ✗ {{ errorMessage }}
-      </p>
     </div>
   </form>
 </div>

@@ -151,6 +151,149 @@
     border-radius: 0.5vw;
     border: 1px solid #dc3545;
   }
+  .password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .password-toggle {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #6c757d;
+    z-index: 10;
+  }
+  
+  .password-toggle:hover {
+    color: #007bff;
+  }
+  
+  .help-text {
+    color: #6c757d;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    font-style: italic;
+  }
+  
+  .form-group input[disabled], .form-group select[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  /* Estilos para modo edición */
+  .header h2 {
+    color: var(--mode-color, #ffffff);
+  }
+  
+  .register-container[data-mode="edit"] {
+    --mode-color: #ffffff;
+  }
+  
+  .register-container[data-mode="create"] {
+    --mode-color: #ffffff;
+  }
+  
+  /* Indicador visual para modo edición */
+  .physician-form::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    border-radius: 2vw 2vw 0 0;
+    display: none;
+  }
+  
+  .register-container[data-mode="edit"] .physician-form::before {
+    display: block;
+  }
+  
+  /* Estados de loading en botón */
+  .submit-btn[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .submit-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Focus states para accesibilidad */
+  .form-group input:focus,
+  .form-group select:focus,
+  .submit-btn:focus,
+  .password-toggle:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+  }
+  
+  /* Animaciones de entrada */
+  .register-container[data-mode="edit"] .form-row {
+    animation: slideInFromLeft 0.6s ease-out;
+  }
+  
+  .register-container[data-mode="create"] .form-row {
+    animation: slideInFromRight 0.6s ease-out;
+  }
+  
+  @keyframes slideInFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes slideInFromRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  /* Responsive mejorado */
+  @media (max-width: 768px) {
+    .password-container {
+      position: relative;
+    }
+    
+    .password-toggle {
+      position: absolute;
+      right: 5px;
+    }
+    
+    .help-text {
+      font-size: 0.7rem;
+    }
+  }
   
   /* Responsive design */
   @media (max-width: 768px) {

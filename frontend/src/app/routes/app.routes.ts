@@ -10,6 +10,9 @@ import {RegisterAssistantComponent} from '../dashboards/admin/register-assistant
 import {RegisterPatientComponent} from '../dashboards/assitant/register-patient/register-patient.component';
 import {RegisterComponent} from '../pages/auth/register/register.component';
 import {AppointmentFormComponent} from '../dashboards/patient/appointments/appointment-form/appointment-form.component';
+import {ManagePatientsComponent} from '../dashboards/manage-patient/manage-patient.component';
+import {ManagePhysicianComponent} from '../dashboards/admin/manage-phsycian/manage-phsycian.component';
+import {ManageAssistantsComponent} from '../dashboards/admin/manage-assistan/manage-assistan.component';
 
 export const routes: Routes = [
   {path: '', component: HomeComponent},
@@ -25,17 +28,23 @@ export const routes: Routes = [
   {path: 'register', component: RegisterComponent},
   {path: 'appointment-form', component: AppointmentFormComponent},
   
-  // Rutas para admin
-  {path: 'manage-patients', component: AdminDashboardComponent},
+  // Rutas para gestión de personal médico por admin
+  {path: 'admin/manage-physicians', component: ManagePhysicianComponent},
+  {path: 'admin/manage-assistants', component: ManageAssistantsComponent},
+  
+  // Rutas compartidas para gestión de pacientes
+  {path: 'manage-patients', component: ManagePatientsComponent},
+  {path: 'admin/manage-patients', component: ManagePatientsComponent},
+  {path: 'assistant/manage-patients', component: ManagePatientsComponent},
+  {path: 'physician/manage-patients', component: ManagePatientsComponent},
+  
+  // Otras rutas...
   {path: 'manage-appointments', component: AdminDashboardComponent},
   {path: 'medical-history', component: AdminDashboardComponent},
   {path: 'medical-schedule', component: AdminDashboardComponent},
   {path: 'reports', component: AdminDashboardComponent},
-  {path: 'physicians-view', component: AdminDashboardComponent},
-  {path: 'assistants-view', component: AdminDashboardComponent},
   
   // Rutas para asistente
-  {path: 'assistant-manage-patients', component: AssistantDashboardComponent},
   {path: 'assistant-manage-appointments', component: AssistantDashboardComponent},
   {path: 'assistant-schedule-appointment', component: AssistantDashboardComponent},
   {path: 'assistant-reports', component: AssistantDashboardComponent},
@@ -45,7 +54,7 @@ export const routes: Routes = [
   {path: 'physician-patients', component: PhysicianDashboardComponent},
   {path: 'physician-medical-history', component: PhysicianDashboardComponent},
   
-  // Nuevas rutas para paciente
+  // Rutas para paciente
   {path: 'patient-appointment-history', component: PatientDashboardComponent},
   {path: 'patient-help-chat', component: PatientDashboardComponent}
 ];

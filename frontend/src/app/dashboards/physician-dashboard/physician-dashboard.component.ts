@@ -32,8 +32,8 @@ export class PhysicianDashboardComponent implements OnInit {
     this.router.navigate(['/physician-schedule']);
   }
 
-  goToPatients() {
-    this.router.navigate(['/physician-patients']);
+  goToManagePatients() {
+    this.router.navigate(['/physician/manage-patients']);
   }
 
   goToMedicalHistory() {

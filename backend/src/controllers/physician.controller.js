@@ -23,6 +23,22 @@ exports.createPhysician = async (req, res) => {
     const newPhysicianId = await Physician.create(req.body);
     res.status(201).json({ id: newPhysicianId, ...req.body });
   } catch (error) {
+    console.error('ERROR AL CREAR MÉDICO:', error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Nuevo método para actualizar médico
+exports.updatePhysician = async (req, res) => {
+  try {
+    const affectedRows = await Physician.update(req.params.id, req.body);
+    if (affectedRows > 0) {
+      res.json({ message: 'Médico actualizado exitosamente', ...req.body });
+    } else {
+      res.status(404).json({ message: 'Médico no encontrado' });
+    }
+  } catch (error) {
+    console.error('ERROR AL ACTUALIZAR MÉDICO:', error);
+    res.status(500).json({ message: error.message, stack: error.stack });
   }
 };

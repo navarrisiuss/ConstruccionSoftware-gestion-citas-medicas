@@ -53,4 +53,19 @@ export class AdminService {
       `${this.apiUrl}/medical-history`;
     return this.http.get<any[]>(url);
   }
+
+  updateAssistant(id: number, assistantData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/assistants/${id}`, assistantData);
+  }
+
+  getAssistantByEmail(email: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/assistants/email?email=${email}`);
+  }
+  updatePhysician(id: number, physicianData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/physicians/${id}`, physicianData);
+  }
+  
+  getPhysicianByEmail(email: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/physicians/email?email=${email}`);
+  }
 }

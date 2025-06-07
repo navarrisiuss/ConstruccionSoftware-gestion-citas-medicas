@@ -13,6 +13,7 @@
     "concurrently": "^8.2.0"
   },
   "dependencies": {
-    "gestion-citas-medicas": "file:"
+    "gestion-citas-medicas": "file:",
+    "sweetalert2": "^11.22.0"
   }
 }

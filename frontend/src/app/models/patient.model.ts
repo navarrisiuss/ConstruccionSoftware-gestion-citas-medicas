@@ -6,8 +6,8 @@ export class Patient extends Person {
   private birthDate: Date;
   private phone: string;
   private address: string;
-  private gender: Gender;
-
+  public gender: Gender | null;
+  
   constructor(
     name: string,
     paternalLastName: string,
@@ -18,7 +18,7 @@ export class Patient extends Person {
     birthDate: Date,
     phone: string,
     address: string,
-    gender: Gender) {
+    gender: Gender | null) { // 🎯 Cambiar aquí para aceptar null
     super(name, paternalLastName, maternalLastName, email, password);
     this.rut = rut;
     this.birthDate = birthDate;

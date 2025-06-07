@@ -32,7 +32,7 @@ export class AssistantDashboardComponent implements OnInit {
   }
 
   goToManagePatients() {
-    this.router.navigate(['/assistant-manage-patients']).then(r => r);
+    this.router.navigate(['/assistant/manage-patients']);
   }
 
   // Funciones para gestión de citas
