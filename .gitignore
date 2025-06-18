@@ -6,10 +6,16 @@
 /out-tsc
 /bazel-out
 
-# Node
-/node_modules
+# Node (Frontend y Backend)
+**/node_modules
+**/.angular/cache
 npm-debug.log
 yarn-error.log
+
+# Backend específico
+/backend/.env
+/backend/dist
+/backend/build
 
 # IDEs and editors
 .idea/

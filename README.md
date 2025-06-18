@@ -1,59 +1,100 @@
-# GestionCitasMedicas
+# Sistema de Gestión de Citas Médicas
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.8.
+Aplicación web para la gestión de citas médicas con arquitectura separada de frontend (Angular) y backend (Node.js) con base de datos MySQL.
 
-## Development server
+## Estructura del Proyecto
 
-To start a local development server, run:
+proyecto/
+├── frontend/          # Aplicación Angular
+│   ├── src/
+│   └── ...
+├── backend/           # Servidor Node.js
+│   ├── src/
+│   └── ...
+└── package.json       # Configuración principal
 
+## Requisitos Previos
+
+Node.js (v14 o superior)
+Angular CLI
+MySQL (v8.0 o superior)
+
+## Configuración Inicial
+
+Clonar el repositorio
+Instalar todas las dependencias:
 ```bash
-ng serve
+npm run install-all
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Configurar la base de datos:
+    Asegúrate de que MySQL esté ejecutándose
+    Verifica la configuración en backend/.env (si no existe, crea este archivo basado en .env.example)
 
-## Code scaffolding
+## Iniciar la Aplicación
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Para iniciar tanto el frontend como el backend simultáneamente:
 
 ```bash
+npm start
+```
+
+Esto iniciará:
+
+    Frontend Angular en http://localhost:4200/
+    Backend Node.js en http://localhost:3000/
+
+## Iniciar Componentes por Separado
+
+Para ejecutar solo el backend:
+```bash
+npm run backend
+```
+Para ejecutar solo el frontend:
+```bash
+npm run frontend
+```
+
+## Desarrollo con Angular
+Generar Nuevos Componentes
+```bash
+cd frontend
 ng generate component component-name
 ```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+Para una lista completa de opciones disponibles:
 ```bash
 ng generate --help
 ```
-
-## Building
-
-To build the project run:
-
+Compilación
 ```bash
+cd frontend
 ng build
 ```
+Los archivos compilados se almacenarán en el directorio frontend/dist/
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## API Backend
+El backend proporciona los siguientes endpoints:
 
-## Running unit tests
+    GET /api/patients - Obtener todos los pacientes
+    POST /api/patients - Registrar nuevo paciente
+    GET /api/physicians - Obtener todos los médicos
+    POST /api/physicians - Registrar nuevo médico
+    GET /api/auth - Autenticación de usuarios
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+Base de Datos
+La aplicación utiliza MySQL con las siguientes tablas principales:
 
+    patients - Información de pacientes
+    physicians - Información de médicos
+
+## Pruebas
+Pruebas Unitarias (Frontend)
 ```bash
+cd frontend
 ng test
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Recursos Adicionales
+    Angular Documentation
+    Node.js Documentation
+    Express Documentation
+    MySQL Documentation
