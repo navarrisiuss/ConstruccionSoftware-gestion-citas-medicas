@@ -1,4 +1,17 @@
 {
   "patients": [
+    {
+      "id": "b9dc",
+      "name": "a",
+      "paternalLastName": "a",
+      "maternalLastName": "a",
+      "email": "ejemplo@ejemplo.com",
+      "password": "1234",
+      "rut": "a",
+      "birthDate": "2025-04-01T00:00:00.000Z",
+      "phone": "a",
+      "address": "a",
+      "gender": 0
+    }
   ]
 }

@@ -25,6 +25,11 @@ export class PatientService {
     return this.http.get<any>(`${this.apiUrl}/check-rut?rut=${rut}`);
   }
 
+  // Método para verificar correo electrónico
+  checkEmailExists(email: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/check-email?email=${email}`);
+  }
+
   // Método para actualizar paciente
   updatePatient(id: string, patient: Patient): Observable<Patient> {
     return this.http.put<Patient>(`${this.apiUrl}/${id}`, patient);
@@ -37,6 +42,6 @@ export class PatientService {
 
   // Método para eliminar paciente (para implementar después)
   deletePatient(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+    return this.http.delete<any>(`${this.apiUrl}/delete?${id}`);
   }
 }

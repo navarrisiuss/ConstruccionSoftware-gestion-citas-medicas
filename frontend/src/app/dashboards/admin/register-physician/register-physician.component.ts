@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { NgIf, NgFor } from '@angular/common';
-import { Physician } from '../../../models/physician.model';
-import { AdminService } from '../../../services/admin.service';
+import {Component, OnInit} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {NgIf, NgFor} from '@angular/common';
+import {Physician} from '../../../models/physician.model';
+import {AdminService} from '../../../services/admin.service';
 import Swal from 'sweetalert2';
+import {PatientService} from '../../../services/patient.service';
 
 // Interfaz para datos de actualización de médico
 interface PhysicianUpdateData {
@@ -37,7 +38,7 @@ export class RegisterPhysicianComponent implements OnInit {
   isEditMode: boolean = false;
   physicianId: number | null = null;
   originalEmail: string = '';
-  
+
   // 🎯 Variable bandera para navegación condicional
   shouldReturnToManage: boolean = false;
 
@@ -61,8 +62,10 @@ export class RegisterPhysicianComponent implements OnInit {
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private adminService: AdminService
-  ) {}
+    private adminService: AdminService,
+    private patientService: PatientService
+  ) {
+  }
 
   ngOnInit() {
     // Verificar si estamos en modo edición
@@ -124,7 +127,7 @@ export class RegisterPhysicianComponent implements OnInit {
         this.isLoading = false;
         Swal.close();
         console.error('Error cargando médico:', error);
-        
+
         Swal.fire({
           title: 'Error',
           text: 'No se pudieron cargar los datos del médico.',
@@ -142,10 +145,6 @@ export class RegisterPhysicianComponent implements OnInit {
     if (!this.validateForm()) {
       return;
     }
-
-    this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
 
     if (this.isEditMode) {
       this.updatePhysician();
@@ -180,7 +179,7 @@ export class RegisterPhysicianComponent implements OnInit {
       next: (response) => {
         this.isLoading = false;
         Swal.close();
-        
+
         Swal.fire({
           title: '¡Éxito!',
           html: `
@@ -209,9 +208,9 @@ export class RegisterPhysicianComponent implements OnInit {
         this.isLoading = false;
         Swal.close();
         console.error('Error al registrar médico:', error);
-        
+
         let errorMessage = 'Error al registrar médico';
-        
+
         // Manejar error de email duplicado
         if (error.message && error.message.includes('Duplicate entry')) {
           errorMessage = 'Ya existe un médico registrado con este email';
@@ -277,7 +276,7 @@ export class RegisterPhysicianComponent implements OnInit {
       next: (response) => {
         this.isLoading = false;
         Swal.close();
-        
+
         Swal.fire({
           title: '¡Éxito!',
           html: `
@@ -305,9 +304,9 @@ export class RegisterPhysicianComponent implements OnInit {
         this.isLoading = false;
         Swal.close();
         console.error('Error al actualizar médico:', error);
-        
+
         let errorMessage = 'Error al actualizar médico';
-        
+
         // Manejar error de email duplicado
         if (error.message && error.message.includes('Duplicate entry')) {
           errorMessage = 'Ya existe otro médico registrado con este email';
@@ -342,7 +341,7 @@ export class RegisterPhysicianComponent implements OnInit {
       });
       return false;
     }
-    
+
     if (!this.paternalLastName.trim()) {
       Swal.fire({
         title: 'Campo Requerido',
@@ -353,7 +352,7 @@ export class RegisterPhysicianComponent implements OnInit {
       });
       return false;
     }
-    
+
     if (!this.email.trim() || !this.isValidEmail(this.email)) {
       Swal.fire({
         title: 'Email Inválido',
@@ -364,7 +363,7 @@ export class RegisterPhysicianComponent implements OnInit {
       });
       return false;
     }
-    
+
     if (!this.specialty.trim()) {
       Swal.fire({
         title: 'Especialidad Requerida',
@@ -375,7 +374,7 @@ export class RegisterPhysicianComponent implements OnInit {
       });
       return false;
     }
-    
+
     // Validar contraseña solo en modo creación o si se ingresó una nueva
     if (!this.isEditMode && (!this.password || this.password.length < 6)) {
       Swal.fire({
@@ -387,7 +386,7 @@ export class RegisterPhysicianComponent implements OnInit {
       });
       return false;
     }
-    
+
     if (this.isEditMode && this.password && this.password.length < 6) {
       Swal.fire({
         title: 'Contraseña Inválida',
@@ -398,7 +397,7 @@ export class RegisterPhysicianComponent implements OnInit {
       });
       return false;
     }
-    
+
     return true;
   }
 
@@ -426,7 +425,7 @@ export class RegisterPhysicianComponent implements OnInit {
     // Verificar si hay cambios sin guardar
     if (this.hasUnsavedChanges()) {
       const destination = this.getDestinationText();
-      
+
       Swal.fire({
         title: '¿Descartar cambios?',
         html: `
@@ -484,17 +483,17 @@ export class RegisterPhysicianComponent implements OnInit {
 
   private hasUnsavedChanges(): boolean {
     if (!this.isEditMode) {
-      return this.name.trim() !== '' || 
-             this.paternalLastName.trim() !== '' || 
-             this.maternalLastName.trim() !== '' || 
-             this.email.trim() !== '' || 
-             this.password.trim() !== '' ||
-             this.specialty.trim() !== '';
+      return this.name.trim() !== '' ||
+        this.paternalLastName.trim() !== '' ||
+        this.maternalLastName.trim() !== '' ||
+        this.email.trim() !== '' ||
+        this.password.trim() !== '' ||
+        this.specialty.trim() !== '';
     }
-    
+
     // En modo edición, verificar si hay cambios desde los datos originales
-    return this.email !== this.originalEmail || 
-           this.password.trim() !== '';
+    return this.email !== this.originalEmail ||
+      this.password.trim() !== '';
   }
 
   // Método para mostrar/ocultar contraseña

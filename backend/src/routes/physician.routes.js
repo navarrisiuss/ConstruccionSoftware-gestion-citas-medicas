@@ -6,5 +6,6 @@ router.get('/', physicianController.getAllPhysicians);
 router.get('/email', physicianController.getPhysicianByEmail);
 router.post('/', physicianController.createPhysician);
 router.put('/:id', physicianController.updatePhysician); // Nueva ruta para actualización
+router.delete('/:id', physicianController.deletePhysician);
 
 module.exports = router;

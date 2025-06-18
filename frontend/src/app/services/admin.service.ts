@@ -48,8 +48,8 @@ export class AdminService {
 
   // Historiales médicos
   getMedicalHistory(patientId?: string): Observable<any[]> {
-    const url = patientId ? 
-      `${this.apiUrl}/medical-history?patientId=${patientId}` : 
+    const url = patientId ?
+      `${this.apiUrl}/medical-history?patientId=${patientId}` :
       `${this.apiUrl}/medical-history`;
     return this.http.get<any[]>(url);
   }
@@ -64,7 +64,7 @@ export class AdminService {
   updatePhysician(id: number, physicianData: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/physicians/${id}`, physicianData);
   }
-  
+
   getPhysicianByEmail(email: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/physicians/email?email=${email}`);
   }

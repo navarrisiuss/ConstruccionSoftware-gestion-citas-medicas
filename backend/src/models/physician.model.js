@@ -45,7 +45,17 @@ const Physician = {
       console.error('ERROR AL ACTUALIZAR MÉDICO:', dbError);
       throw dbError;
     }
-  }
+  },
+
+  delete: async (id) => {
+    try {
+      const [result] = await db.query('DELETE FROM physicians WHERE id = ?', [id]);
+      return result.affectedRows;
+    } catch (dbError) {
+      console.error('ERROR AL ELIMINAR MÉDICO:', dbError);
+      throw dbError;
+    }
+  },
 };
 
 module.exports = Physician;
