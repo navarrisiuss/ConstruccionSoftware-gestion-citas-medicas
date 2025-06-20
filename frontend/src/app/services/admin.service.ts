@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Admin } from '../models/admin.model';
 import { Physician } from '../models/physician.model';
 import { Assistant } from '../models/assistant.model';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +23,18 @@ export class AdminService {
     return this.http.get<Physician[]>(`${this.apiUrl}/physicians`);
   }
 
+  getPhysiciansForSelect(): Observable<{ id: number; fullName: string }[]> {
+       return this.http.get<any[]>(`${this.apiUrl}/physicians`)
+         .pipe(
+           map((list: any[]) =>
+             list.map(p => ({
+               id: p.id,
+               fullName: `${p.name} ${p.paternalLastName} ${p.maternalLastName}`
+             }))
+           )
+         );
+    }
+
   // Gestión de asistentes
   registerAssistant(assistant: Assistant): Observable<Assistant> {
     return this.http.post<Assistant>(`${this.apiUrl}/assistants`, assistant);
@@ -39,6 +52,11 @@ export class AdminService {
   // Gestión de citas
   getAllAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/appointments`);
+  }
+
+  //Crear una cita
+  createAppointment(appointment: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/appointments`, appointment);
   }
 
   // Reportes
