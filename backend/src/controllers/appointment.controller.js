@@ -30,6 +30,21 @@ exports.getAppointmentsByPhysician = async (req, res) => {
 exports.createAppointment = async (req, res) => {
     try {
         console.log('Datos recibidos:', req.body);
+        
+        // Verificar si ya existe una cita en el mismo día, hora y médico
+        const conflictingAppointment = await Appointment.checkConflict(
+            req.body.physician_id, 
+            req.body.date, 
+            req.body.time
+        );
+        
+        if (conflictingAppointment) {
+            return res.status(409).json({ 
+                message: 'Ya existe una cita agendada para este médico en la fecha y hora seleccionada',
+                conflict: true
+            });
+        }
+        
         const newAppointmentId = await Appointment.create(req.body);
         res.status(201).json({ id: newAppointmentId, ...req.body });
     } catch (error) {

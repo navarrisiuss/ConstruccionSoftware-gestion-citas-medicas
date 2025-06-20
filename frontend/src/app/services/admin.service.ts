@@ -51,11 +51,17 @@ export class AdminService {
 
   // Gestión de citas
   getAllAppointments(): Observable<any[]> {
+    console.log('AdminService: obteniendo todas las citas');
     return this.http.get<any[]>(`${this.apiUrl}/appointments`);
+  }
+
+  getAppointmentsByPatient(patientId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/appointments/patient/${patientId}`);
   }
 
   //Crear una cita
   createAppointment(appointment: any): Observable<any> {
+    console.log('AdminService: enviando cita al servidor:', appointment);
     return this.http.post<any>(`${this.apiUrl}/appointments`, appointment);
   }
 

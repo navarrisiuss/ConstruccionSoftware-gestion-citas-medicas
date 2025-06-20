@@ -43,6 +43,22 @@ const Appointment = {
             throw dbError;
         }
     },
+    checkConflict: async (physicianId, date, time) => {
+        try {
+            const [rows] = await db.query(`
+                SELECT id FROM appointments 
+                WHERE physician_id = ? 
+                AND date = ? 
+                AND time = ? 
+                AND status != 'cancelled'
+            `, [physicianId, date, time]);
+            
+            return rows.length > 0 ? rows[0] : null;
+        } catch (dbError) {
+            console.error('ERROR AL VERIFICAR CONFLICTO:', dbError);
+            throw dbError;
+        }
+    },
 
     update: async (id, appointment) => {
         try {
@@ -66,6 +82,7 @@ const Appointment = {
             throw dbError;
         }
     }
+
 };
 
 module.exports = Appointment;

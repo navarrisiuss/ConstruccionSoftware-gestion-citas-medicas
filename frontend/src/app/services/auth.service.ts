@@ -23,9 +23,19 @@ export class AuthService {
     return this.http.get<any[]>(`${this.apiUrl}?email=${email}`);
   }
 
-  getCurrentUser(): any {
-    return this.currentUser;
+  // En auth.service.ts
+getCurrentUser(): any {
+  const userStr = localStorage.getItem('currentUser');
+  if (userStr) {
+    try {
+      return JSON.parse(userStr);
+    } catch (e) {
+      console.error('Error parsing user data:', e);
+      return null;
+    }
   }
+  return null;
+}
 
   logout() {
     this.currentUser = null;

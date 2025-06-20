@@ -2,6 +2,10 @@
   <form (ngSubmit)="submit()" class="appointment-form">
     <h2>Agendar Nueva Cita</h2>
     
+    <div class="patient-info" *ngIf="currentUser">
+      <p><strong>Paciente:</strong> {{ getPatientInfo() }}</p>
+      <p><strong>ID:</strong> {{ patientId }}</p>
+    </div>
     <div class="form-group">
       <label for="physician">Médico:</label>
       <select [(ngModel)]="newAppt.physician_id" name="physician_id" id="physician" required>
@@ -25,6 +29,7 @@
     <div class="form-buttons">
       <button type="submit">Agendar Cita</button>
       <button type="button" (click)="goToPatientDashboard()">Volver</button>
+      <button type="button" (click)="loadAppointments()" style="background: #28a745;">🔄 Recargar Citas</button>
     </div>
   </form>
 
@@ -47,19 +52,64 @@
       <div class="calendar-day-header">Sáb</div>
 
       <div *ngFor="let calDay of calendarDays" 
-           class="calendar-day"
-           [class.other-month]="calDay.isOtherMonth"
-           [class.today]="calDay.isToday"
-           [class.has-appointments]="calDay.appointments?.length > 0">
+     class="calendar-day"
+     [class.other-month]="calDay.isOtherMonth"
+     [class.today]="calDay.isToday"
+     [class.has-appointments]="calDay.appointments?.length > 0"
+     [class.mixed-appointments]="calDay.isMixedDay"
+     [class.own-appointments-only]="calDay.hasOwnAppointments && !calDay.hasOtherAppointments"
+     [class.other-appointments-only]="calDay.hasOtherAppointments && !calDay.hasOwnAppointments">
         
         <span class="day-number">{{ calDay.day }}</span>
         
         <div *ngIf="calDay.appointments?.length > 0" class="appointments">
-          <div *ngFor="let apt of calDay.appointments" class="appointment-item">
-            {{ apt.time }} - {{ apt.physician }}
+          <div *ngFor="let apt of calDay.appointments" 
+               class="appointment-item"
+               [class.current-patient]="apt.isCurrentPatient"
+               [class.other-patient]="!apt.isCurrentPatient"
+               [class.cancelled]="apt.status === 'cancelled'"
+               [class.completed]="apt.status === 'completed'">
+            
+            <!-- Citas del paciente actual -->
+            <div *ngIf="apt.isCurrentPatient" class="own-appointment">
+              <div class="apt-time">{{ apt.time }}</div>
+              <div class="apt-doctor">Dr. {{ apt.physician }}</div>
+              <div class="apt-label">Mi Cita</div>
+            </div>
+            
+            <!-- Citas de otros pacientes -->
+            <div *ngIf="!apt.isCurrentPatient" class="other-appointment">
+              <div class="apt-time">{{ apt.time }}</div>
+              <div class="apt-doctor">Dr. {{ apt.physician }}</div>
+              <div class="apt-patient">{{ apt.patient }}</div>
+              <div class="apt-label">Ocupado</div>
+            </div>
+            
+            <div class="apt-status" *ngIf="apt.status && apt.status !== 'scheduled'">
+              {{ apt.status === 'cancelled' ? 'Cancelada' : 
+                 apt.status === 'completed' ? 'Completada' : apt.status }}
+            </div>
           </div>
         </div>
       </div>
+      <div class="calendar-legend">
+        <h4>Leyenda:</h4>
+        <div class="legend-item">
+          <span class="legend-color current-patient"></span>
+          <span>Mis Citas</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color other-patient"></span>
+          <span>Citas de Otros Pacientes</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color cancelled"></span>
+          <span>Citas Canceladas</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-color completed"></span>
+          <span>Citas Completadas</span>
+        </div>
     </div>
   </div>
 </div>
