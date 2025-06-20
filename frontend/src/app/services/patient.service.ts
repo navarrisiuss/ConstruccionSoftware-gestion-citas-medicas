@@ -44,4 +44,9 @@ export class PatientService {
   deletePatient(id: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/delete?${id}`);
   }
+
+  // Método para buscar pacientes por correo electrónico
+  searchPatientsByEmail(email: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/search?email=${email}`);
+  }
 }

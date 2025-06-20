@@ -68,4 +68,12 @@ export class AdminService {
   getPhysicianByEmail(email: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/physicians/email?email=${email}`);
   }
+
+  getAdminByEmail(email: string): Observable<Admin[]> {
+    return this.http.get<Admin[]>(`${this.apiUrl}/admins/email?email=${email}`);
+  }
+
+  getPatientByEmail(email: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/patients/email?email=${email}`);
+  }
 }

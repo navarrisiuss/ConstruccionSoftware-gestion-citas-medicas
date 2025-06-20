@@ -166,66 +166,95 @@ export class RegisterPhysicianComponent implements OnInit {
       }
     });
 
-    const newPhysician = new Physician(
-      this.name,
-      this.paternalLastName,
-      this.maternalLastName,
-      this.email,
-      this.password,
-      this.specialty
-    );
+    // Verificar si el email ya está asociado a un paciente
+    this.patientService.searchPatientsByEmail(this.email).subscribe({
+      next: (patients) => {
+        if (patients.length > 0) {
+          Swal.close();
+          Swal.fire({
+            title: 'Email Duplicado',
+            text: 'Existe un paciente registrado con este email. Por favor, utiliza otro email.',
+            icon: 'error',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#dc3545'
+          });
+          return;
+        }
 
-    this.adminService.registerPhysician(newPhysician).subscribe({
-      next: (response) => {
-        this.isLoading = false;
-        Swal.close();
+        // Si el email no está en pacientes, se registra el médico
+        const newPhysician = new Physician(
+          this.name,
+          this.paternalLastName,
+          this.maternalLastName,
+          this.email,
+          this.password,
+          this.specialty
+        );
 
-        Swal.fire({
-          title: '¡Éxito!',
-          html: `
-            <div style="text-align: center; padding: 20px;">
-              <div style="font-size: 3rem; margin-bottom: 15px;">👨‍⚕️✅</div>
-              <p style="font-size: 1.2rem; color: #007bff; margin-bottom: 10px;">
-                <strong>Médico registrado exitosamente</strong>
-              </p>
-              <p style="color: #6c757d;">
-                Dr. ${this.name} ${this.paternalLastName} ha sido agregado al sistema
-              </p>
-            </div>
-          `,
-          icon: 'success',
-          confirmButtonText: 'Continuar',
-          confirmButtonColor: '#007bff',
-          timer: 3000,
-          timerProgressBar: true
-        }).then(() => {
-          this.resetForm();
-          // 🎯 Navegación condicional después del registro
-          this.navigateBack();
+        this.adminService.registerPhysician(newPhysician).subscribe({
+          next: (response) => {
+            this.isLoading = false;
+            Swal.close();
+
+            Swal.fire({
+              title: '¡Éxito!',
+              html: `
+              <div style="text-align: center; padding: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">👨‍⚕️✅</div>
+                <p style="font-size: 1.2rem; color: #007bff; margin-bottom: 10px;">
+                  <strong>Médico registrado exitosamente</strong>
+                </p>
+                <p style="color: #6c757d;">
+                  Dr. ${this.name} ${this.paternalLastName} ha sido agregado al sistema
+                </p>
+              </div>
+            `,
+              icon: 'success',
+              confirmButtonText: 'Continuar',
+              confirmButtonColor: '#007bff',
+              timer: 3000,
+              timerProgressBar: true
+            }).then(() => {
+              this.resetForm();
+              this.navigateBack();
+            });
+          },
+          error: (error) => {
+            this.isLoading = false;
+            Swal.close();
+            console.error('Error al registrar médico:', error);
+
+            let errorMessage = 'Error al registrar médico';
+
+            if (error.message && error.message.includes('Duplicate entry')) {
+              errorMessage = 'Ya existe un médico registrado con este email';
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+
+            Swal.fire({
+              title: 'Error al Registrar',
+              html: `
+              <div style="text-align: center; padding: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">❌</div>
+                <p>${errorMessage}</p>
+              </div>
+            `,
+              icon: 'error',
+              confirmButtonText: 'Entendido',
+              confirmButtonColor: '#dc3545'
+            });
+          }
         });
       },
       error: (error) => {
         this.isLoading = false;
         Swal.close();
-        console.error('Error al registrar médico:', error);
-
-        let errorMessage = 'Error al registrar médico';
-
-        // Manejar error de email duplicado
-        if (error.message && error.message.includes('Duplicate entry')) {
-          errorMessage = 'Ya existe un médico registrado con este email';
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
+        console.error('Error al verificar email de paciente:', error);
 
         Swal.fire({
-          title: 'Error al Registrar',
-          html: `
-            <div style="text-align: center; padding: 20px;">
-              <div style="font-size: 3rem; margin-bottom: 15px;">❌</div>
-              <p>${errorMessage}</p>
-            </div>
-          `,
+          title: 'Error',
+          text: 'No se pudo verificar el correo del paciente.',
           icon: 'error',
           confirmButtonText: 'Entendido',
           confirmButtonColor: '#dc3545'
