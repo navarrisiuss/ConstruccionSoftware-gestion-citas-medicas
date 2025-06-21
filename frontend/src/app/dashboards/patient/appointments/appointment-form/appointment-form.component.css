@@ -322,6 +322,98 @@
 .patient-info strong {
   color: #17a2b8;
 }
+.form-help {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.form-help.error {
+  color: #dc3545;
+}
+
+select:disabled {
+  background-color: #e9ecef;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.specialty-count {
+  font-weight: normal;
+  color: #6c757d;
+  font-size: 0.9em;
+}
+/* ✅ Estilos para días clickeables */
+.calendar-day.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-day.clickable:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  background-color: #f8f9fa;
+}
+
+/* ✅ Indicador de más citas */
+.more-appointments-indicator {
+  background: #ffc107;
+  color: #000;
+  padding: 0.2rem 0.4rem;
+  margin: 0.1rem 0;
+  border-radius: 3px;
+  font-size: 0.6rem;
+  text-align: center;
+  border: 1px solid #e0a800;
+}
+
+.more-text {
+  font-weight: bold;
+  display: block;
+  line-height: 1.2;
+}
+
+.click-hint {
+  font-size: 0.5rem;
+  opacity: 0.8;
+  display: block;
+  margin-top: 1px;
+}
+
+/* ✅ Efectos hover para el indicador */
+.calendar-day.clickable:hover .more-appointments-indicator {
+  background: #e0a800;
+  transform: scale(1.05);
+}
+
+/* ✅ Estilos para la ventana modal */
+.day-details-modal .swal2-html-container {
+  text-align: left !important;
+}
+
+.modal-appointment-item {
+  transition: transform 0.2s ease;
+}
+
+.modal-appointment-item:hover {
+  transform: translateX(5px);
+}
+
+/* ✅ Responsive para dispositivos móviles */
+@media (max-width: 768px) {
+  .calendar-day.clickable:hover {
+    transform: none;
+  }
+  
+  .more-appointments-indicator {
+    font-size: 0.55rem;
+  }
+  
+  .click-hint {
+    font-size: 0.45rem;
+  }
+}
   
   @media (max-width: 768px) {
     .appointment-container {
