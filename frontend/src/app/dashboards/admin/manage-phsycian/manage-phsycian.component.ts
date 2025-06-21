@@ -3,7 +3,7 @@ import {Router} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {NgIf, NgFor, CommonModule} from '@angular/common';
 import {AdminService} from '../../../services/admin.service';
-import {PhysicianService} from '../../../services/phsycian.service';
+import {PhysicianService} from '../../../services/physician.service';
 import Swal from 'sweetalert2';
 
 @Component({

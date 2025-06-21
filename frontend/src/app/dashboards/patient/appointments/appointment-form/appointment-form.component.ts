@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AdminService } from '../../../../services/admin.service';
-import { AuthService } from '../../../../services/auth.service'; // ✅ Importar AuthService
+import { AuthService } from '../../../../services/auth.service';
+import {PhysicianService} from '../../../../services/physician.service';
 import { Router } from '@angular/router';
+import {MEDICAL_SPECIALTIES} from '../../../../constants/medical-specialties';
 import Swal from 'sweetalert2';
 
 interface PhysicianDto {
@@ -30,33 +32,35 @@ interface AppointmentEvent {
   styleUrls: ['./appointment-form.component.css']
 })
 export class AppointmentFormComponent implements OnInit {
-  newAppt = { patient_id: '', physician_id: '', date: '', time: '' };
+  newAppt = { patient_id: '', physician_id: '', date: '', time: '', specialty: ''};
+  specialty: undefined
   physicians: PhysicianDto[] = [];
   appointments: AppointmentEvent[] = [];
   patientId = ''; // ✅ Cambiar a string vacío inicialmente
   currentUser: any = null; // ✅ Agregar variable para usuario actual
-  
+
+  // Lista de especialidades médicas
+  medicalSpecialties = MEDICAL_SPECIALTIES;
+
   // Calendario simple
   currentDate = new Date();
   calendarDays: any[] = [];
 
   constructor(
     private adminSvc: AdminService,
-    private authService: AuthService, // ✅ Inyectar AuthService
+    private authService: AuthService,
+    private physicianService: PhysicianService,
     private router: Router
   ) {}
 
   ngOnInit() {
     // ✅ Obtener usuario autenticado
     this.currentUser = this.authService.getCurrentUser();
-    
+
     if (this.currentUser && this.currentUser.id) {
       this.patientId = this.currentUser.id.toString();
       this.newAppt.patient_id = this.patientId;
-      
-      console.log('Paciente autenticado:', this.currentUser);
-      console.log('ID del paciente:', this.patientId);
-      
+
       // Solo cargar datos si tenemos un paciente válido
       this.loadPhysicians();
       this.loadAppointments();
@@ -79,24 +83,25 @@ export class AppointmentFormComponent implements OnInit {
       .subscribe((list: {id:number; fullName:string}[]) => this.physicians = list);
   }
 
+  loadPhysiciansBySpecialty(specialty: string) {
+
+  }
+
   loadAppointments() {
-    console.log('Cargando todas las citas para mostrar en el calendario');
-    console.log('ID del paciente actual:', this.patientId);
-    
     // Cargar TODAS las citas, no solo las del paciente actual
     this.adminSvc.getAllAppointments()
       .subscribe({
         next: (list: any[]) => {
           console.log('Todas las citas desde el servidor:', list);
-          
+
           this.appointments = list.map(a => {
             console.log('Cita original:', a);
-            
+
             let formattedDate = a.date;
             if (a.date.includes('T')) {
               formattedDate = a.date.split('T')[0];
             }
-            
+
             const mappedAppointment = {
               id: a.id,
               date: formattedDate,
@@ -107,13 +112,12 @@ export class AppointmentFormComponent implements OnInit {
               status: a.status,
               isCurrentPatient: a.patient_id.toString() === this.patientId // ✅ Comparar con ID real
             };
-            
+
             console.log('Cita mapeada:', mappedAppointment);
             console.log('¿Es del paciente actual?', mappedAppointment.isCurrentPatient);
             return mappedAppointment;
           });
-          
-          console.log('Array final de todas las citas:', this.appointments);
+
           this.generateCalendar();
         },
         error: (error) => {
@@ -130,42 +134,38 @@ export class AppointmentFormComponent implements OnInit {
     return 'Usuario';
   }
   generateCalendar() {
-    console.log('Generando calendario para:', this.currentDate.getFullYear(), this.currentDate.getMonth() + 1);
-    console.log('Citas disponibles para mostrar:', this.appointments);
-    
     const year = this.currentDate.getFullYear();
     const month = this.currentDate.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-  
+
     this.calendarDays = [];
-  
+
     // Días vacíos del mes anterior
     for (let i = 0; i < startingDayOfWeek; i++) {
       this.calendarDays.push({ day: '', isOtherMonth: true, appointments: [] });
     }
-  
+
     // Días del mes actual
     for (let day = 1; day <= daysInMonth; day++) {
       const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      console.log(`Buscando citas para el día: ${dateString}`);
-      
+
       const dayAppointments = this.appointments.filter(apt => {
         console.log(`Comparando: "${apt.date}" === "${dateString}"`);
         return apt.date === dateString;
       });
-      
+
       // Identificar si hay citas mixtas (propias y de otros)
       const hasOwnAppointments = dayAppointments.some(apt => apt.isCurrentPatient);
       const hasOtherAppointments = dayAppointments.some(apt => !apt.isCurrentPatient);
       const isMixedDay = hasOwnAppointments && hasOtherAppointments;
-      
+
       if (dayAppointments.length > 0) {
         console.log(`✅ Día ${day} (${dateString}): encontradas ${dayAppointments.length} citas`, dayAppointments);
       }
-      
+
       this.calendarDays.push({
         day: day,
         isOtherMonth: false,
@@ -177,15 +177,14 @@ export class AppointmentFormComponent implements OnInit {
         hasOtherAppointments: hasOtherAppointments
       });
     }
-    
+
     const daysWithAppointments = this.calendarDays.filter(d => d.appointments?.length > 0);
-    console.log('Días con citas en el calendario:', daysWithAppointments);
   }
 
   isToday(year: number, month: number, day: number): boolean {
     const today = new Date();
-    return today.getFullYear() === year && 
-           today.getMonth() === month && 
+    return today.getFullYear() === year &&
+           today.getMonth() === month &&
            today.getDate() === day;
   }
 
@@ -224,12 +223,12 @@ export class AppointmentFormComponent implements OnInit {
       });
       return;
     }
-  
+
     // Validación adicional: no permitir fechas pasadas
     const selectedDate = new Date(this.newAppt.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (selectedDate < today) {
       Swal.fire({
         title: 'Error',
@@ -242,17 +241,17 @@ export class AppointmentFormComponent implements OnInit {
 
     // ✅ Asegurar que el patient_id esté actualizado
     this.newAppt.patient_id = this.patientId;
-  
+
     console.log('Enviando cita:', this.newAppt);
     console.log('ID del paciente en la cita:', this.newAppt.patient_id);
-    
+
     this.adminSvc.createAppointment(this.newAppt)
       .subscribe({
         next: (response) => {
           console.log('Respuesta del servidor:', response);
           console.log('Recargando citas...');
           this.loadAppointments();
-          this.newAppt = { patient_id: this.patientId, physician_id: '', date: '', time: '' };
+          this.newAppt = { patient_id: this.patientId, physician_id: '', date: '', time: '', specialty: ''};
           Swal.fire({
             title: '¡Cita creada con éxito!',
             text: 'Su cita ha sido agendada correctamente',
@@ -262,7 +261,7 @@ export class AppointmentFormComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error al crear cita:', error);
-          
+
           // Manejar específicamente el error de conflicto
           if (error.status === 409) {
             Swal.fire({
