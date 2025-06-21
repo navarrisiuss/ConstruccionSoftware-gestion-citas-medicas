@@ -6,6 +6,7 @@ import {Physician} from '../../../models/physician.model';
 import {AdminService} from '../../../services/admin.service';
 import Swal from 'sweetalert2';
 import {PatientService} from '../../../services/patient.service';
+import {MEDICAL_SPECIALTIES} from '../../../constants/medical-specialties';
 
 // Interfaz para datos de actualización de médico
 interface PhysicianUpdateData {
@@ -34,6 +35,8 @@ export class RegisterPhysicianComponent implements OnInit {
   errorMessage: string = '';
   isLoading: boolean = false;
 
+  specialties: string[] = MEDICAL_SPECIALTIES; // Lista de especialidades médicas
+
   // Variables para modo edición
   isEditMode: boolean = false;
   physicianId: number | null = null;
@@ -41,23 +44,6 @@ export class RegisterPhysicianComponent implements OnInit {
 
   // 🎯 Variable bandera para navegación condicional
   shouldReturnToManage: boolean = false;
-
-  // Lista de especialidades predefinidas
-  specialties = [
-    'Cardiología',
-    'Dermatología',
-    'Endocrinología',
-    'Gastroenterología',
-    'Ginecología',
-    'Neurología',
-    'Oftalmología',
-    'Ortopedia',
-    'Pediatría',
-    'Psiquiatría',
-    'Radiología',
-    'Urología',
-    'Medicina General'
-  ];
 
   constructor(
     private router: Router,
