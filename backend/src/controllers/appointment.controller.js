@@ -1,4 +1,5 @@
 const Appointment = require('../models/appointment.model');
+const db = require('../config/db.config'); // ✅ Agregar esta importación
 
 exports.getAllAppointments = async (req, res) => {
     try {
@@ -62,6 +63,73 @@ exports.updateAppointment = async (req, res) => {
             res.status(404).json({ message: 'Cita no encontrada' });
         }
     } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ✅ Actualizar estado de cita - MÉTODO CORREGIDO
+exports.updateAppointmentStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        
+        console.log('Actualizando estado de cita:', id, 'nuevo estado:', status);
+        
+        const validStatuses = ['scheduled', 'confirmed', 'completed', 'cancelled'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ message: 'Estado inválido' });
+        }
+
+        const [result] = await db.query(
+            'UPDATE appointments SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [status, id]
+        );
+
+        console.log('Resultado de la actualización:', result);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Cita no encontrada' });
+        }
+
+        res.json({ message: 'Estado actualizado correctamente', status });
+    } catch (error) {
+        console.error('Error actualizando estado:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ✅ Cancelar cita con detalles - MÉTODO CORREGIDO
+exports.cancelAppointment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, cancellation_reason, cancellation_details, cancelled_by } = req.body;
+
+        console.log('Cancelando cita:', id, 'datos:', req.body);
+
+        const [result] = await db.query(`
+            UPDATE appointments 
+            SET status = ?, 
+                cancellation_reason = ?, 
+                cancellation_details = ?, 
+                cancelled_by = ?, 
+                cancelled_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+        `, [status, cancellation_reason, cancellation_details, cancelled_by, id]);
+
+        console.log('Resultado de la cancelación:', result);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Cita no encontrada' });
+        }
+
+        res.json({ 
+            message: 'Cita cancelada correctamente',
+            cancellation_reason,
+            cancelled_at: new Date()
+        });
+    } catch (error) {
+        console.error('Error cancelando cita:', error);
         res.status(500).json({ message: error.message });
     }
 };

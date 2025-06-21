@@ -64,6 +64,14 @@ export class AdminService {
     console.log('AdminService: enviando cita al servidor:', appointment);
     return this.http.post<any>(`${this.apiUrl}/appointments`, appointment);
   }
+  updateAppointmentStatus(appointmentId: number, status: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/appointments/${appointmentId}/status`, { status });
+  }
+  
+  // ✅ Cancelar cita con detalles
+  cancelAppointment(appointmentId: number, cancelData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/appointments/${appointmentId}/cancel`, cancelData);
+  }
 
   // Reportes
   generateReport(reportType: string, dateRange?: any): Observable<any> {
