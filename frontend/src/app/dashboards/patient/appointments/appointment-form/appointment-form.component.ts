@@ -7,6 +7,7 @@ import {PhysicianService} from '../../../../services/physician.service';
 import { Router } from '@angular/router';
 import {MEDICAL_SPECIALTIES} from '../../../../constants/medical-specialties';
 import Swal from 'sweetalert2';
+import {Physician} from '../../../../models/physician.model';
 
 interface PhysicianDto {
   id: number;
@@ -34,9 +35,10 @@ interface AppointmentEvent {
 export class AppointmentFormComponent implements OnInit {
   newAppt = { patient_id: '', physician_id: '', date: '', time: '', specialty: ''};
   specialty: undefined
-  physicians: PhysicianDto[] = [];
+  physicians: Physician[] = [];
   appointments: AppointmentEvent[] = [];
   patientId = ''; // ✅ Cambiar a string vacío inicialmente
+  physicianId = ''; // ✅ Cambiar a string vacío inicialmente
   currentUser: any = null; // ✅ Agregar variable para usuario actual
 
   // Lista de especialidades médicas
@@ -62,7 +64,6 @@ export class AppointmentFormComponent implements OnInit {
       this.newAppt.patient_id = this.patientId;
 
       // Solo cargar datos si tenemos un paciente válido
-      this.loadPhysicians();
       this.loadAppointments();
       this.generateCalendar();
     } else {
@@ -78,13 +79,11 @@ export class AppointmentFormComponent implements OnInit {
     }
   }
 
-  private loadPhysicians() {
-    this.adminSvc.getPhysiciansForSelect()
-      .subscribe((list: {id:number; fullName:string}[]) => this.physicians = list);
-  }
-
   loadPhysiciansBySpecialty(specialty: string) {
-
+    this.physicianService.getPhysiciansBySpecialty(specialty).subscribe((list) => {
+      console.log('Médicos recibidos:', list); // 🔍 revisa en consola
+      this.physicians = list;
+    });
   }
 
   loadAppointments() {
@@ -92,10 +91,8 @@ export class AppointmentFormComponent implements OnInit {
     this.adminSvc.getAllAppointments()
       .subscribe({
         next: (list: any[]) => {
-          console.log('Todas las citas desde el servidor:', list);
 
           this.appointments = list.map(a => {
-            console.log('Cita original:', a);
 
             let formattedDate = a.date;
             if (a.date.includes('T')) {
@@ -112,9 +109,6 @@ export class AppointmentFormComponent implements OnInit {
               status: a.status,
               isCurrentPatient: a.patient_id.toString() === this.patientId // ✅ Comparar con ID real
             };
-
-            console.log('Cita mapeada:', mappedAppointment);
-            console.log('¿Es del paciente actual?', mappedAppointment.isCurrentPatient);
             return mappedAppointment;
           });
 
@@ -153,7 +147,6 @@ export class AppointmentFormComponent implements OnInit {
       const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
       const dayAppointments = this.appointments.filter(apt => {
-        console.log(`Comparando: "${apt.date}" === "${dateString}"`);
         return apt.date === dateString;
       });
 
@@ -284,5 +277,15 @@ export class AppointmentFormComponent implements OnInit {
 
   goToPatientDashboard() {
     this.router.navigate(['/patient-dashboard']);
+  }
+
+  onSpecialtyChange(event: Event) {
+    const selectedSpecialty = (event.target as HTMLSelectElement).value;
+    console.log('Especialidad seleccionada:', selectedSpecialty);
+    this.newAppt.specialty = selectedSpecialty;
+
+    if (selectedSpecialty) {
+      this.loadPhysiciansBySpecialty(selectedSpecialty);
+    }
   }
 }

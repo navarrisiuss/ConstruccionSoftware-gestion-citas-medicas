@@ -1,3 +1,12 @@
+<div class="header">
+  <div class="header-actions">
+    <button (click)="goToPatientDashboard()" class="btn-back">
+      <i class="icon">🏠</i>
+      Volver al Panel
+    </button>
+  </div>
+</div>
+
 <div class="appointment-container">
   <form (ngSubmit)="submit()" class="appointment-form">
     <h2>Agendar Nueva Cita</h2>
@@ -9,7 +18,7 @@
 
     <div class="form-group">
       <label for="specialty">Especialidad:</label>
-      <select [(ngModel)]="newAppt.specialty" name="specialty" id="specialty" required>
+      <select [(ngModel)]="newAppt.specialty" (change)="onSpecialtyChange($event)" name="specialty" id="specialty" required>
         <option value="">Seleccione una especialidad</option>
         <option *ngFor="let spec of medicalSpecialties" [value]="spec">
           {{ spec }}
@@ -17,15 +26,15 @@
       </select>
     </div>
 
-      <div class="form-group">
-        <label for="physician">Médico:</label>
-        <select [(ngModel)]="newAppt.physician_id" name="physician_id" id="physician" required>
-          <option value="">Seleccione un médico</option>
-          <option *ngFor="let doc of physicians" [value]="doc.id">
-            {{ doc.fullName }}
-          </option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label for="physician">Médico:</label>
+      <select [(ngModel)]="newAppt.physician_id" name="physician_id" id="physician" required>
+        <option value="">Seleccione un médico</option>
+        <option *ngFor="let doc of physicians">
+          {{ doc.name }} {{ doc.paternalLastName }} {{ doc.maternalLastName }}
+        </option>
+      </select>
+    </div>
 
       <div class="form-group">
         <label for="date">Fecha:</label>

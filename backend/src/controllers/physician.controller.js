@@ -56,3 +56,18 @@ exports.deletePhysician = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getPhysiciansBySpecialty = async (req, res) => {
+    try {
+        const specialty = req.query.specialty;
+        if (!specialty) {
+        return res.status(400).json({ message: 'Especialidad es requerida' });
+        }
+
+        const physicians = await Physician.getBySpecialty(specialty);
+        res.json(physicians);
+    } catch (error) {
+        console.error('ERROR AL OBTENER MÉDICOS POR ESPECIALIDAD:', error);
+        res.status(500).json({ message: error.message });
+    }
+}

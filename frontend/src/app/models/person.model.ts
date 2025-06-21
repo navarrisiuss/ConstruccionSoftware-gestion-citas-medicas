@@ -1,8 +1,8 @@
 export class Person {
   constructor(
-    private name: string,
-    private paternalLastName: string,
-    private maternalLastName: string,
+    public name: string,
+    public paternalLastName: string,
+    public maternalLastName: string,
     private email: string,
     private password: string
   ) {}
@@ -12,49 +12,48 @@ export class Person {
   }
 
   // Getters
-  getName(): string {
+  public getName(): string {
     return this.name;
   }
 
-  getPaternalLastName(): string {
+  public getPaternalLastName(): string {
     return this.paternalLastName;
   }
 
-  getFullName(): string {
+  public getFullName(): string {
     return `${this.name} ${this.paternalLastName} ${this.maternalLastName}`;
   }
 
-  getMaternalLastName(): string {
+  public getMaternalLastName(): string {
     return this.maternalLastName;
   }
 
-  getEmail(): string {
+  public getEmail(): string {
     return this.email;
   }
 
-  getPassword(): string {
+  public getPassword(): string {
     return this.password;
   }
 
   // Setters
-
-  setName(name: string) {
+  public setName(name: string) {
     this.name = name;
   }
 
-  setPaternalLastName(paternalLastName: string) {
+  public setPaternalLastName(paternalLastName: string) {
     this.paternalLastName = paternalLastName;
   }
 
-  setMaternalLastName(maternalLastName: string) {
+  public setMaternalLastName(maternalLastName: string) {
     this.maternalLastName = maternalLastName;
   }
 
-  setEmail(email: string) {
+  public setEmail(email: string) {
     this.email = email;
   }
 
-  setPassword(password: string) {
+  public setPassword(password: string) {
     this.password = password;
   }
 }

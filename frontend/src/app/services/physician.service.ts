@@ -2,6 +2,7 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Physician} from '../models/physician.model';
+import {map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +40,6 @@ export class PhysicianService {
 
   // Buscar médicos por especialidad
   getPhysiciansBySpecialty(specialty: string): Observable<Physician[]> {
-    return this.http.get<Physician[]>(`${this.apiUrl}/specialty/${specialty}`);
+    return this.http.get<Physician[]>(`${this.apiUrl}/specialty?specialty=${specialty}`);
   }
 }

@@ -1,6 +1,7 @@
-import { Person } from './person.model';
+import {Person} from './person.model';
 
 export class Physician extends Person {
+  private id?: number;  // id opcional
   private specialty: string;
 
   constructor(
@@ -9,10 +10,16 @@ export class Physician extends Person {
     maternalLastName: string,
     email: string,
     password: string,
-    specialty: string
+    specialty: string,
+    id?: number  // ponerlo al final como opcional
   ) {
     super(name, paternalLastName, maternalLastName, email, password);
     this.specialty = specialty;
+    this.id = id;
+  }
+
+  getId(): number | undefined {
+    return this.id;
   }
 
   setSpecialty(specialty: string): void {
