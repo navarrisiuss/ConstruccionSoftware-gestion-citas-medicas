@@ -13,7 +13,6 @@ npm-debug.log
 yarn-error.log
 
 # Backend específico
-/backend/.env
 /backend/dist
 /backend/build
 
