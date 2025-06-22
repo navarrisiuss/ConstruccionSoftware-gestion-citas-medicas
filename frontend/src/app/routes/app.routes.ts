@@ -13,6 +13,7 @@ import {AppointmentFormComponent} from '../dashboards/patient/appointments/appoi
 import {ManagePatientsComponent} from '../dashboards/manage-patient/manage-patient.component';
 import {ManagePhysicianComponent} from '../dashboards/admin/manage-phsycian/manage-phsycian.component';
 import {ManageAssistantsComponent} from '../dashboards/admin/manage-assistan/manage-assistan.component';
+import { AppointmentCalendarFormComponent } from '../dashboards/physician-dashboard/appointment-calendar-form/appointment-calendar-form/appointment-calendar-form.component';
 
 export const routes: Routes = [
   {path: '', component: HomeComponent},
@@ -50,9 +51,10 @@ export const routes: Routes = [
   {path: 'assistant-reports', component: AssistantDashboardComponent},
   
   // Rutas para médico
-  {path: 'physician-schedule', component: PhysicianDashboardComponent},
+  {path: 'physician-schedule', component: AppointmentCalendarFormComponent},
   {path: 'physician-patients', component: PhysicianDashboardComponent},
   {path: 'physician-medical-history', component: PhysicianDashboardComponent},
+
   
   // Rutas para paciente
   {path: 'patient-appointment-history', component: PatientDashboardComponent},

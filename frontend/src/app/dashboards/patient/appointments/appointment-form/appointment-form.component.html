@@ -1,12 +1,3 @@
-<div class="header">
-  <div class="header-actions">
-    <button (click)="goToPatientDashboard()" class="btn-back">
-      <i class="icon">🏠</i>
-      Volver al Panel
-    </button>
-  </div>
-</div>
-
 <div class="appointment-container">
   <form (ngSubmit)="submit()" class="appointment-form">
     <h2>Agendar Nueva Cita</h2>
@@ -18,22 +9,43 @@
 
     <div class="form-group">
       <label for="specialty">Especialidad:</label>
-      <select [(ngModel)]="newAppt.specialty" (change)="onSpecialtyChange($event)" name="specialty" id="specialty" required>
+      <select
+        [(ngModel)]="newAppt.specialty"
+        name="specialty"
+        id="specialty"
+        (change)="onSpecialtyChange()"
+        required>
         <option value="">Seleccione una especialidad</option>
         <option *ngFor="let spec of medicalSpecialties" [value]="spec">
-          {{ spec }}
+          {{ spec }} ({{ getPhysicianCount(spec) }} médicos)
         </option>
       </select>
     </div>
 
     <div class="form-group">
       <label for="physician">Médico:</label>
-      <select [(ngModel)]="newAppt.physician_id" name="physician_id" id="physician" required>
-        <option value="">Seleccione un médico</option>
-        <option *ngFor="let doc of physicians">
-          {{ doc.name }} {{ doc.paternalLastName }} {{ doc.maternalLastName }}
+      <select
+        [(ngModel)]="newAppt.physician_id"
+        name="physician_id"
+        id="physician"
+        [disabled]="!newAppt.specialty"
+        required>
+        <option value="">
+          {{ !newAppt.specialty ? 'Primero seleccione una especialidad' : 'Seleccione un médico' }}
+        </option>
+        <option *ngFor="let doc of filteredPhysicians" [value]="doc.id">
+          {{ doc.fullName }}
         </option>
       </select>
+
+      <!-- ✅ Mostrar información adicional -->
+      <small class="form-help" *ngIf="newAppt.specialty && filteredPhysicians.length > 0">
+        {{ filteredPhysicians.length }} médico(s) disponible(s) en {{ newAppt.specialty }}
+      </small>
+
+      <small class="form-help error" *ngIf="newAppt.specialty && filteredPhysicians.length === 0">
+        No hay médicos disponibles para esta especialidad
+      </small>
     </div>
 
       <div class="form-group">
@@ -72,48 +84,52 @@
       <div class="calendar-day-header">Sáb</div>
 
       <div *ngFor="let calDay of calendarDays"
-           class="calendar-day"
-           [class.other-month]="calDay.isOtherMonth"
-           [class.today]="calDay.isToday"
-           [class.has-appointments]="calDay.appointments?.length > 0"
-           [class.mixed-appointments]="calDay.isMixedDay"
-           [class.own-appointments-only]="calDay.hasOwnAppointments && !calDay.hasOtherAppointments"
-           [class.other-appointments-only]="calDay.hasOtherAppointments && !calDay.hasOwnAppointments">
+      class="calendar-day"
+      [class.other-month]="calDay.isOtherMonth"
+      [class.today]="calDay.isToday"
+      [class.has-appointments]="calDay.appointments?.length > 0"
+      [class.mixed-appointments]="calDay.isMixedDay"
+      [class.own-appointments-only]="calDay.hasOwnAppointments && !calDay.hasOtherAppointments"
+      [class.other-appointments-only]="calDay.hasOtherAppointments && !calDay.hasOwnAppointments"
+      [class.clickable]="calDay.allAppointments?.length > 0"
+      (click)="showDayDetails(calDay)">
 
-        <span class="day-number">{{ calDay.day }}</span>
+    <span class="day-number">{{ calDay.day }}</span>
 
-        <div *ngIf="calDay.appointments?.length > 0" class="appointments">
-          <div *ngFor="let apt of calDay.appointments"
-               class="appointment-item"
-               [class.current-patient]="apt.isCurrentPatient"
-               [class.other-patient]="!apt.isCurrentPatient"
-               [class.cancelled]="apt.status === 'cancelled'"
-               [class.completed]="apt.status === 'completed'">
+    <div *ngIf="calDay.appointments?.length > 0" class="appointments">
+      <!-- Mostrar las primeras 2 citas -->
+      <div *ngFor="let apt of calDay.appointments"
+          class="appointment-item"
+          [class.current-patient]="apt.isCurrentPatient"
+          [class.other-patient]="!apt.isCurrentPatient"
+          [class.cancelled]="apt.status === 'cancelled'"
+          [class.completed]="apt.status === 'completed'">
 
-            <!-- Citas del paciente actual -->
-            <div *ngIf="apt.isCurrentPatient" class="own-appointment">
-              <div class="apt-time">{{ apt.time }}</div>
-              <div class="apt-doctor">Dr. {{ apt.physician }}</div>
-              <div class="apt-label">Mi Cita</div>
-            </div>
+        <!-- Citas del paciente actual -->
+        <div *ngIf="apt.isCurrentPatient" class="own-appointment">
+          <div class="apt-time">{{ apt.time }}</div>
+          <div class="apt-doctor">Dr. {{ apt.physician }}</div>
+          <div class="apt-label">Mi Cita</div>
+        </div>
 
-            <!-- Citas de otros pacientes -->
-            <div *ngIf="!apt.isCurrentPatient" class="other-appointment">
-              <div class="apt-time">{{ apt.time }}</div>
-              <div class="apt-doctor">Dr. {{ apt.physician }}</div>
-              <div class="apt-patient">{{ apt.patient }}</div>
-              <div class="apt-label">Ocupado</div>
-            </div>
-
-            <div class="apt-status" *ngIf="apt.status && apt.status !== 'scheduled'">
-              {{
-                apt.status === 'cancelled' ? 'Cancelada' :
-                  apt.status === 'completed' ? 'Completada' : apt.status
-              }}
-            </div>
-          </div>
+        <!-- Citas de otros pacientes -->
+        <div *ngIf="!apt.isCurrentPatient" class="other-appointment">
+          <div class="apt-time">{{ apt.time }}</div>
+          <div class="apt-doctor">Dr. {{ apt.physician }}</div>
+          <div class="apt-patient">{{ apt.patient }}</div>
+          <div class="apt-label">Ocupado</div>
         </div>
       </div>
+
+      <!-- ✅ Indicador de más citas -->
+      <div *ngIf="calDay.hasMoreAppointments" class="more-appointments-indicator">
+        <span class="more-text">
+          +{{ calDay.totalAppointments - 2 }} más
+        </span>
+        <span class="click-hint">👆 Click para ver todas</span>
+      </div>
+    </div>
+  </div>
       <div class="calendar-legend">
         <h4>Leyenda:</h4>
         <div class="legend-item">
