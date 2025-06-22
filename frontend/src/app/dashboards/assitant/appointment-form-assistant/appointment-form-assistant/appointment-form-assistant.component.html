@@ -1,0 +1,210 @@
+<div class="appointment-container">
+  <form (ngSubmit)="submit()" class="appointment-form">
+    <h2>Gestionar Citas Médicas</h2>
+
+    <!-- Información del asistente -->
+    <div class="assistant-info" *ngIf="currentUser">
+      <p><strong>Asistente:</strong> {{ getAssistantInfo() }}</p>
+      <p><strong>ID:</strong> {{ assistantId }}</p>
+      <p><strong>Rol:</strong> Asistente Médico</p>
+    </div>
+    
+    <!-- ✅ Selección de especialidad IGUAL que pacientes -->
+    <div class="form-group">
+      <label for="specialty">Especialidad:</label>
+      <select
+        [(ngModel)]="newAppt.specialty"
+        name="specialty"
+        id="specialty"
+        (change)="onSpecialtyChange()"
+        required>
+        <option value="">Seleccione una especialidad</option>
+        <option *ngFor="let spec of medicalSpecialties" [value]="spec">
+          {{ spec }} ({{ getPhysicianCount(spec) }} médicos)
+        </option>
+      </select>
+    </div>
+
+    <!-- ✅ Selección de médico IGUAL que pacientes -->
+    <div class="form-group">
+      <label for="physician">Médico *:</label>
+      <select
+        [(ngModel)]="newAppt.physician_id"
+        name="physician_id"
+        id="physician"
+        [disabled]="!newAppt.specialty"
+        (change)="onPhysicianSelectionChange()"
+        required>
+        <option value="">
+          {{ !newAppt.specialty ? 'Primero seleccione una especialidad' : 'Seleccione un médico' }}
+        </option>
+        <option *ngFor="let physician of getFilteredPhysicians()" [value]="physician.id">
+          Dr. {{ physician.fullName }}
+        </option>
+      </select>
+
+      <!-- ✅ Mostrar información adicional IGUAL que pacientes -->
+      <small class="form-help" *ngIf="newAppt.specialty && getFilteredPhysicians().length > 0">
+        {{ getFilteredPhysicians().length }} médico(s) disponible(s) en {{ newAppt.specialty }}
+      </small>
+
+      <small class="form-help error" *ngIf="newAppt.specialty && getFilteredPhysicians().length === 0">
+        No hay médicos disponibles para esta especialidad
+      </small>
+    </div>
+
+    <!-- Búsqueda y selección de paciente -->
+    <div class="form-group">
+      <label for="searchPatient">Buscar Paciente:</label>
+      <input 
+        type="text" 
+        [(ngModel)]="searchPatient" 
+        name="searchPatient" 
+        id="searchPatient"
+        placeholder="Buscar por nombre o RUT..."
+        (input)="onPatientSearch()">
+    </div>
+
+    <div class="form-group">
+      <label for="patient">Paciente *:</label>
+      <select 
+        [(ngModel)]="newAppt.patient_id" 
+        name="patient_id" 
+        id="patient" 
+        (change)="onPatientSelectionChange()"
+        required>
+        <option value="">Seleccione un paciente</option>
+        <option *ngFor="let patient of filteredPatients" [value]="patient.id">
+          {{ patient.fullName }} - {{ patient.rut }}
+        </option>
+      </select>
+      
+      <small class="form-help" *ngIf="filteredPatients.length === 0 && searchPatient">
+        No se encontraron pacientes con ese criterio
+      </small>
+    </div>
+
+    <!-- ✅ Información de filtros activos actualizada -->
+    <div class="filter-info" *ngIf="showFiltered">
+      <div class="filter-card">
+        <h4>🔍 Filtros Activos:</h4>
+        <p>{{ getFilterInfo() }}</p>
+        <p><strong>Mostrando {{ appointments.length }}</strong> de {{ allAppointments.length }} citas</p>
+        <button type="button" class="clear-filters-btn" (click)="clearFilters()">
+          🗑️ Limpiar Filtros
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="date">Fecha *:</label>
+      <input type="date" [(ngModel)]="newAppt.date" name="date" id="date" required>
+    </div>
+
+    <div class="form-group">
+      <label for="time">Hora *:</label>
+      <input type="time" [(ngModel)]="newAppt.time" name="time" id="time" required>
+    </div>
+
+    <div class="form-group">
+      <label for="reason">Motivo de la Consulta:</label>
+      <textarea 
+        [(ngModel)]="newAppt.reason" 
+        name="reason" 
+        id="reason"
+        placeholder="Motivo de la consulta (opcional)"
+        rows="3"></textarea>
+    </div>
+
+    <div class="form-buttons">
+      <button type="submit">Agendar Cita</button>
+      <button type="button" (click)="goToAssistantDashboard()">Volver</button>
+      <button type="button" (click)="loadAllAppointments()" style="background: #6f42c1;">🔄 Recargar</button>
+      <button type="button" (click)="clearFilters()" style="background: #dc3545;" *ngIf="showFiltered">
+        🗑️ Quitar Filtros
+      </button>
+    </div>
+  </form> 
+
+  <div class="calendar-container">
+    <h2>
+      {{ showFiltered ? 'Citas Filtradas' : 'Calendario General de Citas' }}
+      <span *ngIf="showFiltered" class="filter-count">
+        ({{ appointments.length }} de {{ allAppointments.length }})
+      </span>
+    </h2>
+
+    <div class="calendar-header">
+      <button (click)="previousMonth()" class="nav-btn">❮</button>
+      <h3>{{ getMonthName() }}</h3>
+      <button (click)="nextMonth()" class="nav-btn">❯</button>
+    </div>
+
+    <div class="calendar-grid">
+      <div class="calendar-day-header">Dom</div>
+      <div class="calendar-day-header">Lun</div>
+      <div class="calendar-day-header">Mar</div>
+      <div class="calendar-day-header">Mié</div>
+      <div class="calendar-day-header">Jue</div>
+      <div class="calendar-day-header">Vie</div>
+      <div class="calendar-day-header">Sáb</div>
+
+      <div *ngFor="let calDay of calendarDays"
+           class="calendar-day"
+           [class.other-month]="calDay.isOtherMonth"
+           [class.today]="calDay.isToday"
+           [class.has-appointments]="calDay.appointments?.length > 0"
+           [class.assistant-view]="calDay.hasAppointments"
+           [class.clickable]="calDay.allAppointments?.length > 0"
+           (click)="showDayDetails(calDay)">
+
+        <span class="day-number">{{ calDay.day }}</span>
+
+        <div *ngIf="calDay.appointments?.length > 0" class="appointments">
+          <div *ngFor="let apt of calDay.appointments"
+               class="appointment-item assistant-manageable"
+               [class.cancelled]="apt.status === 'cancelled'"
+               [class.completed]="apt.status === 'completed'"
+               [class.confirmed]="apt.status === 'confirmed'">
+
+            <div class="appointment-content">
+              <div class="apt-time">{{ apt.time }}</div>
+              <div class="apt-patient">{{ apt.patient }}</div>
+              <div class="apt-physician">Dr. {{ apt.physician }}</div>
+              <div class="apt-label">Gestionar</div>
+            </div>
+          </div>
+
+          <!-- Indicador de más citas -->
+          <div *ngIf="calDay.hasMoreAppointments" class="more-appointments-indicator">
+            <span class="more-text">
+              +{{ calDay.totalAppointments - 2 }} más
+            </span>
+            <span class="click-hint">👆 Click para gestionar</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leyenda para asistente -->
+    <div class="calendar-legend">
+      <h4>Leyenda:</h4>
+      <div class="legend-item">
+        <span class="legend-color assistant-manageable"></span>
+        <span>Citas Gestionables</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color confirmed"></span>
+        <span>Citas Confirmadas</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color completed"></span>
+        <span>Citas Completadas</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color cancelled"></span>
+        <span>Citas Canceladas</span>
+      </div>
+    </div>
+  </div>
+</div>
