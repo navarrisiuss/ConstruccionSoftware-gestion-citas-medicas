@@ -13,7 +13,9 @@
     "concurrently": "^8.2.0"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "all": "^0.0.0",
+    "axios": "^1.10.0",
     "gestion-citas-medicas": "file:",
     "sweetalert2": "^11.22.0"
   }

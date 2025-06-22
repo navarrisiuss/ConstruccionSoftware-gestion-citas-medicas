@@ -2,10 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { NgIf } from '@angular/common'; // Agregar NgIf
 import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { HelpChatComponent } from '../../../pages/help-chat/help-chat.component'; // Importar el componente de chat de ayuda
 
 @Component({
   selector: 'app-patient-dashboard',
   templateUrl: './patient-dashboard.component.html',
+  imports: [
+    HelpChatComponent
+  ],
   styleUrl: './patient-dashboard.component.css'
 })
 export class PatientDashboardComponent implements OnInit {

@@ -1,0 +1,172 @@
+/* Estilos generales para el contenedor del asistente */
+.assistant-box {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 350px; /* Ancho ajustable */
+  height: 500px; /* Altura ajustable */
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  font-family: Arial, sans-serif;
+  overflow: hidden; /* Para que el contenido interno no se desborde */
+}
+
+/* Encabezado del chat */
+.header {
+  background-color: #007bff; /* Color primario de tu aplicación */
+  color: white;
+  padding: 15px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5em;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.header button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Contenido del chat (mensajes) */
+.content {
+  flex-grow: 1; /* Ocupa el espacio restante */
+  padding: 15px;
+  overflow-y: auto; /* Permite scroll si hay muchos mensajes */
+  background-color: #f7f9fc;
+  display: flex;
+  flex-direction: column; /* Asegura que los mensajes se apilen verticalmente */
+  gap: 10px; /* Espacio entre mensajes */
+}
+
+/* Estilos para los mensajes individuales */
+.content > div {
+  padding: 10px 12px;
+  border-radius: 18px; /* Bordes más redondeados para burbujas de chat */
+  max-width: 80%; /* Limita el ancho de las burbujas */
+  word-wrap: break-word; /* Rompe palabras largas */
+}
+
+.user-message {
+  background-color: #e0f2f7; /* Un azul claro para mensajes del usuario */
+  align-self: flex-end; /* Alinea los mensajes del usuario a la derecha */
+  border-bottom-right-radius: 4px; /* Pequeño ajuste para la esquina */
+}
+
+.ai-message {
+  background-color: #ffffff; /* Blanco para mensajes de la IA */
+  align-self: flex-start; /* Alinea los mensajes de la IA a la izquierda */
+  border: 1px solid #e0e0e0;
+  border-bottom-left-radius: 4px; /* Pequeño ajuste para la esquina */
+}
+
+.label {
+  font-weight: bold;
+  margin-right: 5px;
+  color: #333;
+}
+
+.loading-indicator {
+  font-style: italic;
+  color: #888;
+  text-align: center;
+  padding: 10px 0;
+}
+
+/* Área de entrada de texto y botón */
+.input-container {
+  display: flex;
+  padding: 10px 15px;
+  border-top: 1px solid #eee;
+  background-color: #fff;
+}
+
+.input-container input {
+  flex-grow: 1;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 20px; /* Bordes muy redondeados para el input */
+  font-size: 0.95em;
+  margin-right: 10px;
+  outline: none; /* Quita el contorno al enfocar */
+}
+
+.input-container input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.input-container button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: bold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.input-container button:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.input-container button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Botón flotante para abrir el chat */
+.assistant-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%; /* Circular */
+  width: 60px;
+  height: 60px;
+  font-size: 1.8em; /* Tamaño del icono */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  padding: 0; /* Elimina padding interno que pueda afectar el centrado */
+  line-height: 1; /* Ayuda a centrar el texto/emoji */
+}
+
+.assistant-toggle:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+/* Añadido para el texto del botón cuando no es solo un icono */
+.assistant-toggle.with-text {
+  width: auto;
+  border-radius: 30px; /* Más ovalado */
+  padding: 10px 20px;
+  font-size: 1em;
+}
