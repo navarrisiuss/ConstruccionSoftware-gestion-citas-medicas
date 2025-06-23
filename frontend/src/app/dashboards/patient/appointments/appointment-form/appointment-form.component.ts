@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { AdminService } from '../../../../services/admin.service';
-import { AuthService } from '../../../../services/auth.service';
+import {Component, OnInit} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {CommonModule} from '@angular/common';
+import {AdminService} from '../../../../services/admin.service';
+import {AuthService} from '../../../../services/auth.service';
 import {PhysicianService} from '../../../../services/physician.service';
-import { Router } from '@angular/router';
+import {Router} from '@angular/router';
 import {MEDICAL_SPECIALTIES} from '../../../../constants/medical-specialties';
 import Swal from 'sweetalert2';
 
@@ -32,13 +32,13 @@ interface AppointmentEvent {
 
 @Component({
   standalone: true,
-  imports: [ FormsModule, CommonModule ],
+  imports: [FormsModule, CommonModule],
   selector: 'app-appointment-form',
   templateUrl: './appointment-form.component.html',
   styleUrls: ['./appointment-form.component.css']
 })
 export class AppointmentFormComponent implements OnInit {
-  newAppt = { patient_id: '', physician_id: '', date: '', time: '', specialty: ''};
+  newAppt = {patient_id: '', physician_id: '', date: '', time: '', specialty: ''};
   physicians: PhysicianDto[] = [];
   allPhysicians: PhysicianDto[] = []; // ✅ Lista completa de médicos
   filteredPhysicians: PhysicianDto[] = []; // ✅ Médicos filtrados por especialidad
@@ -54,16 +54,22 @@ export class AppointmentFormComponent implements OnInit {
   currentDate = new Date();
   calendarDays: any[] = [];
 
+  // Horas disponibles para citas
+  availableTimes: string[] = [];
+
   constructor(
     private adminSvc: AdminService,
     private authService: AuthService,
     private physicianService: PhysicianService,
     private router: Router
-  ) {}
+  ) {
+  }
 
   ngOnInit() {
     // ✅ Obtener usuario autenticado
     this.currentUser = this.authService.getCurrentUser();
+
+    this.generateTimeSlots();
 
     if (this.currentUser && this.currentUser.id) {
       this.patientId = this.currentUser.id.toString();
@@ -158,10 +164,6 @@ export class AppointmentFormComponent implements OnInit {
     }
   }
 
-  loadPhysiciansBySpecialty(specialty: string) {
-
-  }
-
   loadAppointments() {
     // Cargar TODAS las citas, no solo las del paciente actual
     this.adminSvc.getAllAppointments()
@@ -208,6 +210,7 @@ export class AppointmentFormComponent implements OnInit {
     }
     return 'Usuario';
   }
+
   generateCalendar() {
     const year = this.currentDate.getFullYear();
     const month = this.currentDate.getMonth();
@@ -220,7 +223,7 @@ export class AppointmentFormComponent implements OnInit {
 
     // Días vacíos del mes anterior
     for (let i = 0; i < startingDayOfWeek; i++) {
-      this.calendarDays.push({ day: '', isOtherMonth: true, appointments: [] });
+      this.calendarDays.push({day: '', isOtherMonth: true, appointments: []});
     }
 
     // Días del mes actual
@@ -266,6 +269,26 @@ export class AppointmentFormComponent implements OnInit {
     }
   }
 
+  generateTimeSlots() {
+    const startHour = 9;
+    const endHour = 17.5;
+    const interval = 30;
+
+    const times: string[] = [];
+
+    for (let hour = startHour; hour <= endHour; hour++) {
+      for (let minutes = 0; minutes < 60; minutes += interval) {
+        if (hour === endHour && minutes > 0) break;
+
+        const h = String(hour).padStart(2, '0');
+        const m = String(minutes).padStart(2, '0');
+        times.push(`${h}:${m}`);
+      }
+    }
+
+    this.availableTimes = times;
+  }
+
   // ✅ Mostrar ventana emergente con todas las citas del día
   showDayDetails(calDay: any) {
     if (!calDay.allAppointments || calDay.allAppointments.length === 0) {
@@ -275,7 +298,7 @@ export class AppointmentFormComponent implements OnInit {
     const appointmentsHtml = calDay.allAppointments.map((apt: any, index: number) => {
       const appointmentClass = apt.isCurrentPatient ? 'current-patient' : 'other-patient';
       const statusText = apt.status === 'cancelled' ? ' (Cancelada)' :
-                        apt.status === 'completed' ? ' (Completada)' : '';
+        apt.status === 'completed' ? ' (Completada)' : '';
 
       return `
         <div class="modal-appointment-item ${appointmentClass}" style="
@@ -294,9 +317,9 @@ export class AppointmentFormComponent implements OnInit {
           </div>
           <div style="margin-top: 0.25rem; font-size: 0.9rem;">
             ${apt.isCurrentPatient ?
-              '👤 Mi Cita' :
-              `👤 ${apt.patient} (Ocupado)`
-            }${statusText}
+        '👤 Mi Cita' :
+        `👤 ${apt.patient} (Ocupado)`
+      }${statusText}
           </div>
         </div>
       `;
@@ -331,8 +354,8 @@ export class AppointmentFormComponent implements OnInit {
   isToday(year: number, month: number, day: number): boolean {
     const today = new Date();
     return today.getFullYear() === year &&
-           today.getMonth() === month &&
-           today.getDate() === day;
+      today.getMonth() === month &&
+      today.getDate() === day;
   }
 
   previousMonth() {
@@ -346,7 +369,7 @@ export class AppointmentFormComponent implements OnInit {
   }
 
   getMonthName(): string {
-    return this.currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+    return this.currentDate.toLocaleDateString('es-ES', {month: 'long', year: 'numeric'});
   }
 
   submit() {
@@ -398,7 +421,7 @@ export class AppointmentFormComponent implements OnInit {
           console.log('Respuesta del servidor:', response);
           console.log('Recargando citas...');
           this.loadAppointments();
-          this.newAppt = { patient_id: this.patientId, physician_id: '', date: '', time: '', specialty: ''};
+          this.newAppt = {patient_id: this.patientId, physician_id: '', date: '', time: '', specialty: ''};
           Swal.fire({
             title: '¡Cita creada con éxito!',
             text: 'Su cita ha sido agendada correctamente',
