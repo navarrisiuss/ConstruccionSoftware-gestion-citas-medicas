@@ -21,7 +21,10 @@ export class RegisterAssistantComponent {
   errorMessage: string = '';
   isLoading: boolean = false;
 
-  constructor(private router: Router, private adminService: AdminService) {}
+  constructor(
+    private router: Router,
+    private adminService: AdminService
+  ) {}
 
   registerAssistant() {
     if (!this.validateForm()) {
@@ -30,7 +33,7 @@ export class RegisterAssistantComponent {
 
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     const newAssistant = new Assistant(
       this.name,
       this.paternalLastName,
@@ -44,7 +47,7 @@ export class RegisterAssistantComponent {
         this.successMessage = '¡Asistente registrado exitosamente!';
         this.resetForm();
         this.isLoading = false;
-        
+
         setTimeout(() => {
           this.router.navigate(['/admin-dashboard']);
         }, 2000);
@@ -52,7 +55,7 @@ export class RegisterAssistantComponent {
       error: (error) => {
         this.errorMessage = 'Error al registrar asistente: ' + error.message;
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -87,8 +90,6 @@ export class RegisterAssistantComponent {
     this.maternalLastName = '';
     this.email = '';
     this.password = '';
-    this.successMessage = '';
-    this.errorMessage = '';
   }
 
   backToDashboard() {

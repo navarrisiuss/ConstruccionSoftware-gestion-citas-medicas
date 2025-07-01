@@ -12,7 +12,10 @@ import { AuthService } from '../../services/auth.service';
 export class PhysicianDashboardComponent implements OnInit {
   currentUser: any = null;
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
@@ -24,7 +27,7 @@ export class PhysicianDashboardComponent implements OnInit {
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['/login']).then((r) => r);
+    this.router.navigate(['/login']);
   }
 
   // Funciones para los botones del dashboard

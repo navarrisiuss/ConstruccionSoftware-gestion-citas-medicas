@@ -1,102 +1,76 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { PatientDashboardComponent } from './patient-dashboard.component';
 import { AuthService } from '../../../services/auth.service';
 
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-
 describe('PatientDashboardComponent', () => {
   let component: PatientDashboardComponent;
   let fixture: ComponentFixture<PatientDashboardComponent>;
-  let mockAuthService: any;
-  let mockRouter: any;
+  let authService: jasmine.SpyObj<AuthService>;
+  let router: Router;
 
-  const mockUserData = {
-    id: 'patient123',
-    nombre: 'Juan Paciente',
-    rol: 'patient',
+  const mockUser = {
+    name: 'John',
+    paternalLastName: 'Doe',
+    maternalLastName: 'Smith',
   };
 
-  beforeEach(waitForAsync(() => {
-    mockRouter = {
-      navigate: jasmine.createSpy('navigate'),
-    };
-
-    mockAuthService = jasmine.createSpyObj('AuthService', [
+  beforeEach(async () => {
+    authService = jasmine.createSpyObj('AuthService', [
       'getCurrentUser',
       'logout',
     ]);
+    authService.getCurrentUser.and.returnValue(mockUser);
 
-    TestBed.configureTestingModule({
-      imports: [PatientDashboardComponent, HttpClientTestingModule],
-      providers: [
-        { provide: Router, useValue: mockRouter },
-        { provide: AuthService, useValue: mockAuthService },
-      ],
+    await TestBed.configureTestingModule({
+      imports: [CommonModule, RouterTestingModule, PatientDashboardComponent],
+      providers: [{ provide: AuthService, useValue: authService }],
     }).compileComponents();
-  }));
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(PatientDashboardComponent);
     component = fixture.componentInstance;
-
-    mockAuthService.getCurrentUser.and.returnValue(mockUserData);
-
-    mockAuthService.logout.and.callFake(() => {});
+    router = TestBed.inject(Router);
   });
 
-  it('should create', () => {
-    fixture.detectChanges();
+  it('should create component and set currentUser on init', () => {
+    fixture.detectChanges(); // calls ngOnInit
+
     expect(component).toBeTruthy();
+    expect(authService.getCurrentUser).toHaveBeenCalled();
+    expect(component.currentUser).toEqual(mockUser);
+
+    const span: HTMLElement =
+      fixture.nativeElement.querySelector('.user-info span');
+    expect(span.textContent).toContain('John');
   });
 
-  describe('ngOnInit', () => {
-    it('debería obtener el usuario actual del AuthService y asignarlo a currentUser', () => {
-      fixture.detectChanges();
-
-      expect(mockAuthService.getCurrentUser).toHaveBeenCalled();
-
-      expect(component.currentUser).toEqual(mockUserData);
-    });
-
-    it('debería asignar null a currentUser si AuthService.getCurrentUser devuelve null', () => {
-      mockAuthService.getCurrentUser.and.returnValue(null);
-      fixture.detectChanges();
-
-      expect(mockAuthService.getCurrentUser).toHaveBeenCalled();
-      expect(component.currentUser).toBeNull();
-    });
+  it('goToNewAppointment should navigate to appointment-form', () => {
+    spyOn(router, 'navigate');
+    component.goToNewAppointment();
+    expect(router.navigate).toHaveBeenCalledWith(['/appointment-form']);
   });
 
-  describe('goToNewAppointment', () => {
-    it('debería navegar a la ruta "/appointment-form"', () => { // <-- CORRECCIÓN EN EL TÍTULO DE LA PRUEBA
-      component.goToNewAppointment();
-
-      // La prueba ahora espera la ruta correcta que usa tu código.
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/appointment-form']); // <-- CORRECCIÓN 1
-    });
+  it('goToAppointmentHistory should navigate to patient-appointment-history', () => {
+    spyOn(router, 'navigate');
+    component.goToAppointmentHistory();
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/patient-appointment-history',
+    ]);
   });
 
-  describe('logout', () => {
-    it('debería llamar a authService.logout()', () => {
-      component.logout();
-      expect(mockAuthService.logout).toHaveBeenCalled();
-    });
+  it('goToHelpChat should navigate to patient-help-chat', () => {
+    spyOn(router, 'navigate');
+    component.goToHelpChat();
+    expect(router.navigate).toHaveBeenCalledWith(['/patient-help-chat']);
+  });
 
-    it('debería navegar a la ruta "/login" después de llamar a logout', () => { // <-- CORRECCIÓN EN EL TÍTULO DE LA PRUEBA
-      component.logout();
-
-      // La prueba ahora espera la ruta correcta que usa tu código.
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']); // <-- CORRECIÓN 2
-    });
-
-    it('debería llamar a authService.logout() antes de navegar', () => {
-      component.logout();
-      expect(mockAuthService.logout).toHaveBeenCalled();
-      // La prueba ahora espera la ruta correcta que usa tu código.
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']); // <-- CORRECIÓN 3
-    });
+  it('logout should call authService.logout and navigate to login', () => {
+    spyOn(router, 'navigate');
+    component.logout();
+    expect(authService.logout).toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/login']);
   });
 });

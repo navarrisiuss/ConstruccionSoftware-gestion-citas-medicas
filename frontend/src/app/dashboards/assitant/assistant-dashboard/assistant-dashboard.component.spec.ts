@@ -1,46 +1,76 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of } from 'rxjs';
-
 import { AssistantDashboardComponent } from './assistant-dashboard.component';
 import { AuthService } from '../../../services/auth.service';
+import { of } from 'rxjs';
 
 describe('AssistantDashboardComponent', () => {
   let component: AssistantDashboardComponent;
   let fixture: ComponentFixture<AssistantDashboardComponent>;
+  let authService: jasmine.SpyObj<AuthService>;
+  let router: jasmine.SpyObj<Router>;
 
-  let mockAuthService: any;
-  let mockRouter: any;
-
-  beforeEach(waitForAsync(() => {
-    mockAuthService = jasmine.createSpyObj('AuthService', [
+  beforeEach(async () => {
+    authService = jasmine.createSpyObj('AuthService', [
       'getCurrentUser',
       'logout',
     ]);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    router = jasmine.createSpyObj('Router', ['navigate']);
 
-    TestBed.configureTestingModule({
-      imports: [AssistantDashboardComponent, HttpClientTestingModule],
+    await TestBed.configureTestingModule({
+      imports: [AssistantDashboardComponent],
       providers: [
-        { provide: AuthService, useValue: mockAuthService },
-        { provide: Router, useValue: mockRouter },
+        { provide: AuthService, useValue: authService },
+        { provide: Router, useValue: router },
       ],
     }).compileComponents();
-  }));
-
-  beforeEach(() => {
-    mockAuthService.getCurrentUser.and.returnValue({
-      name: 'Asistente Test',
-      role: 'assistant',
-    });
 
     fixture = TestBed.createComponent(AssistantDashboardComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('ngOnInit should set currentUser when user exists', () => {
+    const user = { id: 1, name: 'Test' };
+    authService.getCurrentUser.and.returnValue(user);
+
+    component.ngOnInit();
+    expect(component.currentUser).toEqual(user);
+    expect(authService.getCurrentUser).toHaveBeenCalled();
+  });
+
+  it('logout should call authService.logout and navigate to /login', () => {
+    component.logout();
+    expect(authService.logout).toHaveBeenCalled();
+    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('goToRegisterPatient should navigate to /register-patient', () => {
+    component.goToRegisterPatient();
+    expect(router.navigate).toHaveBeenCalledWith(['/register-patient']);
+  });
+
+  it('goToManagePatients should navigate to /assistant-manage-patients', () => {
+    component.goToManagePatients();
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/assistant-manage-patients',
+    ]);
+  });
+
+  it('goToManageAppointments should navigate to /assistant-manage-appointments', () => {
+    component.goToManageAppointments();
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/assistant-manage-appointments',
+    ]);
+  });
+
+  it('goToScheduleAppointment should navigate to /assistant-schedule-appointment', () => {
+    component.goToScheduleAppointment();
+    expect(router.navigate).toHaveBeenCalledWith([
+      '/assistant-schedule-appointment',
+    ]);
   });
 });

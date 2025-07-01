@@ -81,16 +81,18 @@ describe('AdminDashboardComponent', () => {
       expect(mockAuthService.getCurrentUser).toHaveBeenCalled();
       expect(component.currentUser).not.toBeNull();
       expect(component.currentUser instanceof Admin).toBeTrue();
-      expect((component.currentUser as Admin).getName()).toEqual('SuperAdminNombre');
+      expect((component.currentUser as Admin).getName()).toEqual(
+        'SuperAdminNombre'
+      );
     });
 
     it('debería establecer currentUser aunque getCurrentUser devuelva un objeto simple', () => {
-      const mockNonAdminUser = { 
-        name: 'NoSoyAdmin', 
+      const mockNonAdminUser = {
+        name: 'NoSoyAdmin',
         paternalLastName: 'Apellido',
         maternalLastName: 'Materno',
         email: 'test@test.com',
-        password: 'pass123'
+        password: 'pass123',
       };
       mockAuthService.getCurrentUser.and.returnValue(mockNonAdminUser);
 
@@ -134,6 +136,43 @@ describe('AdminDashboardComponent', () => {
     it('debería navegar a "/register-physician"', () => {
       component.goToRegisterPhysician();
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/register-physician']);
+    });
+  });
+
+  describe('otros métodos de navegación', () => {
+    it('goToRegisterAssistant debería navegar a "/register-assistant"', () => {
+      component.goToRegisterAssistant();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/register-assistant']);
+    });
+    it('goToManagePatients debería navegar a "/manage-patients"', () => {
+      component.goToManagePatients();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/manage-patients']);
+    });
+    it('goToManageAppointments debería navegar a "/manage-appointments"', () => {
+      component.goToManageAppointments();
+      expect(mockRouter.navigate).toHaveBeenCalledWith([
+        '/manage-appointments',
+      ]);
+    });
+    it('goToMedicalHistory debería navegar a "/medical-history"', () => {
+      component.goToMedicalHistory();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/medical-history']);
+    });
+    it('goToMedicalSchedule debería navegar a "/medical-schedule"', () => {
+      component.goToMedicalSchedule();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/medical-schedule']);
+    });
+    it('goToReports debería navegar a "/reports"', () => {
+      component.goToReports();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/reports']);
+    });
+    it('goToPhysiciansView debería navegar a "/physicians-view"', () => {
+      component.goToPhysiciansView();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/physicians-view']);
+    });
+    it('goToAssistantsView debería navegar a "/assistants-view"', () => {
+      component.goToAssistantsView();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/assistants-view']);
     });
   });
 });

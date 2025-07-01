@@ -43,4 +43,37 @@ describe('PhysicianDashboardComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should set currentUser from authService on init', () => {
+    expect(mockAuthService.getCurrentUser).toHaveBeenCalled();
+    expect(component.currentUser).toEqual({
+      name: 'Dr. Test',
+      role: 'physician',
+    });
+  });
+
+  it('logout should call authService.logout and navigate to login', () => {
+    component.logout();
+    expect(mockAuthService.logout).toHaveBeenCalled();
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  describe('navigation methods', () => {
+    it('goToSchedule should navigate to /physician-schedule', () => {
+      component.goToSchedule();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/physician-schedule']);
+    });
+
+    it('goToPatients should navigate to /physician-patients', () => {
+      component.goToPatients();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/physician-patients']);
+    });
+
+    it('goToMedicalHistory should navigate to /physician-medical-history', () => {
+      component.goToMedicalHistory();
+      expect(mockRouter.navigate).toHaveBeenCalledWith([
+        '/physician-medical-history',
+      ]);
+    });
+  });
 });

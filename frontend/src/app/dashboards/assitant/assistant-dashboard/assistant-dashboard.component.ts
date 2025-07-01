@@ -26,24 +26,24 @@ export class AssistantDashboardComponent implements OnInit {
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['/login']).then((r) => r);
+    this.router.navigate(['/login']);
   }
 
   // Funciones para gestión de pacientes
   goToRegisterPatient() {
-    this.router.navigate(['/register-patient']).then((r) => r);
+    this.router.navigate(['/register-patient']);
   }
 
   goToManagePatients() {
-    this.router.navigate(['/assistant-manage-patients']).then(r => r);
+    this.router.navigate(['/assistant-manage-patients']);
   }
 
   // Funciones para gestión de citas
   goToManageAppointments() {
-    this.router.navigate(['/assistant-manage-appointments']).then(r => r);
+    this.router.navigate(['/assistant-manage-appointments']);
   }
 
   goToScheduleAppointment() {
-    this.router.navigate(['/assistant-schedule-appointment']).then(r => r);
+    this.router.navigate(['/assistant-schedule-appointment']);
   }
 }

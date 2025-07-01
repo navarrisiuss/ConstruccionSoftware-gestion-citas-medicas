@@ -36,10 +36,13 @@ export class RegisterPhysicianComponent {
     'Psiquiatría',
     'Radiología',
     'Urología',
-    'Medicina General'
+    'Medicina General',
   ];
 
-  constructor(private router: Router, private adminService: AdminService) {}
+  constructor(
+    private router: Router,
+    private adminService: AdminService
+  ) {}
 
   registerPhysician() {
     if (!this.validateForm()) {
@@ -48,7 +51,7 @@ export class RegisterPhysicianComponent {
 
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     const newPhysician = new Physician(
       this.name,
       this.paternalLastName,
@@ -65,7 +68,7 @@ export class RegisterPhysicianComponent {
         console.log('Médico registrado:', response);
         this.resetForm();
         this.isLoading = false;
-        
+
         // Opcional: redirigir después de 2 segundos
         setTimeout(() => {
           this.router.navigate(['/admin-dashboard']);
@@ -75,7 +78,7 @@ export class RegisterPhysicianComponent {
         this.errorMessage = 'Error al registrar médico: ' + error.message;
         this.isLoading = false;
         console.error('Error:', error);
-      }
+      },
     });
   }
 
@@ -115,7 +118,6 @@ export class RegisterPhysicianComponent {
     this.email = '';
     this.password = '';
     this.specialty = '';
-    this.successMessage = '';
     this.errorMessage = '';
   }
 
