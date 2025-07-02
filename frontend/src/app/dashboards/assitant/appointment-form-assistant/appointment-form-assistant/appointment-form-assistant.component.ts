@@ -479,7 +479,7 @@ export class AppointmentFormAssistantComponent implements OnInit {
     if (!calDay.allAppointments || calDay.allAppointments.length === 0) {
       return;
     }
-
+  
     const appointmentsHtml = calDay.allAppointments.map((apt: any) => {
       const statusText = apt.status === 'cancelled' ? ' (Cancelada)' : 
                         apt.status === 'completed' ? ' (Completada)' : 
@@ -580,30 +580,36 @@ export class AppointmentFormAssistantComponent implements OnInit {
     });
 
      // ✅ Actualizar las funciones globales
-  (window as any).confirmAppointment = (appointmentId: number) => {
-    this.updateAppointmentStatus(appointmentId, 'confirmed');
-    Swal.close();
-  };
-
-  (window as any).completeAppointment = (appointmentId: number) => {
-    this.updateAppointmentStatus(appointmentId, 'completed');
-    Swal.close();
-  };
-
-  (window as any).markNoShow = (appointmentId: number) => {
-    this.updateAppointmentStatus(appointmentId, 'no_show');
-    Swal.close();
-  };
-
-  (window as any).cancelAppointment = (appointmentId: number) => {
-    this.cancelAppointmentWithReason(appointmentId);
-    Swal.close();
-  };
-
-  (window as any).reactivateAppointment = (appointmentId: number) => {
-    this.updateAppointmentStatus(appointmentId, 'scheduled');
-    Swal.close();
-  };
+     (window as any).confirmAppointment = (appointmentId: number) => {
+      console.log('🔄 Confirmando cita:', appointmentId);
+      this.updateAppointmentStatus(appointmentId, 'confirmed');
+      Swal.close();
+    };
+  
+    (window as any).completeAppointment = (appointmentId: number) => {
+      console.log('🔄 Completando cita:', appointmentId);
+      this.updateAppointmentStatus(appointmentId, 'completed');
+      Swal.close();
+    };
+  
+    (window as any).markNoShow = (appointmentId: number) => {
+      console.log('🔄 Marcando como no presentada:', appointmentId);
+      this.updateAppointmentStatus(appointmentId, 'no_show');
+      Swal.close();
+    };
+  
+    // ✅ CORREGIR: NO cerrar el modal, dejarlo abierto para el proceso de cancelación
+    (window as any).cancelAppointment = (appointmentId: number) => {
+      console.log('🔄 Iniciando cancelación de cita:', appointmentId);
+      this.cancelAppointmentWithReason(appointmentId);
+      // ❌ NO cerrar aquí: Swal.close();
+    };
+  
+    (window as any).reactivateAppointment = (appointmentId: number) => {
+      console.log('🔄 Reactivando cita:', appointmentId);
+      this.updateAppointmentStatus(appointmentId, 'scheduled');
+      Swal.close();
+    };
 
     Swal.fire({
       title: `📅 Citas del ${dateFormatted}`,
@@ -658,6 +664,8 @@ export class AppointmentFormAssistantComponent implements OnInit {
   }
   // ✅ Cancelar cita con motivo
   cancelAppointmentWithReason(appointmentId: number) {
+    console.log('🔄 Iniciando proceso de cancelación para cita:', appointmentId);
+    
     Swal.fire({
       title: 'Cancelar Cita',
       text: 'Seleccione el motivo de cancelación:',
@@ -682,8 +690,11 @@ export class AppointmentFormAssistantComponent implements OnInit {
         return null;
       }
     }).then((result) => {
+      console.log('📝 Resultado de selección de motivo:', result);
+      
       if (result.isConfirmed) {
         if (result.value === 'other') {
+          // Solicitar detalles adicionales
           Swal.fire({
             title: 'Especifique el motivo',
             input: 'textarea',
@@ -700,17 +711,22 @@ export class AppointmentFormAssistantComponent implements OnInit {
             }
           }).then((reasonResult) => {
             if (reasonResult.isConfirmed) {
+              console.log('📝 Cancelando con motivo personalizado:', reasonResult.value);
               this.cancelAppointmentWithDetails(appointmentId, 'other', reasonResult.value);
             }
           });
         } else {
+          console.log('📝 Cancelando con motivo predefinido:', result.value);
           this.cancelAppointmentWithDetails(appointmentId, result.value, '');
         }
+      } else {
+        console.log('❌ Cancelación abortada por el usuario');
       }
     });
   }
 
   // ✅ Cancelar con detalles específicos
+  // ✅ Actualizar para cerrar el modal correcto después de completar la cancelación
   cancelAppointmentWithDetails(appointmentId: number, reason: string, details: string) {
     const cancelData = {
       status: 'cancelled',
@@ -720,20 +736,31 @@ export class AppointmentFormAssistantComponent implements OnInit {
       cancelled_at: new Date().toISOString()
     };
 
+    console.log('📤 Enviando datos de cancelación:', cancelData);
+
     this.adminSvc.cancelAppointment(appointmentId, cancelData)
       .subscribe({
         next: (response) => {
-          console.log('Cita cancelada:', response);
+          console.log('✅ Cita cancelada exitosamente:', response);
           this.loadAllAppointments(); // Recargar calendario
+          
+          // ✅ Cerrar cualquier modal abierto y mostrar confirmación
+          Swal.close();
+          
           Swal.fire({
             title: '¡Cita cancelada!',
             text: 'La cita ha sido cancelada y se notificará a los involucrados',
             icon: 'success',
-            confirmButtonText: 'Aceptar'
+            confirmButtonText: 'Aceptar',
+            timer: 3000
           });
         },
         error: (error) => {
-          console.error('Error cancelando cita:', error);
+          console.error('❌ Error cancelando cita:', error);
+          
+          // ✅ Cerrar modal de cancelación y mostrar error
+          Swal.close();
+          
           Swal.fire({
             title: 'Error',
             text: 'No se pudo cancelar la cita. Intente nuevamente.',
@@ -754,13 +781,16 @@ export class AppointmentFormAssistantComponent implements OnInit {
       });
       return;
     }
-
-    // Validación de fechas pasadas
-    const selectedDate = new Date(this.newAppt.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  
+    // ✅ VALIDACIÓN CORREGIDA: Usar directamente los strings de fecha
+    const selectedDateStr = this.newAppt.date; // Formato: "YYYY-MM-DD"
+    const todayStr = new Date().toISOString().split('T')[0]; // Formato: "YYYY-MM-DD"
     
-    if (selectedDate < today) {
+    console.log('Fecha seleccionada:', selectedDateStr);
+    console.log('Fecha de hoy:', todayStr);
+  
+    // ✅ Comparar strings directamente
+    if (selectedDateStr < todayStr) {
       Swal.fire({
         title: 'Error',
         text: 'No puede agendar citas en fechas pasadas',
@@ -769,7 +799,23 @@ export class AppointmentFormAssistantComponent implements OnInit {
       });
       return;
     }
-
+  
+    // ✅ Si es HOY, validar que la hora no haya pasado
+    if (selectedDateStr === todayStr) {
+      const [hour, minute] = this.newAppt.time.split(':').map(Number);
+      const now = new Date();
+      
+      if (hour < now.getHours() || (hour === now.getHours() && minute <= now.getMinutes())) {
+        Swal.fire({
+          title: 'Error',
+          text: 'No puede agendar una cita en una hora que ya pasó',
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+        return;
+      }
+    }
+  
     console.log('Enviando cita desde asistente:', this.newAppt);
     
     // ✅ Guardar los filtros actuales antes de limpiar el formulario
@@ -792,7 +838,7 @@ export class AppointmentFormAssistantComponent implements OnInit {
             reason: '' 
           };
           
-          this.loadAllAppointments(); // Esto aplicará los filtros automáticamente
+          this.loadAllAppointments();
           
           Swal.fire({
             title: '¡Cita creada con éxito!',

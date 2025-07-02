@@ -16,7 +16,7 @@ import {ManageAssistantsComponent} from '../dashboards/admin/manage-assistan/man
 import { AppointmentCalendarFormComponent } from '../dashboards/physician-dashboard/appointment-calendar-form/appointment-calendar-form/appointment-calendar-form.component';
 import {HelpChatComponent} from '../pages/help-chat/help-chat.component';
 import { AppointmentFormAssistantComponent } from '../dashboards/assitant/appointment-form-assistant/appointment-form-assistant/appointment-form-assistant.component';
-
+import { AdminAppointmentManagerComponent } from '../dashboards/admin/admin-dashboard/appointment-manager/admin-appointment-manager/admin-appointment-manager.component';
 export const routes: Routes = [
   {path: '', component: HomeComponent},
   {path: 'home', component: HomeComponent},
@@ -42,9 +42,9 @@ export const routes: Routes = [
   {path: 'physician/manage-patients', component: ManagePatientsComponent},
 
   // Otras rutas...
-  {path: 'manage-appointments', component: AdminDashboardComponent},
+  {path: 'admin/appointment-manager', component: AdminAppointmentManagerComponent},
   {path: 'medical-history', component: AdminDashboardComponent},
-  {path: 'medical-schedule', component: AdminDashboardComponent},
+  {path: 'admin/appointment-manager', component: AdminAppointmentManagerComponent},
   {path: 'reports', component: AdminDashboardComponent},
 
   // Rutas para asistente
