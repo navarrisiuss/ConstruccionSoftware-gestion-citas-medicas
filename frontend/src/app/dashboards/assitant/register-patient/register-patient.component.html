@@ -1,1 +1,156 @@
+<<<<<<< HEAD
 <h1>register-patient works!</h1>
+=======
+<div class="register-container">
+  <h2>{{ isEditMode ? 'Editar Datos del Paciente' : 'Registrar Paciente' }}</h2>
+  <form (submit)="register(); $event.preventDefault()">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="name" 
+          name="name" 
+          required
+          placeholder="Ingrese el nombre"
+          [disabled]="isLoading">
+      </div>
+
+      <div class="form-group">
+        <label>Apellido Paterno *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="paternalLastName" 
+          name="paternalLastName" 
+          required
+          placeholder="Apellido paterno"
+          [disabled]="isLoading">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Apellido Materno</label>
+        <input 
+          type="text" 
+          [(ngModel)]="maternalLastName" 
+          name="maternalLastName"
+          placeholder="Apellido materno"
+          [disabled]="isLoading">
+      </div>
+
+      <div class="form-group">
+        <label>Email *</label>
+        <input 
+          type="email" 
+          [(ngModel)]="email" 
+          name="email" 
+          required
+          placeholder="correo@ejemplo.com"
+          [disabled]="isLoading">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Contraseña *</label>
+        <input 
+          type="password" 
+          [(ngModel)]="password" 
+          name="password" 
+          required
+          placeholder="Mínimo 6 caracteres"
+          [disabled]="isLoading">
+      </div>
+
+      <div class="form-group">
+        <label>RUT * 
+          <span *ngIf="rutChecked && !isEditMode" class="rut-verified">✓ Verificado</span>
+          <span *ngIf="isEditMode" class="rut-edit-mode">📝 Modo Edición</span>
+        </label>
+        <input 
+          type="text" 
+          [(ngModel)]="rut" 
+          name="rut" 
+          required
+          placeholder="12.345.678-9"
+          [disabled]="isLoading || isEditMode"
+          (blur)="onRutBlur()"
+          [class.rut-verified-input]="rutChecked"
+          [class.rut-edit-mode-input]="isEditMode">
+        <small *ngIf="!rutChecked && !isEditMode" class="rut-help">
+          El RUT será verificado automáticamente
+        </small>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Fecha de Nacimiento *</label>
+        <input 
+          type="date" 
+          [(ngModel)]="birthDate" 
+          name="birthDate" 
+          required
+          [disabled]="isLoading">
+      </div>
+
+      <div class="form-group">
+        <label>Teléfono *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="phone" 
+          name="phone" 
+          required
+          placeholder="+56 9 1234 5678"
+          [disabled]="isLoading">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Dirección *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="address" 
+          name="address" 
+          required
+          placeholder="Calle, número, ciudad"
+          [disabled]="isLoading">
+      </div>
+
+      <div class="form-group">
+        <label>Género *</label>
+        <select 
+          [(ngModel)]="gender" 
+          name="gender" 
+          required
+          [disabled]="isLoading">
+          <option [value]="null" disabled>Selecciona tu género</option>
+          <option [value]="Gender.Male">Masculino</option>
+          <option [value]="Gender.Female">Femenino</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button 
+        type="submit" 
+        class="submit-btn"
+        [disabled]="isLoading">
+        <span *ngIf="!isLoading && !isEditMode">Registrar Paciente</span>
+        <span *ngIf="!isLoading && isEditMode">Actualizar Datos</span>
+        <span *ngIf="isLoading && !isEditMode">Registrando...</span>
+        <span *ngIf="isLoading && isEditMode">Actualizando...</span>
+      </button>
+      <button 
+        type="button" 
+        class="back-btn"
+        (click)="backToAssistant()"
+        [disabled]="isLoading">
+        Volver al Dashboard
+      </button>
+    </div>
+  </form>
+</div>
+>>>>>>> parent of e8805a3 (Agregar información del usuario actual y mejorar navegación en el registro de pacientes mediante la gestion de pacientes y citas.)
