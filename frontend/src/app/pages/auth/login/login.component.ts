@@ -28,10 +28,10 @@ export class LoginComponent {
           if (usuario.password === this.password) {
             this.message = 'Login exitoso!';
             this.authService.setCurrentUser(usuario);
-            
+
             // Redirigir según el rol del usuario
             const userRole = this.authService.getUserRole();
-            switch(userRole) {
+            switch (userRole) {
               case 'admin':
                 this.router.navigate(['/admin-dashboard']);
                 break;
@@ -52,9 +52,21 @@ export class LoginComponent {
         }
       },
       error: (error: any) => {
-        console.error(error);
-        this.message = 'Error en el servidor.';
-      }
+        console.error('Error detallado:', error);
+
+        // Manejar diferentes tipos de errores
+        if (error.status === 0) {
+          this.message =
+            'No se puede conectar al servidor. Verifique que el backend esté ejecutándose.';
+        } else if (error.status === 500) {
+          this.message =
+            'Error interno del servidor. Verifique la conexión a la base de datos.';
+        } else if (error.status === 400) {
+          this.message = error.error?.message || 'Datos de login inválidos.';
+        } else {
+          this.message = `Error en el servidor (${error.status}): ${error.error?.message || 'Error desconocido'}`;
+        }
+      },
     });
   }
 

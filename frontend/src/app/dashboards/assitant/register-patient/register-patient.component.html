@@ -1,1 +1,190 @@
-<h1>register-patient works!</h1>
+<div class="register-patient-container">
+  <div class="form-header">
+    <h2>Registrar Nuevo Paciente</h2>
+    <button type="button" class="back-btn" (click)="backToDashboard()">
+      ← Volver al Dashboard
+    </button>
+  </div>
+
+  <form
+    (ngSubmit)="registerPatient()"
+    #patientForm="ngForm"
+    class="patient-form"
+  >
+    <!-- Mensajes de error y éxito -->
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="success-message">
+      {{ successMessage }}
+    </div>
+
+    <!-- Información Personal -->
+    <div class="form-section">
+      <h3>Información Personal</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Nombre *</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            [(ngModel)]="name"
+            required
+            class="form-input"
+            placeholder="Ingrese el nombre"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="paternalLastName">Apellido Paterno *</label>
+          <input
+            type="text"
+            id="paternalLastName"
+            name="paternalLastName"
+            [(ngModel)]="paternalLastName"
+            required
+            class="form-input"
+            placeholder="Ingrese apellido paterno"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="maternalLastName">Apellido Materno</label>
+          <input
+            type="text"
+            id="maternalLastName"
+            name="maternalLastName"
+            [(ngModel)]="maternalLastName"
+            class="form-input"
+            placeholder="Ingrese apellido materno"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="rut">RUT *</label>
+          <input
+            type="text"
+            id="rut"
+            name="rut"
+            [(ngModel)]="rut"
+            required
+            class="form-input"
+            placeholder="12345678-9"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="birthDate">Fecha de Nacimiento *</label>
+          <input
+            type="date"
+            id="birthDate"
+            name="birthDate"
+            [(ngModel)]="birthDate"
+            required
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Género *</label>
+          <select
+            id="gender"
+            name="gender"
+            [(ngModel)]="gender"
+            required
+            class="form-select"
+          >
+            <option *ngFor="let g of genders" [value]="g.value">
+              {{ g.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información de Contacto -->
+    <div class="form-section">
+      <h3>Información de Contacto</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            [(ngModel)]="email"
+            required
+            class="form-input"
+            placeholder="ejemplo@correo.com"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Teléfono *</label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            [(ngModel)]="phone"
+            required
+            class="form-input"
+            placeholder="+56 9 1234 5678"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Dirección *</label>
+        <textarea
+          id="address"
+          name="address"
+          [(ngModel)]="address"
+          required
+          class="form-textarea"
+          placeholder="Ingrese la dirección completa"
+          rows="3"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Información de Acceso -->
+    <div class="form-section">
+      <h3>Información de Acceso</h3>
+
+      <div class="form-group">
+        <label for="password">Contraseña *</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="password"
+          required
+          class="form-input"
+          placeholder="Mínimo 6 caracteres"
+        />
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn-secondary"
+        (click)="resetForm()"
+        [disabled]="isLoading"
+      >
+        Limpiar Formulario
+      </button>
+
+      <button type="submit" class="btn-primary" [disabled]="isLoading">
+        {{ isLoading ? 'Registrando...' : 'Registrar Paciente' }}
+      </button>
+    </div>
+  </form>
+</div>

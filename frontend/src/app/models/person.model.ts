@@ -9,12 +9,26 @@ export class Person {
 
   isValid(): boolean {
     return (
-      this.name.length > 0 &&
-      this.paternalLastName.length > 0 &&
-      this.maternalLastName.length > 0 &&
-      this.email.length > 0 &&
-      this.password.length > 0
+      this.name != null &&
+      this.name.trim().length > 0 &&
+      this.paternalLastName != null &&
+      this.paternalLastName.trim().length > 0 &&
+      this.maternalLastName != null &&
+      this.maternalLastName.trim().length > 0 &&
+      this.email != null &&
+      this.email.trim().length > 0 &&
+      this.password != null &&
+      this.password.trim().length > 0 &&
+      this.isValidEmail(this.email) // Add email format validation
     );
+  }
+
+  private isValidEmail(email: string): boolean {
+    if (!email) {
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   }
 
   getName(): string {

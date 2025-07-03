@@ -5,44 +5,27 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-// --- Dejamos esta función auxiliar por si la necesitas en otras pruebas, pero la usaremos con cuidado ---
-const createMockAdmin = (
-  data: {
-    name?: string;
-    paternalLastName?: string;
-    maternalLastName?: string;
-    email?: string;
-    password?: string;
-    id?: string;
-  } = {}
-): Admin => {
-  const name = data.name || 'Admin';
-  const paternalLastName = data.paternalLastName || 'Test';
-  const maternalLastName = data.maternalLastName || 'Usuario';
-  const email = data.email || 'admin@test.com';
-  const password = data.password || 'password123';
-
-  const adminInstance = new Admin(
-    name,
-    paternalLastName,
-    maternalLastName,
-    email,
-    password
-  );
-
-  if (data.id) {
-    (adminInstance as any).id = data.id;
-  } else {
-    (adminInstance as any).id = 'admin-default-id';
-  }
-  return adminInstance;
-};
-
 describe('AdminDashboardComponent', () => {
   let component: AdminDashboardComponent;
   let fixture: ComponentFixture<AdminDashboardComponent>;
-  let mockAuthService: any;
-  let mockRouter: any;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockRouter: jasmine.SpyObj<Router>;
+
+  const createMockAdmin = (overrides: any = {}): Admin => {
+    const adminInstance = new Admin(
+      overrides.name || 'Admin',
+      overrides.paternalLastName || 'Test',
+      overrides.maternalLastName || 'Usuario',
+      overrides.email || 'admin@test.com',
+      overrides.password || 'password123'
+    );
+    if (overrides.id) {
+      (adminInstance as any).id = overrides.id;
+    } else {
+      (adminInstance as any).id = 'admin-default-id';
+    }
+    return adminInstance;
+  };
 
   beforeEach(waitForAsync(() => {
     mockAuthService = jasmine.createSpyObj('AuthService', [
@@ -67,12 +50,12 @@ describe('AdminDashboardComponent', () => {
     mockRouter.navigate.and.returnValue(Promise.resolve(true));
   });
 
-  it('debería crearse el componente', () => {
+  it('should create the component', () => {
     expect(component).toBeTruthy();
   });
 
   describe('ngOnInit', () => {
-    it('debería establecer currentUser si getCurrentUser devuelve una instancia de Admin', () => {
+    it('should set currentUser when getCurrentUser returns an Admin instance', () => {
       const mockAdminUser = createMockAdmin({ name: 'SuperAdminNombre' });
       mockAuthService.getCurrentUser.and.returnValue(mockAdminUser);
 
@@ -86,93 +69,65 @@ describe('AdminDashboardComponent', () => {
       );
     });
 
-    it('debería establecer currentUser aunque getCurrentUser devuelva un objeto simple', () => {
-      const mockNonAdminUser = {
+    it('should convert plain object to Admin instance when needed', () => {
+      const mockUserObject = {
         name: 'NoSoyAdmin',
         paternalLastName: 'Apellido',
         maternalLastName: 'Materno',
         email: 'test@test.com',
         password: 'pass123',
       };
-      mockAuthService.getCurrentUser.and.returnValue(mockNonAdminUser);
+      mockAuthService.getCurrentUser.and.returnValue(mockUserObject);
 
       fixture.detectChanges();
 
-      expect(mockAuthService.getCurrentUser).toHaveBeenCalled();
       expect(component.currentUser).not.toBeNull();
       expect(component.currentUser instanceof Admin).toBeTrue();
       expect((component.currentUser as Admin).getName()).toEqual('NoSoyAdmin');
     });
 
-    it('no debería establecer currentUser si getCurrentUser devuelve null', () => {
+    it('should not set currentUser when getCurrentUser returns null', () => {
       mockAuthService.getCurrentUser.and.returnValue(null);
 
       fixture.detectChanges();
 
-      expect(mockAuthService.getCurrentUser).toHaveBeenCalled();
       expect(component.currentUser).toBeNull();
     });
   });
 
-  describe('logout', () => {
+  describe('Authentication', () => {
     beforeEach(() => {
       const mockAdminUser = createMockAdmin();
       mockAuthService.getCurrentUser.and.returnValue(mockAdminUser);
       fixture.detectChanges();
     });
 
-    it('debería llamar a authService.logout()', () => {
+    it('should logout and navigate to login', () => {
       component.logout();
-      expect(mockAuthService.logout).toHaveBeenCalled();
-    });
 
-    it('debería navegar a "/login" después del logout', () => {
-      component.logout();
+      expect(mockAuthService.logout).toHaveBeenCalled();
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']);
     });
   });
 
-  describe('goToRegisterPhysician', () => {
-    it('debería navegar a "/register-physician"', () => {
-      component.goToRegisterPhysician();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/register-physician']);
-    });
-  });
+  describe('Navigation Methods', () => {
+    const navigationTests = [
+      { method: 'goToRegisterPhysician', route: '/register-physician' },
+      { method: 'goToRegisterAssistant', route: '/register-assistant' },
+      { method: 'goToManagePatients', route: '/manage-patients' },
+      { method: 'goToManageAppointments', route: '/manage-appointments' },
+      { method: 'goToMedicalHistory', route: '/medical-history' },
+      { method: 'goToMedicalSchedule', route: '/medical-schedule' },
+      { method: 'goToReports', route: '/reports' },
+      { method: 'goToPhysiciansView', route: '/physicians-view' },
+      { method: 'goToAssistantsView', route: '/assistants-view' },
+    ];
 
-  describe('otros métodos de navegación', () => {
-    it('goToRegisterAssistant debería navegar a "/register-assistant"', () => {
-      component.goToRegisterAssistant();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/register-assistant']);
-    });
-    it('goToManagePatients debería navegar a "/manage-patients"', () => {
-      component.goToManagePatients();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/manage-patients']);
-    });
-    it('goToManageAppointments debería navegar a "/manage-appointments"', () => {
-      component.goToManageAppointments();
-      expect(mockRouter.navigate).toHaveBeenCalledWith([
-        '/manage-appointments',
-      ]);
-    });
-    it('goToMedicalHistory debería navegar a "/medical-history"', () => {
-      component.goToMedicalHistory();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/medical-history']);
-    });
-    it('goToMedicalSchedule debería navegar a "/medical-schedule"', () => {
-      component.goToMedicalSchedule();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/medical-schedule']);
-    });
-    it('goToReports debería navegar a "/reports"', () => {
-      component.goToReports();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/reports']);
-    });
-    it('goToPhysiciansView debería navegar a "/physicians-view"', () => {
-      component.goToPhysiciansView();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/physicians-view']);
-    });
-    it('goToAssistantsView debería navegar a "/assistants-view"', () => {
-      component.goToAssistantsView();
-      expect(mockRouter.navigate).toHaveBeenCalledWith(['/assistants-view']);
+    navigationTests.forEach(({ method, route }) => {
+      it(`${method} should navigate to ${route}`, () => {
+        (component as any)[method]();
+        expect(mockRouter.navigate).toHaveBeenCalledWith([route]);
+      });
     });
   });
 });
