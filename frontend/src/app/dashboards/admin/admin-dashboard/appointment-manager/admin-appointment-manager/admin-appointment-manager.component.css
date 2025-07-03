@@ -1,0 +1,966 @@
+.admin-appointment-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* ============ HEADER ============ */
+  .admin-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .header-info h1 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  
+  .admin-subtitle {
+    margin: 0.5rem 0 0 0;
+    color: #718096;
+    font-size: 1rem;
+  }
+  
+  .admin-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #4a5568;
+    font-weight: 500;
+  }
+  
+  /* ============ ESTADÍSTICAS ============ */
+  .stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .stat-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #667eea;
+    transition: transform 0.2s ease;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-2px);
+  }
+  
+  .stat-card.scheduled { border-left-color: #3182ce; }
+  .stat-card.confirmed { border-left-color: #38a169; }
+  .stat-card.completed { border-left-color: #319795; }
+  .stat-card.cancelled { border-left-color: #e53e3e; }
+  .stat-card.no-show { border-left-color: #d69e2e; }
+  
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    color: #718096;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  /* ============ CONTROLES DE VISTA ============ */
+  .view-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .view-buttons {
+    display: flex;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 0.25rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .view-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    color: #4a5568;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+  }
+  
+  .view-btn.active {
+    background: #667eea;
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .btn-export, .btn-refresh {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-export {
+    background: #38a169;
+    color: white;
+  }
+  
+  .btn-refresh {
+    background: #3182ce;
+    color: white;
+  }
+  
+  .btn-export:hover, .btn-refresh:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* ============ LAYOUT PRINCIPAL ============ */
+  .main-content {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 1.5rem;
+    /* ✅ REDUCIR la altura máxima para evitar desbordamiento */
+    height: calc(100vh - 350px); /* Aumentado de 300px a 350px */
+    max-height: 800px; /* ✅ NUEVO: Altura máxima fija */
+  }
+  
+  /* ============ PANEL IZQUIERDO ============ */
+  .left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-height: 100%;
+    overflow-y: auto;
+    /* ✅ NUEVO: Scroll más suave */
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+  }
+  
+  /* ============ FORMULARIO ============ */
+  .admin-form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-form h3 {
+    margin: 0 0 1.5rem 0;
+    color: #2d3748;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.75rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  
+  .form-select, .form-input, .form-textarea, .search-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    background: white;
+  }
+  
+  .form-select:focus, .form-input:focus, .form-textarea:focus, .search-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  
+  .form-select:disabled {
+    background: #f7fafc;
+    color: #a0aec0;
+    cursor: not-allowed;
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .form-help {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: #718096;
+  }
+  
+  .form-help.error {
+    color: #e53e3e;
+  }
+  
+  .form-buttons {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  /* ============ BOTONES ============ */
+  .btn-primary, .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+  }
+  
+  .btn-primary {
+    background: #667eea;
+    color: white;
+    flex: 1;
+  }
+  
+  .btn-secondary {
+    background: #e2e8f0;
+    color: #4a5568;
+  }
+  
+  .btn-primary:hover {
+    background: #5a67d8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
+  
+  .btn-secondary:hover {
+    background: #cbd5e0;
+  }
+  
+  /* ============ PANEL DE FILTROS ============ */
+  .filters-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .filters-panel h3 {
+    margin: 0 0 1.5rem 0;
+    color: #2d3748;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.75rem;
+  }
+  
+  .filter-group {
+    margin-bottom: 1rem;
+  }
+  
+  .filter-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+  
+  .filter-select, .date-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: white;
+    transition: border-color 0.2s ease;
+  }
+  
+  .filter-select:focus, .date-input:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+  
+  .date-range {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .date-separator {
+    color: #718096;
+    font-size: 0.85rem;
+  }
+  
+  .date-input {
+    flex: 1;
+  }
+  
+  /* ============ INFO DE FILTROS ============ */
+  .filter-info {
+    margin-top: 1.5rem;
+  }
+  
+  .filter-card {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .filter-card h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+  }
+  
+  .filter-text, .filter-count {
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+  
+  .clear-filters-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    transition: all 0.2s ease;
+  }
+  
+  .clear-filters-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* ============ PANEL DERECHO ============ */
+  .right-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /* ✅ NUEVO: Altura máxima para el panel derecho */
+    max-height: 100%;
+  }
+  
+  /* ============ CALENDARIO ============ */
+  .calendar-container {
+    /* ✅ REDUCIR padding para dar más espacio */
+    padding: 1rem; /* Reducido de 1.5rem a 1rem */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    /* ✅ NUEVO: Altura máxima y overflow */
+    max-height: 100%;
+    overflow: hidden;
+  }
+  
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* ✅ REDUCIR margen inferior */
+    margin-bottom: 1rem; /* Reducido de 1.5rem a 1rem */
+  }
+  
+  .calendar-header h2 {
+    margin: 0;
+    color: #2d3748;
+    /* ✅ REDUCIR tamaño de fuente */
+    font-size: 1.3rem; /* Reducido de 1.5rem a 1.3rem */
+    font-weight: 600;
+  }
+  
+  .nav-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s ease;
+  }
+  
+  .nav-btn:hover {
+    background: #5a67d8;
+    transform: scale(1.05);
+  }
+  
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    /* ✅ NUEVO: Ajustar altura del grid */
+    flex: 1;
+    min-height: 0; /* Importante para que funcione el flex */
+    max-height: 500px; /* ✅ NUEVO: Altura máxima fija */
+  }
+  
+  .calendar-day-header {
+    background: #4a5568;
+    color: white;
+    /* ✅ REDUCIR padding */
+    padding: 0.5rem; /* Reducido de 0.75rem a 0.5rem */
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.8rem; /* Reducido de 0.85rem a 0.8rem */
+  }
+  
+  .admin-calendar-day {
+    background: white;
+    /* ✅ REDUCIR padding y altura mínima */
+    padding: 0.25rem; /* Reducido de 0.5rem a 0.25rem */
+    min-height: 70px; /* Reducido de 100px a 70px */
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    /* ✅ NUEVO: Asegurar que el contenido se ajuste */
+    overflow: hidden;
+  }
+  
+  .admin-calendar-day:hover {
+    background: #f7fafc;
+    border-color: #667eea;
+  }
+  
+  .admin-calendar-day.today {
+    background: #ebf8ff;
+    border-color: #3182ce;
+  }
+  
+  .admin-calendar-day.other-month {
+    background: #f7fafc;
+    opacity: 0.5;
+  }
+  
+  .admin-calendar-day.has-appointments {
+    background: #f0fff4;
+  }
+  
+  .day-number {
+    font-weight: 600;
+    color: #2d3748;
+    /* ✅ REDUCIR tamaño de fuente */
+    font-size: 0.8rem; /* Reducido de 0.9rem a 0.8rem */
+  }
+  
+  .day-indicators {
+    display: flex;
+    gap: 1px; /* Reducido de 2px a 1px */
+    margin-top: 0.2rem; /* Reducido de 0.25rem a 0.2rem */
+    flex-wrap: wrap;
+  }
+  
+  .indicator {
+    width: 6px; /* Reducido de 8px a 6px */
+    height: 6px; /* Reducido de 8px a 6px */
+    border-radius: 50%;
+    display: inline-block;
+  }
+  
+  .indicator.scheduled { background: #3182ce; }
+  .indicator.confirmed { background: #38a169; }
+  .indicator.completed { background: #319795; }
+  .indicator.cancelled { background: #e53e3e; }
+  .indicator.no-show { background: #d69e2e; }
+  
+  .appointments-preview {
+    /* ✅ REDUCIR margen superior */
+    margin-top: 0.3rem; /* Reducido de 0.5rem a 0.3rem */
+  }
+  
+  .appointment-preview {
+    background: #e2e8f0;
+    /* ✅ REDUCIR padding */
+    padding: 1px 3px; /* Reducido de 2px 4px a 1px 3px */
+    border-radius: 3px;
+    margin-bottom: 1px; /* Reducido de 2px a 1px */
+    /* ✅ REDUCIR tamaño de fuente */
+    font-size: 0.6rem; /* Reducido de 0.7rem a 0.6rem */
+    border-left: 2px solid #cbd5e0; /* Reducido de 3px a 2px */
+    /* ✅ NUEVO: Limitar altura */
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .appointment-preview.scheduled { border-left-color: #3182ce; background: #ebf8ff; }
+  .appointment-preview.confirmed { border-left-color: #38a169; background: #f0fff4; }
+  .appointment-preview.completed { border-left-color: #319795; background: #e6fffa; }
+  .appointment-preview.cancelled { border-left-color: #e53e3e; background: #fed7d7; }
+  .appointment-preview.no-show { border-left-color: #d69e2e; background: #fefcbf; }
+  
+  .apt-time {
+    font-weight: 600;
+    color: #2d3748;
+  }
+  
+  .apt-info {
+    color: #4a5568;
+    margin-top: 1px;
+    /* ✅ NUEVO: Truncar texto largo */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60px; /* ✅ NUEVO: Ancho máximo */
+  }
+  
+  .more-appointments {
+    text-align: center;
+    /* ✅ REDUCIR tamaño de fuente */
+    font-size: 0.6rem; /* Reducido de 0.7rem a 0.6rem */
+    color: #718096;
+    margin-top: 1px; /* Reducido de 2px a 1px */
+  }
+  
+  .day-count {
+    position: absolute;
+    top: 0.2rem; /* Reducido de 0.25rem a 0.2rem */
+    right: 0.2rem; /* Reducido de 0.25rem a 0.2rem */
+    background: #667eea;
+    color: white;
+    border-radius: 50%;
+    /* ✅ REDUCIR tamaño */
+    width: 16px; /* Reducido de 20px a 16px */
+    height: 16px; /* Reducido de 20px a 16px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem; /* Reducido de 0.7rem a 0.6rem */
+    font-weight: 600;
+  }
+  
+  /* ============ LEYENDA ============ */
+  .calendar-legend {
+    /* ✅ REDUCIR márgenes */
+    margin-top: 1rem; /* Reducido de 1.5rem a 1rem */
+    padding-top: 0.75rem; /* Reducido de 1rem a 0.75rem */
+    border-top: 1px solid #e2e8f0;
+    /* ✅ NUEVO: Hacer la leyenda más compacta */
+    flex-shrink: 0; /* No permitir que se reduzca */
+  }
+  
+  .calendar-legend h4 {
+    margin: 0 0 0.5rem 0; /* Reducido de 0.75rem a 0.5rem */
+    color: #2d3748;
+    font-size: 0.9rem; /* Reducido de 1rem a 0.9rem */
+  }
+  
+  .legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem; /* Reducido de 1rem a 0.75rem */
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem; /* Reducido de 0.5rem a 0.4rem */
+    font-size: 0.8rem; /* Reducido de 0.85rem a 0.8rem */
+  }
+  
+  .legend-color {
+    width: 10px; /* Reducido de 12px a 10px */
+    height: 10px; /* Reducido de 12px a 10px */
+    border-radius: 3px;
+  }
+  
+  .legend-color.scheduled { background: #3182ce; }
+  .legend-color.confirmed { background: #38a169; }
+  .legend-color.completed { background: #319795; }
+  .legend-color.cancelled { background: #e53e3e; }
+  .legend-color.no-show { background: #d69e2e; }
+  
+  /* ============ VISTA DE LISTA ============ */
+  .list-container {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    /* ✅ NUEVO: Altura máxima y overflow */
+    max-height: 100%;
+    overflow: hidden; /* Para el contenedor principal */
+  }
+
+  .list-container::after {
+    content: '';
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 30px;
+    height: 30px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #667eea;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  
+  .list-container:hover::after {
+    opacity: 1;
+  }
+  
+  /* ✅ NUEVO: Indicador de que hay más contenido para scroll */
+  .appointments-list.has-scroll::before {
+    content: '↓ Desplázate para ver más citas';
+    position: sticky;
+    top: 0;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    z-index: 1;
+  }
+  
+  .list-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    /* ✅ NUEVO: No permitir que se reduzca */
+    flex-shrink: 0;
+  }
+  
+  .list-header h2 {
+    margin: 0 0 0.5rem 0;
+    color: #2d3748;
+    font-size: 1.5rem;
+  }
+  
+  .appointments-list {
+    flex: 1;
+    /* ✅ CORREGIR: Asegurar scroll vertical */
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0; /* Importante para que funcione el flex */
+    /* ✅ NUEVO: Altura máxima específica */
+    max-height: calc(100vh - 500px); /* Ajustar según el layout */
+    /* ✅ NUEVO: Scroll más suave */
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f7fafc;
+  }
+
+  .appointments-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .appointments-list::-webkit-scrollbar-track {
+    background: #f7fafc;
+    border-radius: 4px;
+  }
+  
+  .appointments-list::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 4px;
+  }
+  
+  .appointments-list::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+  }
+  
+  .appointment-list-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    border-left: 4px solid #e2e8f0;
+    /* ✅ NUEVO: Asegurar que no se deforme */
+    min-height: 80px;
+    flex-shrink: 0; /* No permitir que se reduzca */
+  }
+  
+  .appointment-list-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  .appointment-list-item.scheduled { border-left-color: #3182ce; }
+.appointment-list-item.confirmed { border-left-color: #38a169; }
+.appointment-list-item.completed { border-left-color: #319795; }
+.appointment-list-item.cancelled { border-left-color: #e53e3e; }
+.appointment-list-item.no-show { border-left-color: #d69e2e; }
+
+.apt-main-info {
+display: flex;
+gap: 1.5rem;
+align-items: center;
+flex: 1;
+/* ✅ NUEVO: Evitar overflow */
+min-width: 0;
+}
+  
+.apt-date-time {
+    min-width: 120px;
+    flex-shrink: 0; /* No permitir que se reduzca */
+  }
+  
+  .apt-date {
+    display: block;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.9rem;
+  }
+  
+  .apt-time {
+    display: block;
+    color: #718096;
+    font-size: 0.85rem;
+  }
+  
+  .apt-people {
+    flex: 1;
+    min-width: 0; /* Para permitir text-overflow */
+  }
+  
+  .apt-patient, .apt-physician {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    color: #4a5568;
+    /* ✅ NUEVO: Truncar texto largo */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .apt-status {
+    flex-shrink: 0; /* No permitir que se reduzca */
+    margin-right: 1rem;
+  }
+  
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    /* ✅ NUEVO: Evitar wrap */
+    white-space: nowrap;
+  }
+  
+  .status-badge.scheduled { background: #ebf8ff; color: #3182ce; }
+.status-badge.confirmed { background: #f0fff4; color: #38a169; }
+.status-badge.completed { background: #e6fffa; color: #319795; }
+.status-badge.cancelled { background: #fed7d7; color: #e53e3e; }
+.status-badge.no-show { background: #fefcbf; color: #d69e2e; }
+
+.apt-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-shrink: 0; /* No permitir que se reduzca */
+}
+
+.btn-action {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  /* ✅ NUEVO: Evitar wrap */
+  white-space: nowrap;
+}
+  
+.btn-action.view { background: #667eea; color: white; }
+.btn-action.confirm { background: #38a169; color: white; }
+.btn-action.complete { background: #319795; color: white; }
+.btn-action.cancel { background: #e53e3e; color: white; }
+
+.btn-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+  
+  /* ============ ESTADO VACÍO ============ */
+  .no-appointments {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* ✅ NUEVO: Altura mínima */
+    min-height: 300px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    color: #718096;
+  }
+  
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+  
+  .empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #4a5568;
+  }
+  
+  .empty-state p {
+    margin-bottom: 1rem;
+  }
+  
+  /* ============ RESPONSIVE MEJORADOS ============ */
+  @media (max-width: 1024px) {
+    .main-content {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      height: auto;
+      max-height: none;
+    }
+  
+    .appointments-list {
+      /* ✅ AJUSTAR altura para tablets */
+      max-height: calc(100vh - 400px);
+    }
+  
+    .appointment-list-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      min-height: auto;
+      padding: 1rem;
+    }
+  
+    .apt-main-info {
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  
+    .apt-actions {
+      width: 100%;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+  
+    .apt-status {
+      margin-right: 0;
+      margin-bottom: 0.5rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .admin-appointment-container {
+      padding: 0.5rem;
+    }
+  
+    .appointments-list {
+      /* ✅ AJUSTAR altura para móviles */
+      max-height: calc(100vh - 350px);
+    }
+  
+    .appointment-list-item {
+      padding: 0.75rem;
+    }
+  
+    .apt-actions {
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+  
+    .btn-action {
+      font-size: 0.7rem;
+      padding: 0.3rem 0.6rem;
+    }
+  
+    .apt-patient, .apt-physician {
+      font-size: 0.85rem;
+    }
+  
+    .status-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .appointments-list {
+      /* ✅ AJUSTAR altura para pantallas muy pequeñas */
+      max-height: calc(100vh - 300px);
+    }
+  
+    .appointment-list-item {
+      padding: 0.5rem;
+      min-height: auto;
+    }
+  
+    .apt-date-time {
+      min-width: 100px;
+    }
+  
+    .apt-date, .apt-time {
+      font-size: 0.8rem;
+    }
+  
+    .btn-action {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.65rem;
+    }
+  
+  }

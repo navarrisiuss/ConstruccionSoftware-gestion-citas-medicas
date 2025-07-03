@@ -1,3 +1,4 @@
+<!-- admin-dashboard.component.html -->
 <div class="container">
   <div class="header">
     <h1>Panel de Administración</h1>
@@ -37,13 +38,10 @@
           <i class="icon">👥</i>
           <span>Gestionar Pacientes</span>
         </button>
-        <button (click)="goToManageAppointments()" class="action-btn appointments">
-          <i class="icon">📅</i>
-          <span>Gestionar Citas</span>
-        </button>
-        <button (click)="goToMedicalSchedule()" class="action-btn schedule">
-          <i class="icon">🗓️</i>
-          <span>Agenda Médica</span>
+        <!-- ✅ UN SOLO BOTÓN COMBINADO -->
+        <button (click)="goToAdvancedAppointmentManager()" class="action-btn appointments-schedule">
+          <i class="icon">📅🗓️</i>
+          <span>Gestión Avanzada de Citas y Agenda Médica</span>
         </button>
         <button (click)="goToMedicalHistory()" class="action-btn history">
           <i class="icon">📄</i>

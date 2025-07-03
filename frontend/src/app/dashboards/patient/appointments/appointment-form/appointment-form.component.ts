@@ -382,8 +382,7 @@ export class AppointmentFormComponent implements OnInit {
       });
       return;
     }
-
-    // ✅ Verificar que tenemos ID de paciente válido
+  
     if (!this.patientId) {
       Swal.fire({
         title: 'Error de Sesión',
@@ -393,13 +392,16 @@ export class AppointmentFormComponent implements OnInit {
       });
       return;
     }
-
-    // Validación adicional: no permitir fechas pasadas
-    const selectedDate = new Date(this.newAppt.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (selectedDate < today) {
+  
+    // ✅ VALIDACIÓN CORREGIDA: Usar directamente los strings de fecha
+    const selectedDateStr = this.newAppt.date; // Formato: "YYYY-MM-DD"
+    const todayStr = new Date().toISOString().split('T')[0]; // Formato: "YYYY-MM-DD"
+    
+    console.log('Fecha seleccionada:', selectedDateStr);
+    console.log('Fecha de hoy:', todayStr);
+  
+    // ✅ Comparar strings directamente - más confiable
+    if (selectedDateStr < todayStr) {
       Swal.fire({
         title: 'Error',
         text: 'No puede agendar citas en fechas pasadas',
@@ -408,18 +410,32 @@ export class AppointmentFormComponent implements OnInit {
       });
       return;
     }
-
+  
+    // ✅ Si es HOY, validar que la hora no haya pasado
+    if (selectedDateStr === todayStr) {
+      const [hour, minute] = this.newAppt.time.split(':').map(Number);
+      const now = new Date();
+      
+      if (hour < now.getHours() || (hour === now.getHours() && minute <= now.getMinutes())) {
+        Swal.fire({
+          title: 'Error',
+          text: 'No puede agendar una cita en una hora que ya pasó',
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+        return;
+      }
+    }
+  
     // ✅ Asegurar que el patient_id esté actualizado
     this.newAppt.patient_id = this.patientId;
-
+  
     console.log('Enviando cita:', this.newAppt);
-    console.log('ID del paciente en la cita:', this.newAppt.patient_id);
-
+    
     this.adminSvc.createAppointment(this.newAppt)
       .subscribe({
         next: (response) => {
           console.log('Respuesta del servidor:', response);
-          console.log('Recargando citas...');
           this.loadAppointments();
           this.newAppt = {patient_id: this.patientId, physician_id: '', date: '', time: '', specialty: ''};
           Swal.fire({
@@ -431,8 +447,7 @@ export class AppointmentFormComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error al crear cita:', error);
-
-          // Manejar específicamente el error de conflicto
+          
           if (error.status === 409) {
             Swal.fire({
               title: 'Horario no disponible',
