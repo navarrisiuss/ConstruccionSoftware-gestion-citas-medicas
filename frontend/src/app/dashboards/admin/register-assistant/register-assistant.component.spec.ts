@@ -193,4 +193,125 @@ describe('RegisterAssistantComponent', () => {
     expect(btn.disabled).toBeFalse();
     expect(btn.textContent).toContain('Registrar Asistente');
   });
+
+  // TESTS ADICIONALES RECOMENDADOS
+
+  it('should reset form after successful registration', fakeAsync(() => {
+    // Setup form with data
+    component.name = 'TestName';
+    component.paternalLastName = 'TestLastName';
+    component.maternalLastName = 'TestMaternal';
+    component.email = 'test@example.com';
+    component.password = 'password123';
+
+    adminService.registerAssistant.and.returnValue(
+      of(new Assistant('', '', '', '', ''))
+    );
+
+    component.registerAssistant();
+    tick();
+
+    // Verify form is reset
+    expect(component.name).toBe('');
+    expect(component.paternalLastName).toBe('');
+    expect(component.maternalLastName).toBe('');
+    expect(component.email).toBe('');
+    expect(component.password).toBe('');
+  }));
+
+  it('should validate email format correctly', () => {
+    // Test invalid email formats
+    const invalidEmails = [
+      'test',
+      'test@',
+      '@domain.com',
+      'test@domain',
+      'test.domain.com',
+    ];
+
+    invalidEmails.forEach((email) => {
+      component.name = 'Name';
+      component.paternalLastName = 'LastName';
+      component.email = email;
+      component.password = 'password123';
+
+      component.registerAssistant();
+      expect(component.errorMessage).toBe('Email válido es requerido');
+      expect(adminService.registerAssistant).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should handle whitespace in required fields', () => {
+    component.name = '   '; // Only whitespace
+    component.paternalLastName = 'LastName';
+    component.email = 'test@example.com';
+    component.password = 'password123';
+
+    component.registerAssistant();
+
+    expect(component.errorMessage).toBe('El nombre es requerido');
+    expect(adminService.registerAssistant).not.toHaveBeenCalled();
+  });
+
+  it('should clear error message before new registration attempt', () => {
+    // First attempt with error
+    component.errorMessage = 'Previous error';
+    component.name = 'Name';
+    component.paternalLastName = 'LastName';
+    component.email = 'test@example.com';
+    component.password = 'password123';
+
+    adminService.registerAssistant.and.returnValue(
+      of(new Assistant('', '', '', '', ''))
+    );
+
+    component.registerAssistant();
+
+    expect(component.errorMessage).toBe('');
+  });
+
+  it('should set isLoading to false after error', fakeAsync(() => {
+    component.name = 'Name';
+    component.paternalLastName = 'LastName';
+    component.email = 'test@example.com';
+    component.password = 'password123';
+
+    adminService.registerAssistant.and.returnValue(
+      throwError(() => ({ message: 'Server error' }))
+    );
+
+    component.registerAssistant();
+    tick();
+
+    expect(component.isLoading).toBeFalse();
+  }));
+
+  it('should call preventDefault on form submission', () => {
+    const form = fixture.debugElement.query(By.css('form'));
+    spyOn(Event.prototype, 'preventDefault');
+
+    form.triggerEventHandler('submit', new Event('submit'));
+
+    expect(Event.prototype.preventDefault).toHaveBeenCalled();
+  });
+
+  it('should work with maternalLastName as optional field', fakeAsync(() => {
+    component.name = 'Name';
+    component.paternalLastName = 'LastName';
+    component.maternalLastName = ''; // Optional field empty
+    component.email = 'test@example.com';
+    component.password = 'password123';
+
+    adminService.registerAssistant.and.returnValue(
+      of(new Assistant('', '', '', '', ''))
+    );
+
+    component.registerAssistant();
+    tick();
+
+    expect(adminService.registerAssistant).toHaveBeenCalled();
+    expect(component.successMessage).toContain(
+      'Asistente registrado exitosamente'
+    );
+  }));
 });

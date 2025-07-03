@@ -16,8 +16,8 @@
         (change)="onSpecialtyChange()"
         required>
         <option value="">Seleccione una especialidad</option>
-        <option *ngFor="let spec of medicalSpecialties" [value]="spec">
-          {{ spec }} ({{ getPhysicianCount(spec) }} médicos)
+        <option *ngFor="let spec of medicalSpecialties" [value]="spec.value">
+          {{ spec.label }} ({{ getPhysicianCount(spec.value) }} médicos)
         </option>
       </select>
     </div>
