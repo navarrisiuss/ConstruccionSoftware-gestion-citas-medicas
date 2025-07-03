@@ -73,4 +73,80 @@ describe('AssistantDashboardComponent', () => {
       '/assistant-schedule-appointment',
     ]);
   });
+
+  it('should display user info in template', () => {
+    const user = {
+      id: 1,
+      name: 'John',
+      paternalLastName: 'Doe',
+      maternalLastName: 'Smith',
+    };
+    authService.getCurrentUser.and.returnValue(user);
+    component.ngOnInit();
+    fixture.detectChanges();
+    const span: HTMLElement =
+      fixture.nativeElement.querySelector('.user-info span');
+    expect(span.textContent).toContain('Bienvenido, John Doe Smith');
+  });
+
+  it('should render welcome message and role badge', () => {
+    authService.getCurrentUser.and.returnValue({
+      name: 'Jane',
+      paternalLastName: 'A',
+      maternalLastName: 'B',
+    });
+    component.ngOnInit();
+    fixture.detectChanges();
+    const welcome: HTMLElement =
+      fixture.nativeElement.querySelector('.welcome-message');
+    expect(welcome).toBeTruthy();
+    expect(welcome.textContent).toContain('Hola, Jane!');
+    const badge = welcome.querySelector('.role-badge');
+    expect(badge?.textContent).toContain('Asistente Médico');
+  });
+
+  it('should trigger logout method on logout button click', () => {
+    spyOn(component, 'logout');
+    fixture.detectChanges();
+    const btn: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.logout-btn');
+    btn.click();
+    expect(component.logout).toHaveBeenCalled();
+  });
+
+  it('should trigger goToRegisterPatient on register-patient button click', () => {
+    spyOn(component, 'goToRegisterPatient');
+    fixture.detectChanges();
+    const btn: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.register-patient');
+    btn.click();
+    expect(component.goToRegisterPatient).toHaveBeenCalled();
+  });
+
+  it('should trigger goToManagePatients on manage-patients button click', () => {
+    spyOn(component, 'goToManagePatients');
+    fixture.detectChanges();
+    const btn: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.manage-patients');
+    btn.click();
+    expect(component.goToManagePatients).toHaveBeenCalled();
+  });
+
+  it('should trigger goToScheduleAppointment on schedule button click', () => {
+    spyOn(component, 'goToScheduleAppointment');
+    fixture.detectChanges();
+    const btn: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.schedule');
+    btn.click();
+    expect(component.goToScheduleAppointment).toHaveBeenCalled();
+  });
+
+  it('should trigger goToManageAppointments on appointments button click', () => {
+    spyOn(component, 'goToManageAppointments');
+    fixture.detectChanges();
+    const btn: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.appointments');
+    btn.click();
+    expect(component.goToManageAppointments).toHaveBeenCalled();
+  });
 });

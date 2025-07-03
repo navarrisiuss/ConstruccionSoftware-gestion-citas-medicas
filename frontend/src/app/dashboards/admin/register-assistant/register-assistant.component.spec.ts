@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { By } from '@angular/platform-browser';
 
 import { RegisterAssistantComponent } from './register-assistant.component';
 import { AdminService } from '../../../services/admin.service';
@@ -155,5 +156,41 @@ describe('RegisterAssistantComponent', () => {
   it('backToDashboard should navigate to /admin-dashboard', () => {
     component.backToDashboard();
     expect(router.navigate).toHaveBeenCalledWith(['/admin-dashboard']);
+  });
+
+  it('should display errorMessage in template on validation error', () => {
+    component.errorMessage = 'Nombre requerido';
+    fixture.detectChanges();
+    const el = fixture.nativeElement.querySelector('.error-message');
+    expect(el).toBeTruthy();
+    expect(el.textContent).toContain('Nombre requerido');
+  });
+
+  it('should display successMessage in template on successful register', fakeAsync(() => {
+    component.successMessage = 'Registrado OK';
+    fixture.detectChanges();
+    const el = fixture.nativeElement.querySelector('.success-message');
+    expect(el).toBeTruthy();
+    expect(el.textContent).toContain('Registrado OK');
+  }));
+
+  it('should disable submit button and show loading text when isLoading', () => {
+    component.isLoading = true;
+    fixture.detectChanges();
+    const btn: HTMLButtonElement = fixture.nativeElement.querySelector(
+      'button[type="submit"]'
+    );
+    expect(btn.disabled).toBeTrue();
+    expect(btn.textContent).toContain('Registrando...');
+  });
+
+  it('should enable submit button and show default text when not loading', () => {
+    component.isLoading = false;
+    fixture.detectChanges();
+    const btn: HTMLButtonElement = fixture.nativeElement.querySelector(
+      'button[type="submit"]'
+    );
+    expect(btn.disabled).toBeFalse();
+    expect(btn.textContent).toContain('Registrar Asistente');
   });
 });
