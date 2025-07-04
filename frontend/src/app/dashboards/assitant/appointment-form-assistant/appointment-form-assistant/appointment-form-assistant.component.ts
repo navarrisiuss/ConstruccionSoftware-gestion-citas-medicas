@@ -62,6 +62,13 @@ export class AppointmentFormAssistantComponent implements OnInit {
   showFiltered = false; // ✅ Para filtros
 
   medicalSpecialties = MEDICAL_SPECIALTIES;
+  appointmentStatuses = [
+    { value: 'scheduled', label: 'Programada' },
+    { value: 'confirmed', label: 'Confirmada' },
+    { value: 'completed', label: 'Completada' },
+    { value: 'cancelled', label: 'Cancelada' },
+    { value: 'no_show', label: 'No se presentó' }
+  ];
   
 
   // Calendario
@@ -368,7 +375,7 @@ export class AppointmentFormAssistantComponent implements OnInit {
   }
 
   loadAllAppointments() {
-    console.log('Cargando TODAS las citas para el asistente');
+    console.log('Cargando TODAS las citas para administrador');
     
     this.adminSvc.getAllAppointments()
       .subscribe({
@@ -390,11 +397,14 @@ export class AppointmentFormAssistantComponent implements OnInit {
               patientId: a.patient_id,
               physicianId: a.physician_id,
               status: a.status,
-              isManageable: true
+              isManageable: true,
+              cancellation_reason: a.cancellation_reason,
+              cancellation_details: a.cancellation_details,
+              priority: a.priority || 'normal',
+              notes: a.notes || ''
             };
           });
           
-          // ✅ Guardar todas las citas y aplicar filtros
           this.allAppointments = mappedAppointments;
           this.applyFilters();
           
@@ -664,112 +674,98 @@ export class AppointmentFormAssistantComponent implements OnInit {
   }
   // ✅ Cancelar cita con motivo
   cancelAppointmentWithReason(appointmentId: number) {
-    console.log('🔄 Iniciando proceso de cancelación para cita:', appointmentId);
-    
-    Swal.fire({
-      title: 'Cancelar Cita',
-      text: 'Seleccione el motivo de cancelación:',
-      input: 'select',
-      inputOptions: {
-        'patient_request': 'Solicitud del paciente',
-        'physician_unavailable': 'Médico no disponible',
-        'emergency': 'Emergencia médica',
-        'administrative': 'Motivos administrativos',
-        'schedule_conflict': 'Conflicto de horarios',
-        'other': 'Otro motivo'
-      },
-      inputPlaceholder: 'Seleccione un motivo',
-      showCancelButton: true,
-      confirmButtonText: 'Cancelar Cita',
-      cancelButtonText: 'Mantener Cita',
-      confirmButtonColor: '#dc3545',
-      inputValidator: (value) => {
-        if (!value) {
-          return 'Debe seleccionar un motivo';
-        }
-        return null;
-      }
-    }).then((result) => {
-      console.log('📝 Resultado de selección de motivo:', result);
+      console.log('Iniciando proceso de cancelación para cita:', appointmentId);
       
-      if (result.isConfirmed) {
-        if (result.value === 'other') {
-          // Solicitar detalles adicionales
-          Swal.fire({
-            title: 'Especifique el motivo',
-            input: 'textarea',
-            inputPlaceholder: 'Describa el motivo de cancelación...',
-            showCancelButton: true,
-            confirmButtonText: 'Cancelar Cita',
-            cancelButtonText: 'Volver',
-            confirmButtonColor: '#dc3545',
-            inputValidator: (value) => {
-              if (!value || value.trim().length < 5) {
-                return 'Debe especificar el motivo (mínimo 5 caracteres)';
-              }
-              return null;
-            }
-          }).then((reasonResult) => {
-            if (reasonResult.isConfirmed) {
-              console.log('📝 Cancelando con motivo personalizado:', reasonResult.value);
-              this.cancelAppointmentWithDetails(appointmentId, 'other', reasonResult.value);
-            }
-          });
-        } else {
-          console.log('📝 Cancelando con motivo predefinido:', result.value);
-          this.cancelAppointmentWithDetails(appointmentId, result.value, '');
-        }
-      } else {
-        console.log('❌ Cancelación abortada por el usuario');
-      }
-    });
-  }
-
-  // ✅ Cancelar con detalles específicos
-  // ✅ Actualizar para cerrar el modal correcto después de completar la cancelación
-  cancelAppointmentWithDetails(appointmentId: number, reason: string, details: string) {
-    const cancelData = {
-      status: 'cancelled',
-      cancellation_reason: reason,
-      cancellation_details: details,
-      cancelled_by: this.assistantId,
-      cancelled_at: new Date().toISOString()
-    };
-
-    console.log('📤 Enviando datos de cancelación:', cancelData);
-
-    this.adminSvc.cancelAppointment(appointmentId, cancelData)
-      .subscribe({
-        next: (response) => {
-          console.log('✅ Cita cancelada exitosamente:', response);
-          this.loadAllAppointments(); // Recargar calendario
-          
-          // ✅ Cerrar cualquier modal abierto y mostrar confirmación
-          Swal.close();
-          
-          Swal.fire({
-            title: '¡Cita cancelada!',
-            text: 'La cita ha sido cancelada y se notificará a los involucrados',
-            icon: 'success',
-            confirmButtonText: 'Aceptar',
-            timer: 3000
-          });
+      Swal.fire({
+        title: 'Cancelar Cita',
+        text: 'Como administrador, seleccione el motivo de cancelación:',
+        input: 'select',
+        inputOptions: {
+          'administrative_decision': 'Decisión administrativa',
+          'patient_request': 'Solicitud del paciente',
+          'physician_unavailable': 'Médico no disponible',
+          'emergency': 'Emergencia médica',
+          'schedule_conflict': 'Conflicto de horarios',
+          'system_maintenance': 'Mantenimiento del sistema',
+          'force_majeure': 'Fuerza mayor',
+          'other': 'Otro motivo'
         },
-        error: (error) => {
-          console.error('❌ Error cancelando cita:', error);
-          
-          // ✅ Cerrar modal de cancelación y mostrar error
-          Swal.close();
-          
-          Swal.fire({
-            title: 'Error',
-            text: 'No se pudo cancelar la cita. Intente nuevamente.',
-            icon: 'error',
-            confirmButtonText: 'Aceptar'
-          });
+        inputPlaceholder: 'Seleccione un motivo',
+        showCancelButton: true,
+        confirmButtonText: 'Cancelar Cita',
+        cancelButtonText: 'Mantener Cita',
+        confirmButtonColor: '#dc3545',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'Debe seleccionar un motivo';
+          }
+          return null;
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          if (result.value === 'other') {
+            Swal.fire({
+              title: 'Especifique el motivo',
+              input: 'textarea',
+              inputPlaceholder: 'Describa el motivo de cancelación...',
+              showCancelButton: true,
+              confirmButtonText: 'Cancelar Cita',
+              cancelButtonText: 'Volver',
+              confirmButtonColor: '#dc3545',
+              inputValidator: (value) => {
+                if (!value || value.trim().length < 5) {
+                  return 'Debe especificar el motivo (mínimo 5 caracteres)';
+                }
+                return null;
+              }
+            }).then((reasonResult) => {
+              if (reasonResult.isConfirmed) {
+                this.cancelAppointmentWithDetails(appointmentId, 'other', reasonResult.value);
+              }
+            });
+          } else {
+            this.cancelAppointmentWithDetails(appointmentId, result.value, '');
+          }
         }
       });
-  }
+    }
+
+  cancelAppointmentWithDetails(appointmentId: number, reason: string, details: string) {
+      const cancelData = {
+        status: 'cancelled',
+        cancellation_reason: reason,
+        cancellation_details: details,
+        cancelled_by: this.assistantId,
+        cancelled_at: new Date().toISOString()
+      };
+  
+      console.log('Enviando datos de cancelación:', cancelData);
+  
+      this.adminSvc.cancelAppointment(appointmentId, cancelData)
+        .subscribe({
+          next: (response) => {
+            console.log('Cita cancelada exitosamente:', response);
+            this.loadAllAppointments();
+            
+            Swal.fire({
+              title: '¡Cita cancelada!',
+              text: 'La cita ha sido cancelada por el administrador y se notificará a los involucrados',
+              icon: 'success',
+              confirmButtonText: 'Aceptar',
+              timer: 3000
+            });
+          },
+          error: (error) => {
+            console.error('Error cancelando cita:', error);
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudo cancelar la cita. Intente nuevamente.',
+              icon: 'error',
+              confirmButtonText: 'Aceptar'
+            });
+          }
+        });
+    }
 
   submit() {
     if (!this.newAppt.patient_id || !this.newAppt.physician_id || !this.newAppt.date || !this.newAppt.time) {

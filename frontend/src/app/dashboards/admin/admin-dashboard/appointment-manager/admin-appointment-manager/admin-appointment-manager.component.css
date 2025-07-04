@@ -66,7 +66,7 @@
   .stat-card.confirmed { border-left-color: #38a169; }
   .stat-card.completed { border-left-color: #319795; }
   .stat-card.cancelled { border-left-color: #e53e3e; }
-  .stat-card.no-show { border-left-color: #d69e2e; }
+  .stat-card.no-show { border-left-color: #966400; }
   
   .stat-number {
     font-size: 2rem;
@@ -511,7 +511,7 @@
   .indicator.confirmed { background: #38a169; }
   .indicator.completed { background: #319795; }
   .indicator.cancelled { background: #e53e3e; }
-  .indicator.no-show { background: #d69e2e; }
+  .indicator.no-show { background: #966400; }
   
   .appointments-preview {
     /* ✅ REDUCIR margen superior */
@@ -538,7 +538,7 @@
   .appointment-preview.confirmed { border-left-color: #38a169; background: #f0fff4; }
   .appointment-preview.completed { border-left-color: #319795; background: #e6fffa; }
   .appointment-preview.cancelled { border-left-color: #e53e3e; background: #fed7d7; }
-  .appointment-preview.no-show { border-left-color: #d69e2e; background: #fefcbf; }
+  .appointment-preview.no-show { border-left-color: #966400; background: #fefcbf; }
   
   .apt-time {
     font-weight: 600;
@@ -619,7 +619,7 @@
   .legend-color.confirmed { background: #38a169; }
   .legend-color.completed { background: #319795; }
   .legend-color.cancelled { background: #e53e3e; }
-  .legend-color.no-show { background: #d69e2e; }
+  .legend-color.no-show { background: #966400; }
   
   /* ============ VISTA DE LISTA ============ */
   .list-container {
@@ -741,7 +741,7 @@
 .appointment-list-item.confirmed { border-left-color: #38a169; }
 .appointment-list-item.completed { border-left-color: #319795; }
 .appointment-list-item.cancelled { border-left-color: #e53e3e; }
-.appointment-list-item.no-show { border-left-color: #d69e2e; }
+.appointment-list-item.no-show { border-left-color: #966400; }
 
 .apt-main-info {
 display: flex;
@@ -804,7 +804,7 @@ min-width: 0;
 .status-badge.confirmed { background: #f0fff4; color: #38a169; }
 .status-badge.completed { background: #e6fffa; color: #319795; }
 .status-badge.cancelled { background: #fed7d7; color: #e53e3e; }
-.status-badge.no-show { background: #fefcbf; color: #d69e2e; }
+.status-badge.no-show { background: #fefcbf; color: #966400; }
 
 .apt-actions {
   display: flex;
@@ -862,6 +862,66 @@ min-width: 0;
   
   .empty-state p {
     margin-bottom: 1rem;
+  }
+
+  .edit-mode-indicator {
+    margin-bottom: 1rem;
+  }
+  
+  .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+  }
+  
+  .cancel-edit-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+  }
+  
+  .cancel-edit-btn:hover {
+    background: #c82333;
+    transform: scale(1.05);
+  }
+  
+  .btn-warning {
+    background: #ffc107 !important;
+    color: #212529 !important;
+  }
+  
+  .btn-warning:hover {
+    background: #e0a800 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  }
+  
+  /* ============ RESPONSIVE PARA MODO EDICIÓN ============ */
+  @media (max-width: 768px) {
+    .alert {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+    
+    .cancel-edit-btn {
+      width: 100%;
+      padding: 0.5rem;
+    }
   }
   
   /* ============ RESPONSIVE MEJORADOS ============ */

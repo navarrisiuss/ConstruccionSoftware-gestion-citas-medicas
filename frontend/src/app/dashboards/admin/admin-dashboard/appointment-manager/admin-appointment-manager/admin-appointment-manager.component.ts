@@ -2,24 +2,37 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { AdminService } from '../../../../../services/admin.service';
-import { PhysicianService } from '../../../../../services/physician.service';
 import { AuthService } from '../../../../../services/auth.service';
-import { MEDICAL_SPECIALTIES } from '../../../../../constants/medical-specialties';
+import { PhysicianService } from '../../../../../services/physician.service';
+import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+
+// Definir constantes de especialidades médicas
+const MEDICAL_SPECIALTIES = [
+  'Cardiología', 'Neurología', 'Pediatría', 'Ginecología',
+  'Dermatología', 'Psiquiatría', 'Oftalmología', 'Traumatología',
+  'Medicina Interna', 'Cirugía General', 'Endocrinología', 'Gastroenterología'
+];
 
 interface PatientDto {
   id: number;
+  firstName: string; // Mapea a 'name' del backend
+  lastName: string;  // Mapea a 'paternalLastName' del backend
   fullName: string;
   rut: string;
   email: string;
+  phone: string;
 }
 
 interface PhysicianDto {
   id: number;
+  firstName: string; // Mapea a 'name' del backend
+  lastName: string;  // Mapea a 'paternalLastName' del backend
   fullName: string;
+  email: string;
   specialty: string;
+  licenseNumber: string;
 }
 
 interface SpecialtyCount {
@@ -39,6 +52,10 @@ interface AppointmentEvent {
   isManageable: boolean;
   cancellation_reason?: string;
   cancellation_details?: string;
+  priority?: string;
+  notes?: string;
+  reason?: string;
+  specialty?: string;
 }
 
 @Component({
@@ -57,8 +74,8 @@ export class AdminAppointmentManagerComponent implements OnInit {
     time: '', 
     reason: '', 
     specialty: '',
-    priority: 'normal', // ✅ Nuevo: Prioridad
-    notes: '' // ✅ Nuevo: Notas administrativas
+    priority: 'normal',
+    notes: ''
   };
 
   // ✅ DATOS COMPLETOS
@@ -89,6 +106,10 @@ export class AdminAppointmentManagerComponent implements OnInit {
   currentDate = new Date();
   calendarDays: any[] = [];
   viewMode = 'calendar'; // 'calendar' | 'list'
+
+  // ✅ NUEVAS VARIABLES PARA EDICIÓN
+  isEditing = false;
+  editingAppointmentId: number | null = null;
   
   medicalSpecialties = MEDICAL_SPECIALTIES;
   appointmentStatuses = [
@@ -114,73 +135,285 @@ export class AdminAppointmentManagerComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.currentUser = this.authService.getCurrentUser();
+    this.initializeAdmin();
+    this.loadAllPatients();
+    this.loadAllPhysicians();
+    this.loadAllAppointments();
+    this.generateCalendar();
+  }
 
-    if (this.currentUser && this.currentUser.id) {
-      this.adminId = this.currentUser.id.toString();
-
-      console.log('Admin autenticado:', this.currentUser);
-      console.log('ID del admin:', this.adminId);
-
-      this.loadPatients();
-      this.loadPhysicians();
-      this.loadAllAppointments();
-      this.generateCalendar();
-    } else {
-      Swal.fire({
-        title: 'Sesión Expirada',
-        text: 'Debe iniciar sesión para gestionar citas',
-        icon: 'warning',
-        confirmButtonText: 'Ir al Login'
-      }).then(() => {
-        this.router.navigate(['/login']);
-      });
+  initializeAdmin() {
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.currentUser = user;
+      this.adminId = user.id || user.email || 'admin';
     }
   }
 
-  // ✅ CARGA DE DATOS
-  private loadPatients() {
-    this.adminSvc.getAllPatients()
-      .subscribe({
-        next: (list: any[]) => {
-          console.log('Pacientes desde el servidor:', list);
-          
-          this.patients = list.map(p => ({
-            id: p.id,
-            fullName: `${p.name} ${p.paternalLastName} ${p.maternalLastName}`,
-            rut: p.rut,
-            email: p.email
-          }));
+  // ✅ MÉTODO ACTUALIZADO: Submit con lógica de edición y creación
+  submit() {
+    // Validaciones básicas
+    if (!this.newAppt.patient_id || !this.newAppt.physician_id || !this.newAppt.date || !this.newAppt.time) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Por favor complete todos los campos obligatorios',
+        icon: 'error',
+        confirmButtonText: 'Aceptar'
+      });
+      return;
+    }
 
-          this.filteredPatients = [...this.patients];
-          console.log('Pacientes procesados:', this.patients);
+    if (this.isEditing && this.editingAppointmentId) {
+      // ✅ MODO EDICIÓN
+      this.updateAppointment();
+    } else {
+      // ✅ MODO CREACIÓN
+      this.createAppointment();
+    }
+  }
+
+  // ✅ NUEVO MÉTODO: Crear nueva cita
+  createAppointment() {
+    console.log('Creando nueva cita:', this.newAppt);
+    
+    const appointmentData = {
+      patient_id: parseInt(this.newAppt.patient_id),
+      physician_id: parseInt(this.newAppt.physician_id),
+      date: this.newAppt.date,
+      time: this.newAppt.time,
+      reason: this.newAppt.reason,
+      priority: this.newAppt.priority,
+      notes: this.newAppt.notes,
+      status: 'scheduled'
+    };
+
+    this.adminSvc.createAppointment(appointmentData)
+      .subscribe({
+        next: (response) => {
+          console.log('Cita creada exitosamente:', response);
+          this.clearForm();
+          this.loadAllAppointments();
+          
+          Swal.fire({
+            title: '✅ Cita Creada',
+            text: 'La nueva cita ha sido programada exitosamente',
+            icon: 'success',
+            confirmButtonText: 'Aceptar',
+            timer: 3000,
+            timerProgressBar: true
+          });
         },
         error: (error) => {
-          console.error('Error cargando pacientes:', error);
+          console.error('Error creando cita:', error);
+          Swal.fire({
+            title: 'Error',
+            text: 'No se pudo crear la cita. Intente nuevamente.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+          });
         }
       });
   }
 
-  private loadPhysicians() {
+  // ✅ NUEVO MÉTODO: Actualizar cita existente
+  updateAppointment() {
+    console.log('Actualizando cita ID:', this.editingAppointmentId, 'con datos:', this.newAppt);
+    
+    const appointmentData = {
+      patient_id: parseInt(this.newAppt.patient_id),
+      physician_id: parseInt(this.newAppt.physician_id),
+      date: this.newAppt.date,
+      time: this.newAppt.time,
+      reason: this.newAppt.reason,
+      priority: this.newAppt.priority,
+      notes: this.newAppt.notes
+    };
+    
+    this.adminSvc.updateAppointment(this.editingAppointmentId!, appointmentData)
+      .subscribe({
+        next: (response) => {
+          console.log('Cita actualizada:', response);
+          this.resetEditMode();
+          this.loadAllAppointments();
+          
+          Swal.fire({
+            title: '✅ Cita Actualizada',
+            text: 'Los cambios han sido guardados correctamente',
+            icon: 'success',
+            confirmButtonText: 'Aceptar',
+            timer: 3000,
+            timerProgressBar: true
+          });
+        },
+        error: (error) => {
+          console.error('Error actualizando cita:', error);
+          Swal.fire({
+            title: 'Error',
+            text: 'No se pudo actualizar la cita. Intente nuevamente.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+          });
+        }
+      });
+  }
+
+  editAppointment(appointmentId: number) {
+    const appointment = this.allAppointments.find(apt => apt.id === appointmentId);
+    
+    if (appointment) {
+      console.log('✅ Cita encontrada para editar:', appointment);
+      console.log('✅ Pacientes disponibles:', this.patients);
+      console.log('✅ Médicos disponibles:', this.allPhysicians);
+      
+      // ✅ Marcar como modo edición
+      this.isEditing = true;
+      this.editingAppointmentId = appointmentId;
+      
+      // ✅ Verificar que los IDs coincidan
+      const selectedPatient = this.patients.find(p => p.id === appointment.patientId);
+      const selectedPhysician = this.allPhysicians.find(p => p.id === appointment.physicianId);
+      
+      console.log('✅ Paciente seleccionado:', selectedPatient);
+      console.log('✅ Médico seleccionado:', selectedPhysician);
+      
+      // ✅ Precargar TODOS los datos
+      this.newAppt.patient_id = appointment.patientId.toString();
+      this.newAppt.physician_id = appointment.physicianId.toString();
+      this.newAppt.date = appointment.date;
+      this.newAppt.time = appointment.time;
+      this.newAppt.reason = appointment.reason || '';
+      this.newAppt.specialty = appointment.specialty || '';
+      this.newAppt.priority = appointment.priority || 'normal';
+      this.newAppt.notes = appointment.notes || '';
+      
+      console.log('✅ Datos cargados en formulario:', this.newAppt);
+      
+      // ✅ Actualizar filtros si es necesario
+      this.onSpecialtyChange();
+      this.onPatientSelectionChange();
+      
+      Swal.fire({
+        title: '✏️ Modo Edición Activado',
+        html: `
+          <div style="text-align: left;">
+            <p>📝 Se ha cargado la cita <strong>#${appointmentId}</strong> para edición.</p>
+            <p>🔽 Vaya al formulario de la izquierda para realizar los cambios.</p>
+            <p>💾 El botón "Crear Cita" cambió a "Actualizar Cita".</p>
+            <br>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 4px solid #007bff;">
+              <strong>Datos actuales:</strong><br>
+              📅 ${appointment.date} a las ${appointment.time}<br>
+              👤 ${selectedPatient ? selectedPatient.fullName : 'Paciente no encontrado'}<br>
+              👨‍⚕️ Dr. ${selectedPhysician ? selectedPhysician.fullName : 'Médico no encontrado'}
+            </div>
+          </div>
+        `,
+        icon: 'info',
+        confirmButtonText: 'Entendido',
+        timer: 7000,
+        timerProgressBar: true
+      });
+    } else {
+      console.error('❌ No se encontró la cita con ID:', appointmentId);
+    }
+  }
+
+  // ✅ NUEVO MÉTODO: Cancelar edición
+  cancelEdit() {
+    Swal.fire({
+      title: '¿Cancelar edición?',
+      text: 'Se perderán los cambios no guardados',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cancelar',
+      cancelButtonText: 'Continuar editando',
+      confirmButtonColor: '#dc3545'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.resetEditMode();
+        Swal.fire({
+          title: 'Edición cancelada',
+          text: 'El formulario ha sido limpiado',
+          icon: 'info',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      }
+    });
+  }
+
+  // ✅ NUEVO MÉTODO: Resetear modo edición
+  resetEditMode() {
+    this.isEditing = false;
+    this.editingAppointmentId = null;
+    this.clearForm();
+  }
+
+  // ✅ MÉTODO MEJORADO: Limpiar formulario
+  clearForm() {
+    this.newAppt = { 
+      patient_id: '', 
+      physician_id: '', 
+      date: '', 
+      time: '', 
+      reason: '', 
+      specialty: '',
+      priority: 'normal',
+      notes: ''
+    };
+    this.searchPatient = '';
+    this.filteredPatients = [...this.patients];
+  }
+
+  // ... [Resto de métodos existentes permanecen igual] ...
+
+  loadAllPatients() {
+    this.adminSvc.getAllPatients()
+      .subscribe({
+        next: (list: any[]) => {
+          console.log('Datos originales de pacientes:', list); //Para debugging
+          
+          this.patients = list.map(p => ({
+            id: p.id,
+            //Usar los nombres correctos del backend
+            firstName: p.name, // backend usa 'name'
+            lastName: p.paternalLastName, // backend usa 'paternalLastName'
+            fullName: `${p.name} ${p.paternalLastName} ${p.maternalLastName || ''}`.trim(),
+            rut: p.rut,
+            email: p.email,
+            phone: p.phone
+          }));
+          this.filteredPatients = [...this.patients];
+          console.log('Pacientes mapeados:', this.patients); //Para debugging
+        },
+        error: (error) => {
+          console.error('Error al cargar pacientes:', error);
+        }
+      });
+  }
+
+  loadAllPhysicians() {
     this.physicianService.getAllPhysicians()
       .subscribe({
         next: (list: any[]) => {
-          console.log('Médicos desde el servidor:', list);
+          console.log('Datos originales de médicos:', list); // Para debugging
           
           this.allPhysicians = list.map(p => ({
             id: p.id,
-            fullName: `${p.name} ${p.paternalLastName} ${p.maternalLastName}`,
-            specialty: p.specialty || 'Sin especialidad'
+            // Usar los nombres correctos del backend
+            firstName: p.name, // backend usa 'name'
+            lastName: p.paternalLastName, // backend usa 'paternalLastName'
+            fullName: `${p.name} ${p.paternalLastName} ${p.maternalLastName || ''}`.trim(),
+            email: p.email,
+            specialty: p.specialty,
+            licenseNumber: p.licenseNumber
           }));
-
           this.physicians = [...this.allPhysicians];
-          this.filteredPhysicians = [...this.allPhysicians];
           this.calculateSpecialtyCounts();
-
-          console.log('Médicos procesados:', this.allPhysicians);
+          console.log('Médicos mapeados:', this.allPhysicians); // Para debugging
         },
         error: (error) => {
-          console.error('Error cargando médicos:', error);
+          console.error('Error al cargar médicos:', error);
         }
       });
   }
@@ -203,8 +436,9 @@ export class AdminAppointmentManagerComponent implements OnInit {
               id: a.id,
               date: formattedDate,
               time: a.time,
-              physician: a.physician_name || 'Sin nombre',
-              patient: a.patient_name || 'Sin nombre',
+              // ✅ VERIFICAR: Nombres de médicos y pacientes
+              physician: a.physician_name || a.physician || 'Sin nombre',
+              patient: a.patient_name || a.patient || 'Sin nombre',
               patientId: a.patient_id,
               physicianId: a.physician_id,
               status: a.status,
@@ -212,7 +446,9 @@ export class AdminAppointmentManagerComponent implements OnInit {
               cancellation_reason: a.cancellation_reason,
               cancellation_details: a.cancellation_details,
               priority: a.priority || 'normal',
-              notes: a.notes || ''
+              notes: a.notes || '',
+              reason: a.reason || '',
+              specialty: a.specialty || ''
             };
           });
           
@@ -222,7 +458,6 @@ export class AdminAppointmentManagerComponent implements OnInit {
           console.log('Array final de todas las citas:', this.allAppointments);
           this.generateCalendar();
           
-          // ✅ NUEVO: Verificar scroll después de cargar datos
           if (this.viewMode === 'list') {
             setTimeout(() => {
               this.checkScrollNeeded();
@@ -235,328 +470,610 @@ export class AdminAppointmentManagerComponent implements OnInit {
       });
   }
 
-  // ✅ FILTROS AVANZADOS
-  calculateSpecialtyCounts() {
-    const counts: { [key: string]: number } = {};
-
-    this.allPhysicians.forEach(physician => {
-      if (physician.specialty) {
-        counts[physician.specialty] = (counts[physician.specialty] || 0) + 1;
-      }
-    });
-
-    this.specialtyCounts = Object.keys(counts).map(specialty => ({
-      specialty,
-      count: counts[specialty]
-    }));
+  onPatientSearch() {
+    if (this.searchPatient.trim() === '') {
+      this.filteredPatients = [...this.patients];
+    } else {
+      const searchTerm = this.searchPatient.toLowerCase().trim();
+      this.filteredPatients = this.patients.filter(patient =>
+        patient.fullName.toLowerCase().includes(searchTerm) ||
+        patient.rut.toLowerCase().includes(searchTerm) ||
+        patient.email.toLowerCase().includes(searchTerm)
+      );
+    }
   }
 
-  getPhysicianCount(specialty: string): number {
-    const specialtyCount = this.specialtyCounts.find(sc => sc.specialty === specialty);
-    return specialtyCount ? specialtyCount.count : 0;
+  onPatientSelectionChange() {
+    const selectedPatient = this.patients.find(p => p.id.toString() === this.newAppt.patient_id);
+    if (selectedPatient) {
+      console.log('Paciente seleccionado:', selectedPatient);
+    }
   }
 
   onSpecialtyChange() {
-    console.log('Especialidad seleccionada:', this.newAppt.specialty);
-
-    if (this.newAppt.specialty) {
-      this.filteredPhysicians = this.allPhysicians.filter(p =>
-        p.specialty === this.newAppt.specialty
-      );
-    } else {
-      this.filteredPhysicians = [...this.allPhysicians];
+    this.filteredPhysicians = this.getFilteredPhysicians();
+    if (this.newAppt.specialty && this.filteredPhysicians.length === 0) {
+      console.log('No hay médicos disponibles para la especialidad:', this.newAppt.specialty);
     }
+  }
 
-    // Limpiar selección de médico si no está en la nueva lista filtrada
-    if (this.newAppt.physician_id) {
-      const selectedPhysicianExists = this.filteredPhysicians.some(p =>
-        p.id.toString() === this.newAppt.physician_id
-      );
+  onPhysicianSelectionChange() {
+    const selectedPhysician = this.physicians.find(p => p.id.toString() === this.newAppt.physician_id);
+    if (selectedPhysician) {
+      console.log('Médico seleccionado:', selectedPhysician);
+      this.newAppt.specialty = selectedPhysician.specialty;
+    }
+  }
 
-      if (!selectedPhysicianExists) {
-        this.newAppt.physician_id = '';
+  getFilteredPhysicians() {
+    if (!this.newAppt.specialty) {
+      return this.allPhysicians;
+    }
+    return this.allPhysicians.filter(physician => 
+      physician.specialty === this.newAppt.specialty
+    );
+  }
+
+  calculateSpecialtyCounts() {
+    const counts = this.medicalSpecialties.map(specialty => ({
+      specialty,
+      count: this.allPhysicians.filter(p => p.specialty === specialty).length
+    }));
+    this.specialtyCounts = counts;
+  }
+
+  getPhysicianCount(specialty: string): number {
+    return this.allPhysicians.filter(p => p.specialty === specialty).length;
+  }
+
+  getAdminInfo(): string {
+    return this.currentUser?.name || 'Administrador';
+  }
+
+  goToAdminDashboard() {
+    this.router.navigate(['/admin-dashboard']);
+  }
+
+  generateCalendar() {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const firstDayOfWeek = firstDay.getDay();
+    const daysInMonth = lastDay.getDate();
+    
+    this.calendarDays = [];
+    
+    // Días del mes anterior
+    const prevMonth = new Date(year, month - 1, 0);
+    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+      const day = prevMonth.getDate() - i;
+      this.calendarDays.push({
+        day: day,
+        date: new Date(year, month - 1, day),
+        isOtherMonth: true,
+        isToday: false,
+        appointments: [],
+        totalAppointments: 0,
+        isDayWithAppointments: false
+      });
+    }
+    
+    // Días del mes actual
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dateString = this.formatDate(date);
+      const dayAppointments = this.appointments.filter(apt => apt.date === dateString);
+      
+      const today = new Date();
+      const isToday = date.toDateString() === today.toDateString();
+      
+      this.calendarDays.push({
+        day: day,
+        date: date,
+        dateString: dateString,
+        isOtherMonth: false,
+        isToday: isToday,
+        appointments: dayAppointments.slice(0, 3),
+        allAppointments: dayAppointments,
+        totalAppointments: dayAppointments.length,
+        isDayWithAppointments: dayAppointments.length > 0,
+        hasMoreAppointments: dayAppointments.length > 3,
+        hasScheduled: dayAppointments.some(apt => apt.status === 'scheduled'),
+        hasConfirmed: dayAppointments.some(apt => apt.status === 'confirmed'),
+        hasCompleted: dayAppointments.some(apt => apt.status === 'completed'),
+        hasCancelled: dayAppointments.some(apt => apt.status === 'cancelled'),
+        hasNoShow: dayAppointments.some(apt => apt.status === 'no_show')
+      });
+    }
+    
+    // Días del siguiente mes
+    const totalCells = Math.ceil(this.calendarDays.length / 7) * 7;
+    const remainingCells = totalCells - this.calendarDays.length;
+    
+    for (let day = 1; day <= remainingCells; day++) {
+      this.calendarDays.push({
+        day: day,
+        date: new Date(year, month + 1, day),
+        isOtherMonth: true,
+        isToday: false,
+        appointments: [],
+        totalAppointments: 0,
+        isDayWithAppointments: false
+      });
+    }
+  }
+
+  formatDate(date: Date): string {
+    return date.toISOString().split('T')[0];
+  }
+
+  getAppointmentStats() {
+    const total = this.appointments.length;
+    const scheduled = this.appointments.filter(apt => apt.status === 'scheduled').length;
+    const confirmed = this.appointments.filter(apt => apt.status === 'confirmed').length;
+    const completed = this.appointments.filter(apt => apt.status === 'completed').length;
+    const cancelled = this.appointments.filter(apt => apt.status === 'cancelled').length;
+    const noShow = this.appointments.filter(apt => apt.status === 'no_show').length;
+    
+    return { total, scheduled, confirmed, completed, cancelled, noShow };
+  }
+
+  setViewMode(mode: string) {
+    this.viewMode = mode;
+    
+    if (mode === 'list') {
+      setTimeout(() => {
+        this.checkScrollNeeded();
+      }, 100);
+    }
+  }
+
+  checkScrollNeeded() {
+    const listElement = document.querySelector('.appointments-list');
+    if (listElement) {
+      const hasScroll = listElement.scrollHeight > listElement.clientHeight;
+      if (hasScroll) {
+        listElement.classList.add('has-scroll');
+      } else {
+        listElement.classList.remove('has-scroll');
       }
     }
+  }
 
-    this.applyFilters();
+  exportAppointments() {
+    console.log('Exportando citas...');
+    // Implementar exportación
+  }
+
+  getMonthName(): string {
+    return this.currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  }
+
+  previousMonth() {
+    this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1);
     this.generateCalendar();
   }
 
-  onPatientSearch() {
-    if (this.searchPatient.trim()) {
-      this.filteredPatients = this.patients.filter(p => 
-        p.fullName.toLowerCase().includes(this.searchPatient.toLowerCase()) ||
-        p.rut.includes(this.searchPatient)
-      );
+  nextMonth() {
+    this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1);
+    this.generateCalendar();
+  }
+
+  clearFilters() {
+    if (this.isEditing) {
+      // Si estamos editando, preguntar si cancelar
+      this.cancelEdit();
     } else {
-      this.filteredPatients = [...this.patients];
+      // Si no estamos editando, limpiar formulario normal
+      this.selectedPhysician = '';
+      this.selectedStatus = '';
+      this.selectedSpecialty = '';
+      this.dateFrom = '';
+      this.dateTo = '';
+      this.searchPatient = '';
+      this.showFiltered = false;
+      this.clearForm();
+      this.applyFilters();
     }
   }
 
-  // ✅ FILTROS AVANZADOS PARA ADMIN
   applyFilters() {
     let filtered = [...this.allAppointments];
-    let hasFilters = false;
+    let hasActiveFilters = false;
 
-    // Filtrar por paciente
-    if (this.newAppt.patient_id) {
-      filtered = filtered.filter(apt => 
-        apt.patientId.toString() === this.newAppt.patient_id
-      );
-      hasFilters = true;
-    }
-
-    // Filtrar por médico
     if (this.selectedPhysician) {
-      filtered = filtered.filter(apt => 
-        apt.physicianId.toString() === this.selectedPhysician
-      );
-      hasFilters = true;
+      filtered = filtered.filter(apt => apt.physicianId.toString() === this.selectedPhysician);
+      hasActiveFilters = true;
     }
 
-    // Filtrar por especialidad
-    if (this.selectedSpecialty && !this.selectedPhysician) {
-      const physiciansInSpecialty = this.allPhysicians
-        .filter(p => p.specialty === this.selectedSpecialty)
-        .map(p => p.id.toString());
-      filtered = filtered.filter(apt => 
-        physiciansInSpecialty.includes(apt.physicianId.toString())
-      );
-      hasFilters = true;
-    }
-
-    // Filtrar por estado
     if (this.selectedStatus) {
       filtered = filtered.filter(apt => apt.status === this.selectedStatus);
-      hasFilters = true;
+      hasActiveFilters = true;
     }
 
-    // Filtrar por rango de fechas
+    if (this.selectedSpecialty) {
+      const specialtyPhysicians = this.allPhysicians
+        .filter(p => p.specialty === this.selectedSpecialty)
+        .map(p => p.id);
+      filtered = filtered.filter(apt => specialtyPhysicians.includes(apt.physicianId));
+      hasActiveFilters = true;
+    }
+
     if (this.dateFrom) {
       filtered = filtered.filter(apt => apt.date >= this.dateFrom);
-      hasFilters = true;
+      hasActiveFilters = true;
     }
 
     if (this.dateTo) {
       filtered = filtered.filter(apt => apt.date <= this.dateTo);
-      hasFilters = true;
+      hasActiveFilters = true;
     }
 
-    this.filteredAppointments = filtered;
-    this.showFiltered = hasFilters;
-    this.appointments = hasFilters ? this.filteredAppointments : this.allAppointments;
-
-    console.log('Citas después del filtrado:', this.appointments);
-  }
-
-  // ✅ GESTIÓN COMPLETA DE CITAS
-  getFilteredPhysicians(): PhysicianDto[] {
-    return this.filteredPhysicians.length > 0 ? this.filteredPhysicians : this.allPhysicians;
-  }
-
-  onPhysicianSelectionChange() {
-    this.selectedPhysician = this.newAppt.physician_id;
-    this.applyFilters();
-    this.generateCalendar();
-  }
-
-  onPatientSelectionChange() {
-    this.applyFilters();
+    this.appointments = filtered;
+    this.showFiltered = hasActiveFilters;
     this.generateCalendar();
   }
 
   onStatusFilterChange() {
     this.applyFilters();
-    this.generateCalendar();
   }
 
   onSpecialtyFilterChange() {
     this.applyFilters();
-    this.generateCalendar();
   }
 
   onDateFilterChange() {
     this.applyFilters();
-    this.generateCalendar();
   }
 
-  clearFilters() {
-    this.newAppt.patient_id = '';
-    this.newAppt.physician_id = '';
-    this.newAppt.specialty = '';
-    this.selectedPhysician = '';
-    this.selectedStatus = '';
-    this.selectedSpecialty = '';
-    this.dateFrom = '';
-    this.dateTo = '';
-    this.searchPatient = '';
-    this.filteredPatients = [...this.patients];
-    this.filteredPhysicians = [...this.allPhysicians];
-    this.applyFilters();
-    this.generateCalendar();
-  }
-
-  // ✅ INFORMACIÓN DEL FILTRO
   getFilterInfo(): string {
-    if (!this.showFiltered) return '';
-
-    const parts = [];
+    const filters = [];
     
-    if (this.selectedSpecialty) {
-      parts.push(`Especialidad: ${this.selectedSpecialty}`);
-    }
-
     if (this.selectedPhysician) {
       const physician = this.allPhysicians.find(p => p.id.toString() === this.selectedPhysician);
-      if (physician) {
-        parts.push(`Médico: Dr. ${physician.fullName}`);
-      }
+      if (physician) filters.push(`Médico: Dr. ${physician.fullName}`);
     }
     
-    if (this.newAppt.patient_id) {
-      const patient = this.patients.find(p => p.id.toString() === this.newAppt.patient_id);
-      if (patient) {
-        parts.push(`Paciente: ${patient.fullName}`);
-      }
-    }
-
     if (this.selectedStatus) {
       const status = this.appointmentStatuses.find(s => s.value === this.selectedStatus);
-      if (status) {
-        parts.push(`Estado: ${status.label}`);
-      }
+      if (status) filters.push(`Estado: ${status.label}`);
     }
-
-    if (this.dateFrom && this.dateTo) {
-      parts.push(`Fechas: ${this.dateFrom} - ${this.dateTo}`);
-    } else if (this.dateFrom) {
-      parts.push(`Desde: ${this.dateFrom}`);
-    } else if (this.dateTo) {
-      parts.push(`Hasta: ${this.dateTo}`);
+    
+    if (this.selectedSpecialty) {
+      filters.push(`Especialidad: ${this.selectedSpecialty}`);
     }
-
-    return parts.join(' | ');
+    
+    if (this.dateFrom || this.dateTo) {
+      const from = this.dateFrom || 'inicio';
+      const to = this.dateTo || 'fin';
+      filters.push(`Fechas: ${from} - ${to}`);
+    }
+    
+    return filters.join(', ');
   }
 
-  // ✅ CREAR CITA CON VALIDACIONES AVANZADAS
-  submit() {
-    if (!this.newAppt.patient_id || !this.newAppt.physician_id || !this.newAppt.date || !this.newAppt.time) {
-      Swal.fire({
-        title: 'Error',
-        text: 'Por favor complete todos los campos obligatorios',
-        icon: 'error',
-        confirmButtonText: 'Aceptar'
-      });
+  showDayDetails(calDay: any) {
+    if (!calDay.allAppointments || calDay.allAppointments.length === 0) {
       return;
     }
 
-    // Validación de fechas y horas
-    const selectedDateStr = this.newAppt.date;
-    const todayStr = new Date().toISOString().split('T')[0];
-    
-    if (selectedDateStr < todayStr) {
-      Swal.fire({
-        title: 'Error',
-        text: 'No puede agendar citas en fechas pasadas',
-        icon: 'error',
-        confirmButtonText: 'Aceptar'
-      });
-      return;
-    }
+    const appointments = calDay.allAppointments;
+    const dateString = calDay.dateString || calDay.allAppointments[0].date;
 
-    if (selectedDateStr === todayStr) {
-      const [hour, minute] = this.newAppt.time.split(':').map(Number);
-      const now = new Date();
-      
-      if (hour < now.getHours() || (hour === now.getHours() && minute <= now.getMinutes())) {
-        Swal.fire({
-          title: 'Error',
-          text: 'No puede agendar una cita en una hora que ya pasó',
-          icon: 'error',
-          confirmButtonText: 'Aceptar'
-        });
-        return;
-      }
-    }
+    // Crear HTML para las citas
+    let appointmentsHtml = appointments.map((apt: any) => {
+      const statusClass = apt.status;
+      const statusText = apt.status === 'scheduled' ? 'Programada' :
+                        apt.status === 'confirmed' ? 'Confirmada' :
+                        apt.status === 'completed' ? 'Completada' :
+                        apt.status === 'cancelled' ? 'Cancelada' :
+                        'No vino';
 
-    console.log('Enviando cita desde administrador:', this.newAppt);
-    
-    // Guardar filtros actuales
-    const currentFilters = {
-      patient_id: this.newAppt.patient_id,
-      physician_id: this.newAppt.physician_id,
-      specialty: this.newAppt.specialty,
-      selectedPhysician: this.selectedPhysician,
-      selectedStatus: this.selectedStatus,
-      selectedSpecialty: this.selectedSpecialty
+      const priorityColor = apt.priority === 'urgent' ? '#dc3545' :
+                           apt.priority === 'high' ? '#fd7e14' :
+                           apt.priority === 'normal' ? '#28a745' : '#6c757d';
+
+      return `
+        <div class="appointment-detail ${statusClass}" style="margin-bottom: 15px; padding: 12px; border-left: 4px solid ${priorityColor}; background: #f8f9fa; border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div>
+              <strong style="color: #2d3748;">🕐 ${apt.time}</strong>
+              <span class="status-badge ${statusClass}" style="margin-left: 10px; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                ${statusText}
+              </span>
+            </div>
+            <div style="font-size: 0.8rem; color: #666;">
+              Prioridad: <strong style="color: ${priorityColor};">${apt.priority || 'normal'}</strong>
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 8px;">
+            <div><strong>👤 Paciente:</strong> ${apt.patient}</div>
+            <div><strong>👨‍⚕️ Médico:</strong> Dr. ${apt.physician}</div>
+          </div>
+          
+          ${apt.reason ? `<div style="margin-bottom: 8px;"><strong>📝 Motivo:</strong> ${apt.reason}</div>` : ''}
+          ${apt.notes ? `<div style="margin-bottom: 8px;"><strong>📋 Notas:</strong> ${apt.notes}</div>` : ''}
+          ${apt.cancellation_reason ? `<div style="margin-bottom: 8px; color: #dc3545;"><strong>❌ Motivo cancelación:</strong> ${apt.cancellation_reason}</div>` : ''}
+          
+          <div class="appointment-actions" style="margin-top: 10px; text-align: center;">
+            ${apt.status === 'scheduled' ? `
+              <button onclick="confirmAppointment(${apt.id})" style="background: #38a169; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✓ Confirmar</button>
+            ` : ''}
+            
+            ${apt.status === 'scheduled' || apt.status === 'confirmed' ? `
+              <button onclick="completeAppointment(${apt.id})" style="background: #319795; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✓ Completar</button>
+              <button onclick="editAppointment(${apt.id})" style="background: #667eea; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✏️ Editar</button>
+              <button onclick="cancelAppointment(${apt.id})" style="background: #e53e3e; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✗ Cancelar</button>
+            ` : ''}
+            
+            ${apt.status === 'confirmed' ? `
+              <button onclick="markNoShow(${apt.id})" style="background: #d69e2e; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">⚠️ No vino</button>
+            ` : ''}
+            
+            ${apt.status === 'cancelled' || apt.status === 'completed' || apt.status === 'no_show' ? `
+              <button onclick="reactivateAppointment(${apt.id})" style="background: #3182ce; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">🔄 Reactivar</button>
+            ` : ''}
+            
+            ${apt.status === 'cancelled' ? `
+              <button onclick="deleteAppointment(${apt.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">🗑️ Eliminar</button>
+            ` : ''}
+            
+            <button onclick="viewDetails(${apt.id})" style="background: #6c757d; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">👁️ Ver Detalles</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Definir funciones globales
+    (window as any).deleteAppointment = (appointmentId: number) => {
+      console.log('Función global deleteAppointment llamada para ID:', appointmentId);
+      this.deleteAppointment(appointmentId);
     };
+
+    (window as any).cancelAppointment = (appointmentId: number) => {
+      console.log('Función global cancelAppointment llamada para ID:', appointmentId);
+      this.cancelAppointmentWithReason(appointmentId);
+    };
+
+    (window as any).confirmAppointment = (appointmentId: number) => {
+      this.updateAppointmentStatus(appointmentId, 'confirmed');
+      Swal.close();
+    };
+
+    (window as any).completeAppointment = (appointmentId: number) => {
+      this.updateAppointmentStatus(appointmentId, 'completed');
+      Swal.close();
+    };
+
+    (window as any).markNoShow = (appointmentId: number) => {
+      this.updateAppointmentStatus(appointmentId, 'no_show');
+      Swal.close();
+    };
+
+    (window as any).reactivateAppointment = (appointmentId: number) => {
+      this.updateAppointmentStatus(appointmentId, 'scheduled');
+      Swal.close();
+    };
+
+    // ✅ FUNCIÓN GLOBAL PARA EDITAR
+    (window as any).editAppointment = (appointmentId: number) => {
+      this.editAppointment(appointmentId);
+      Swal.close();
+    };
+
+    (window as any).viewDetails = (appointmentId: number) => {
+      Swal.close();
+      setTimeout(() => {
+        this.viewAppointmentDetails(appointmentId);
+      }, 100);
+    };
+
+    Swal.fire({
+      title: `📅 Citas del ${dateString}`,
+      html: `
+        <div style="max-height: 400px; overflow-y: auto; text-align: left;">
+          ${appointmentsHtml}
+        </div>
+      `,
+      showConfirmButton: false,
+      showCloseButton: true,
+      width: '800px',
+      heightAuto: false,
+      customClass: {
+        popup: 'appointment-details-popup'
+      }
+    });
+  }
+
+  deleteAppointment(appointmentId: number) {
+    console.log('Iniciando eliminación de cita ID:', appointmentId);
     
-    this.adminSvc.createAppointment(this.newAppt)
+    Swal.close();
+    
+    setTimeout(() => {
+      Swal.fire({
+        title: '¿Eliminar cita permanentemente?',
+        text: 'Esta acción no se puede deshacer. La cita será eliminada del sistema.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        backdrop: true,
+        heightAuto: false
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.log('Usuario confirmó eliminación, enviando petición...');
+          
+          this.adminSvc.deleteAppointment(appointmentId)
+            .subscribe({
+              next: (response) => {
+                console.log('Respuesta del servidor al eliminar:', response);
+                this.loadAllAppointments();
+                
+                Swal.fire({
+                  title: 'Cita eliminada',
+                  text: 'La cita ha sido eliminada permanentemente del sistema',
+                  icon: 'success',
+                  confirmButtonText: 'Aceptar',
+                  timer: 3000,
+                  timerProgressBar: true
+                });
+              },
+              error: (error) => {
+                console.error('Error eliminando cita:', error);
+                Swal.fire({
+                  title: 'Error',
+                  text: `No se pudo eliminar la cita: ${error.error?.message || error.message}`,
+                  icon: 'error',
+                  confirmButtonText: 'Aceptar'
+                });
+              }
+            });
+        } else if (result.isDismissed) {
+          console.log('Usuario canceló la eliminación');
+        }
+      }).catch((error) => {
+        console.error('Error en SweetAlert:', error);
+        alert('Error al mostrar el diálogo. Intente nuevamente.');
+      });
+    }, 100);
+  }
+
+  cancelAppointmentWithReason(appointmentId: number) {
+    console.log('Iniciando proceso de cancelación para cita:', appointmentId);
+    
+    Swal.close();
+    
+    setTimeout(() => {
+      Swal.fire({
+        title: 'Cancelar Cita',
+        text: 'Como administrador, seleccione el motivo de cancelación:',
+        input: 'select',
+        inputOptions: {
+          'administrative_decision': 'Decisión administrativa',
+          'patient_request': 'Solicitud del paciente',
+          'physician_unavailable': 'Médico no disponible',
+          'emergency': 'Emergencia médica',
+          'schedule_conflict': 'Conflicto de horarios',
+          'system_maintenance': 'Mantenimiento del sistema',
+          'force_majeure': 'Fuerza mayor',
+          'other': 'Otro motivo'
+        },
+        inputPlaceholder: 'Seleccione un motivo',
+        showCancelButton: true,
+        confirmButtonText: 'Cancelar Cita',
+        cancelButtonText: 'Mantener Cita',
+        confirmButtonColor: '#dc3545',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        inputValidator: (value) => {
+          if (!value) {
+            return 'Debe seleccionar un motivo';
+          }
+          return null;
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          if (result.value === 'other') {
+            Swal.close();
+            
+            setTimeout(() => {
+              Swal.fire({
+                title: 'Especifique el motivo',
+                input: 'textarea',
+                inputPlaceholder: 'Describa el motivo de cancelación...',
+                showCancelButton: true,
+                confirmButtonText: 'Cancelar Cita',
+                cancelButtonText: 'Volver',
+                confirmButtonColor: '#dc3545',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                inputValidator: (value) => {
+                  if (!value || value.trim().length < 5) {
+                    return 'Debe especificar el motivo (mínimo 5 caracteres)';
+                  }
+                  return null;
+                }
+              }).then((reasonResult) => {
+                if (reasonResult.isConfirmed) {
+                  this.cancelAppointmentWithDetails(appointmentId, 'other', reasonResult.value);
+                }
+              });
+            }, 100);
+          } else {
+            this.cancelAppointmentWithDetails(appointmentId, result.value, '');
+          }
+        }
+      }).catch((error) => {
+        console.error('Error en modal de cancelación:', error);
+        alert('Error al mostrar el diálogo de cancelación. Intente nuevamente.');
+      });
+    }, 100);
+  }
+
+  cancelAppointmentWithDetails(appointmentId: number, reason: string, details: string) {
+    console.log('Iniciando cancelación con detalles:', { appointmentId, reason, details });
+    
+    const cancelData = {
+      status: 'cancelled',
+      cancellation_reason: reason,
+      cancellation_details: details,
+      cancelled_by: this.adminId,
+      cancelled_at: new Date().toISOString()
+    };
+
+    console.log('Enviando datos de cancelación:', cancelData);
+
+    this.adminSvc.cancelAppointment(appointmentId, cancelData)
       .subscribe({
         next: (response) => {
-          console.log('Respuesta del servidor:', response);
-          
-          // Restaurar solo algunos filtros
-          this.newAppt = { 
-            patient_id: currentFilters.patient_id, 
-            physician_id: currentFilters.physician_id, 
-            specialty: currentFilters.specialty,
-            date: '', 
-            time: '', 
-            reason: '',
-            priority: 'normal',
-            notes: ''
-          };
-          
+          console.log('Respuesta del servidor al cancelar:', response);
           this.loadAllAppointments();
           
           Swal.fire({
-            title: '¡Cita creada con éxito!',
-            text: 'La cita ha sido agendada correctamente por el administrador',
+            title: '¡Cita cancelada!',
+            text: 'La cita ha sido cancelada por el administrador y se notificará a los involucrados',
             icon: 'success',
-            confirmButtonText: 'Aceptar'
+            confirmButtonText: 'Aceptar',
+            timer: 3000
           });
         },
         error: (error) => {
-          console.error('Error al crear cita:', error);
-          
-          if (error.status === 409) {
-            Swal.fire({
-              title: 'Horario no disponible',
-              text: 'El médico ya tiene una cita agendada en esa fecha y hora. Por favor seleccione otro horario.',
-              icon: 'warning',
-              confirmButtonText: 'Aceptar'
-            });
-          } else {
-            Swal.fire({
-              title: 'Error',
-              text: 'No se pudo crear la cita. Intente nuevamente.',
-              icon: 'error',
-              confirmButtonText: 'Aceptar'
-            });
-          }
+          console.error('Error cancelando cita:', error);
+          Swal.fire({
+            title: 'Error',
+            text: `No se pudo cancelar la cita: ${error.error?.message || error.message}`,
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+          });
         }
       });
   }
 
-  // ✅ GESTIÓN DE ESTADOS (TODAS LAS OPCIONES)
-  updateAppointmentStatus(appointmentId: number, status: string) {
-    const statusTexts = {
-      'completed': 'completada',
-      'cancelled': 'cancelada',
-      'scheduled': 'reactivada',
-      'confirmed': 'confirmada',
-      'no_show': 'marcada como no presentada'
-    };
-
-    this.adminSvc.updateAppointmentStatus(appointmentId, status)
+  updateAppointmentStatus(appointmentId: number, newStatus: string) {
+    console.log('Actualizando estado de cita:', appointmentId, 'a:', newStatus);
+    
+    this.adminSvc.updateAppointmentStatus(appointmentId, newStatus)
       .subscribe({
         next: (response) => {
-          console.log('Estado actualizado:', response);
+          console.log('Estado actualizado exitosamente:', response);
           this.loadAllAppointments();
+          
+          const statusText = newStatus === 'confirmed' ? 'confirmada' :
+                            newStatus === 'completed' ? 'completada' :
+                            newStatus === 'no_show' ? 'marcada como no asistió' :
+                            'reactivada';
+          
           Swal.fire({
             title: '¡Estado actualizado!',
-            text: `La cita ha sido ${statusTexts[status as keyof typeof statusTexts]} por el administrador`,
+            text: `La cita ha sido ${statusText}`,
             icon: 'success',
             confirmButtonText: 'Aceptar',
             timer: 2000
@@ -574,543 +1091,64 @@ export class AdminAppointmentManagerComponent implements OnInit {
       });
   }
 
-  // ✅ CANCELACIÓN AVANZADA
-  cancelAppointmentWithReason(appointmentId: number) {
-    console.log('Iniciando proceso de cancelación para cita:', appointmentId);
-    
-    Swal.fire({
-      title: 'Cancelar Cita',
-      text: 'Como administrador, seleccione el motivo de cancelación:',
-      input: 'select',
-      inputOptions: {
-        'administrative_decision': 'Decisión administrativa',
-        'patient_request': 'Solicitud del paciente',
-        'physician_unavailable': 'Médico no disponible',
-        'emergency': 'Emergencia médica',
-        'schedule_conflict': 'Conflicto de horarios',
-        'system_maintenance': 'Mantenimiento del sistema',
-        'force_majeure': 'Fuerza mayor',
-        'other': 'Otro motivo'
-      },
-      inputPlaceholder: 'Seleccione un motivo',
-      showCancelButton: true,
-      confirmButtonText: 'Cancelar Cita',
-      cancelButtonText: 'Mantener Cita',
-      confirmButtonColor: '#dc3545',
-      inputValidator: (value) => {
-        if (!value) {
-          return 'Debe seleccionar un motivo';
-        }
-        return null;
-      }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        if (result.value === 'other') {
-          Swal.fire({
-            title: 'Especifique el motivo',
-            input: 'textarea',
-            inputPlaceholder: 'Describa el motivo de cancelación...',
-            showCancelButton: true,
-            confirmButtonText: 'Cancelar Cita',
-            cancelButtonText: 'Volver',
-            confirmButtonColor: '#dc3545',
-            inputValidator: (value) => {
-              if (!value || value.trim().length < 5) {
-                return 'Debe especificar el motivo (mínimo 5 caracteres)';
-              }
-              return null;
-            }
-          }).then((reasonResult) => {
-            if (reasonResult.isConfirmed) {
-              this.cancelAppointmentWithDetails(appointmentId, 'other', reasonResult.value);
-            }
-          });
-        } else {
-          this.cancelAppointmentWithDetails(appointmentId, result.value, '');
-        }
-      }
-    });
-  }
-
-  cancelAppointmentWithDetails(appointmentId: number, reason: string, details: string) {
-    const cancelData = {
-      status: 'cancelled',
-      cancellation_reason: reason,
-      cancellation_details: details,
-      cancelled_by: this.adminId,
-      cancelled_at: new Date().toISOString()
-    };
-
-    console.log('Enviando datos de cancelación:', cancelData);
-
-    this.adminSvc.cancelAppointment(appointmentId, cancelData)
-      .subscribe({
-        next: (response) => {
-          console.log('Cita cancelada exitosamente:', response);
-          this.loadAllAppointments();
-          
-          Swal.fire({
-            title: '¡Cita cancelada!',
-            text: 'La cita ha sido cancelada por el administrador y se notificará a los involucrados',
-            icon: 'success',
-            confirmButtonText: 'Aceptar',
-            timer: 3000
-          });
-        },
-        error: (error) => {
-          console.error('Error cancelando cita:', error);
-          Swal.fire({
-            title: 'Error',
-            text: 'No se pudo cancelar la cita. Intente nuevamente.',
-            icon: 'error',
-            confirmButtonText: 'Aceptar'
-          });
-        }
-      });
-  }
-
-  // ✅ HERRAMIENTAS ADICIONALES DE ADMIN
-  getAdminInfo(): string {
-    if (this.currentUser) {
-      return `${this.currentUser.name || 'Admin'} ${this.currentUser.paternalLastName || ''}`.trim();
-    }
-    return 'Administrador';
-  }
-
-  goToAdminDashboard() {
-    this.router.navigate(['/admin-dashboard']);
-  }
-
-  generateCalendar() {
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth();
-
-    // Primer día del mes
-    const firstDay = new Date(year, month, 1);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay());
-
-    // Último día del mes
-    const lastDay = new Date(year, month + 1, 0);
-    const endDate = new Date(lastDay);
-    endDate.setDate(endDate.getDate() + (6 - lastDay.getDay()));
-
-    this.calendarDays = [];
-
-    // Días anteriores al mes actual
-    for (let date = new Date(startDate); date < firstDay; date.setDate(date.getDate() + 1)) {
-      this.calendarDays.push({
-        day: date.getDate(),
-        isOtherMonth: true,
-        dateString: date.toISOString().split('T')[0],
-        appointments: [],
-        allAppointments: []
-      });
-    }
-
-    // Días del mes actual
-    const daysInMonth = lastDay.getDate();
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-      const dayAppointments = this.appointments.filter(apt => apt.date === dateString);
-      const sortedAppointments = dayAppointments.sort((a, b) => a.time.localeCompare(b.time));
-      const visibleAppointments = sortedAppointments.slice(0, 3);
-      const hasMoreAppointments = sortedAppointments.length > 3;
-
-      // Análisis de tipos de citas para el admin
-      const hasScheduled = sortedAppointments.some(apt => apt.status === 'scheduled');
-      const hasConfirmed = sortedAppointments.some(apt => apt.status === 'confirmed');
-      const hasCompleted = sortedAppointments.some(apt => apt.status === 'completed');
-      const hasCancelled = sortedAppointments.some(apt => apt.status === 'cancelled');
-      const hasNoShow = sortedAppointments.some(apt => apt.status === 'no_show');
-
-      this.calendarDays.push({
-        day: day,
-        isOtherMonth: false,
-        dateString: dateString,
-        appointments: visibleAppointments,
-        allAppointments: sortedAppointments,
-        hasMoreAppointments: hasMoreAppointments,
-        totalAppointments: sortedAppointments.length,
-        hasScheduled,
-        hasConfirmed,
-        hasCompleted,
-        hasCancelled,
-        hasNoShow,
-        isDayWithAppointments: sortedAppointments.length > 0,
-        isToday: this.isToday(year, month, day)
-      });
-    }
-
-    // Días posteriores al mes actual
-    for (let date = new Date(lastDay); date < endDate; date.setDate(date.getDate() + 1)) {
-      if (date > lastDay) {
-        this.calendarDays.push({
-          day: date.getDate(),
-          isOtherMonth: true,
-          dateString: date.toISOString().split('T')[0],
-          appointments: [],
-          allAppointments: []
-        });
-      }
-    }
-  }
-
-  // ✅ MOSTRAR DETALLES DEL DÍA CON FUNCIONES DE ADMIN
-  showDayDetails(calDay: any) {
-    if (!calDay.allAppointments || calDay.allAppointments.length === 0) {
-      return;
-    }
-
-    const appointmentsHtml = calDay.allAppointments.map((apt: any) => {
-      const statusText = apt.status === 'cancelled' ? ' (Cancelada)' : 
-                        apt.status === 'completed' ? ' (Completada)' : 
-                        apt.status === 'confirmed' ? ' (Confirmada)' : 
-                        apt.status === 'no_show' ? ' (No se presentó)' : 
-                        ' (Programada)';
-      
-      // ✅ TODAS las opciones para ADMIN
-      let actionButtons = '';
-      if (apt.status === 'scheduled') {
-        actionButtons = `
-          <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button onclick="confirmAppointment(${apt.id})" 
-                    style="background: #28a745; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ✓ Confirmar
-            </button>
-            <button onclick="completeAppointment(${apt.id})" 
-                    style="background: #17a2b8; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ✓ Completar
-            </button>
-            <button onclick="markNoShow(${apt.id})" 
-                    style="background: #ffc107; color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ⚠ No vino
-            </button>
-            <button onclick="cancelAppointment(${apt.id})" 
-                    style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ✗ Cancelar
-            </button>
-            <button onclick="editAppointment(${apt.id})" 
-                    style="background: #6f42c1; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ✏️ Editar
-            </button>
-          </div>
-        `;
-      } else if (apt.status === 'confirmed') {
-        actionButtons = `
-          <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button onclick="completeAppointment(${apt.id})" 
-                    style="background: #17a2b8; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ✓ Completar
-            </button>
-            <button onclick="markNoShow(${apt.id})" 
-                    style="background: #ffc107; color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ⚠ No vino
-            </button>
-            <button onclick="cancelAppointment(${apt.id})" 
-                    style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ✗ Cancelar
-            </button>
-            <button onclick="editAppointment(${apt.id})" 
-                    style="background: #6f42c1; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ✏️ Editar
-            </button>
-          </div>
-        `;
-      } else if (apt.status === 'cancelled') {
-        actionButtons = `
-          <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
-            <button onclick="reactivateAppointment(${apt.id})" 
-                    style="background: #28a745; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ↻ Reactivar
-            </button>
-            <button onclick="deleteAppointment(${apt.id})" 
-                    style="background: #6c757d; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              🗑️ Eliminar
-            </button>
-          </div>
-        `;
-      } else if (apt.status === 'completed') {
-        actionButtons = `
-          <div style="margin-top: 0.5rem;">
-            <button onclick="viewDetails(${apt.id})" 
-                    style="background: #17a2b8; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              👁️ Ver detalles
-            </button>
-          </div>
-        `;
-      } else if (apt.status === 'no_show') {
-        actionButtons = `
-          <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
-            <button onclick="reactivateAppointment(${apt.id})" 
-                    style="background: #28a745; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ↻ Reactivar
-            </button>
-            <button onclick="completeAppointment(${apt.id})" 
-                    style="background: #17a2b8; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer; font-size: 0.8rem;">
-              ✓ Marcar Completada
-            </button>
-          </div>
-        `;
-      }
-      
-      // Colores por estado
-      const bgColor = apt.status === 'cancelled' ? '#dc3545' : 
-                      apt.status === 'completed' ? '#17a2b8' : 
-                      apt.status === 'confirmed' ? '#28a745' : 
-                      apt.status === 'no_show' ? '#ffc107' : '#0d6efd';
-      
-      const borderColor = apt.status === 'cancelled' ? '#a71e2a' : 
-                         apt.status === 'completed' ? '#117a8b' : 
-                         apt.status === 'confirmed' ? '#198754' : 
-                         apt.status === 'no_show' ? '#e0a800' : '#0d6efd';
-
-      return `
-        <div class="modal-appointment-item" style="
-          background: ${bgColor};
-          color: ${apt.status === 'no_show' ? 'black' : 'white'};
-          padding: 0.75rem;
-          margin: 0.5rem 0;
-          border-radius: 6px;
-          border-left: 4px solid ${borderColor};
-        ">
-          <div style="font-weight: bold; font-size: 1rem;">
-            🕐 ${apt.time}
-          </div>
-          <div style="margin-top: 0.25rem;">
-            👤 ${apt.patient}
-          </div>
-          <div style="margin-top: 0.25rem;">
-            👨‍⚕️ Dr. ${apt.physician}
-          </div>
-          <div style="margin-top: 0.25rem; font-size: 0.9rem; opacity: 0.9;">
-            📋 Estado: ${statusText}
-          </div>
-          <div style="margin-top: 0.25rem; font-size: 0.85rem; opacity: 0.9;">
-            🆔 ID: ${apt.id}
-          </div>
-          ${actionButtons}
-        </div>
-      `;
-    }).join('');
-
-    const dateFormatted = new Date(calDay.dateString + 'T00:00:00').toLocaleDateString('es-ES', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
-
-    // ✅ FUNCIONES GLOBALES PARA ADMIN
-    (window as any).confirmAppointment = (appointmentId: number) => {
-      this.updateAppointmentStatus(appointmentId, 'confirmed');
-      Swal.close();
-    };
-
-    (window as any).completeAppointment = (appointmentId: number) => {
-      this.updateAppointmentStatus(appointmentId, 'completed');
-      Swal.close();
-    };
-
-    (window as any).markNoShow = (appointmentId: number) => {
-      this.updateAppointmentStatus(appointmentId, 'no_show');
-      Swal.close();
-    };
-
-    (window as any).cancelAppointment = (appointmentId: number) => {
-      this.cancelAppointmentWithReason(appointmentId);
-    };
-
-    (window as any).reactivateAppointment = (appointmentId: number) => {
-      this.updateAppointmentStatus(appointmentId, 'scheduled');
-      Swal.close();
-    };
-
-    (window as any).editAppointment = (appointmentId: number) => {
-      this.editAppointment(appointmentId);
-      Swal.close();
-    };
-
-    (window as any).deleteAppointment = (appointmentId: number) => {
-      this.deleteAppointment(appointmentId);
-      Swal.close();
-    };
-
-    (window as any).viewDetails = (appointmentId: number) => {
-      this.viewAppointmentDetails(appointmentId);
-      Swal.close();
-    };
-
-    Swal.fire({
-      title: `📅 Citas del ${dateFormatted} (Admin)`,
-      html: `
-        <div style="text-align: left; max-height: 400px; overflow-y: auto;">
-          <p style="margin-bottom: 1rem; color: #666; text-align: center;">
-            <strong>${calDay.allAppointments.length}</strong> cita(s) programada(s)
-          </p>
-          ${appointmentsHtml}
-        </div>
-      `,
-      width: '800px',
-      confirmButtonText: 'Cerrar',
-      confirmButtonColor: '#0d6efd',
-      showCloseButton: true
-    });
-  }
-
-  // ✅ FUNCIONES ADICIONALES DE ADMIN
-  editAppointment(appointmentId: number) {
-    // Implementar edición de cita
-    const appointment = this.allAppointments.find(apt => apt.id === appointmentId);
-    if (appointment) {
-      // Prellenar el formulario con los datos de la cita
-      this.newAppt.patient_id = appointment.patientId.toString();
-      this.newAppt.physician_id = appointment.physicianId.toString();
-      this.newAppt.date = appointment.date;
-      this.newAppt.time = appointment.time;
-      
-      Swal.fire({
-        title: 'Editando Cita',
-        text: 'Los datos de la cita han sido cargados en el formulario. Realice los cambios necesarios y guarde.',
-        icon: 'info',
-        confirmButtonText: 'Entendido'
-      });
-    }
-  }
-
-  deleteAppointment(appointmentId: number) {
-    Swal.fire({
-      title: '¿Eliminar cita permanentemente?',
-      text: 'Esta acción no se puede deshacer. La cita será eliminada del sistema.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#dc3545',
-      cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.adminSvc.deleteAppointment(appointmentId)
-          .subscribe({
-            next: () => {
-              this.loadAllAppointments();
-              Swal.fire({
-                title: 'Cita eliminada',
-                text: 'La cita ha sido eliminada permanentemente del sistema',
-                icon: 'success',
-                confirmButtonText: 'Aceptar'
-              });
-            },
-            error: (error) => {
-              console.error('Error eliminando cita:', error);
-              Swal.fire({
-                title: 'Error',
-                text: 'No se pudo eliminar la cita',
-                icon: 'error',
-                confirmButtonText: 'Aceptar'
-              });
-            }
-          });
-      }
-    });
-  }
-
   viewAppointmentDetails(appointmentId: number) {
     const appointment = this.allAppointments.find(apt => apt.id === appointmentId);
-    if (appointment) {
-      Swal.fire({
-        title: `Detalles de la Cita #${appointmentId}`,
-        html: `
-          <div style="text-align: left;">
-            <p><strong>Paciente:</strong> ${appointment.patient}</p>
-            <p><strong>Médico:</strong> Dr. ${appointment.physician}</p>
+    if (!appointment) return;
+
+    const statusText = appointment.status === 'scheduled' ? 'Programada' :
+                      appointment.status === 'confirmed' ? 'Confirmada' :
+                      appointment.status === 'completed' ? 'Completada' :
+                      appointment.status === 'cancelled' ? 'Cancelada' :
+                      'No se presentó';
+
+    Swal.fire({
+      title: `📋 Detalles de la Cita #${appointment.id}`,
+      html: `
+        <div style="text-align: left; max-height: 400px; overflow-y: auto;">
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <h4 style="margin: 0 0 10px 0; color: #2d3748;">📅 Información General</h4>
             <p><strong>Fecha:</strong> ${appointment.date}</p>
             <p><strong>Hora:</strong> ${appointment.time}</p>
-            <p><strong>Estado:</strong> ${appointment.status}</p>
-            ${appointment.cancellation_reason ? `<p><strong>Motivo cancelación:</strong> ${appointment.cancellation_reason}</p>` : ''}
-            ${appointment.cancellation_details ? `<p><strong>Detalles:</strong> ${appointment.cancellation_details}</p>` : ''}
+            <p><strong>Estado:</strong> <span style="color: ${appointment.status === 'completed' ? '#28a745' : appointment.status === 'cancelled' ? '#dc3545' : '#007bff'};">${statusText}</span></p>
+            <p><strong>Prioridad:</strong> ${appointment.priority || 'Normal'}</p>
           </div>
-        `,
-        confirmButtonText: 'Cerrar',
-        confirmButtonColor: '#0d6efd'
-      });
-    }
-  }
-
-  // ✅ MÉTODOS DE NAVEGACIÓN
-  isToday(year: number, month: number, day: number): boolean {
-    const today = new Date();
-    return year === today.getFullYear() && 
-           month === today.getMonth() && 
-           day === today.getDate();
-  }
-
-  previousMonth() {
-    this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-    this.generateCalendar();
-  }
-
-  nextMonth() {
-    this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-    this.generateCalendar();
-  }
-
-  getMonthName(): string {
-    return this.currentDate.toLocaleDateString('es-ES', { 
-      month: 'long', 
-      year: 'numeric' 
+          
+          <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <h4 style="margin: 0 0 10px 0; color: #2d3748;">👤 Paciente</h4>
+            <p><strong>Nombre:</strong> ${appointment.patient}</p>
+          </div>
+          
+          <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <h4 style="margin: 0 0 10px 0; color: #2d3748;">👨‍⚕️ Médico</h4>
+            <p><strong>Nombre:</strong> Dr. ${appointment.physician}</p>
+          </div>
+          
+          ${appointment.reason ? `
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <h4 style="margin: 0 0 10px 0; color: #2d3748;">📝 Motivo de Consulta</h4>
+              <p>${appointment.reason}</p>
+            </div>
+          ` : ''}
+          
+          ${appointment.notes ? `
+            <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <h4 style="margin: 0 0 10px 0; color: #2d3748;">📋 Notas Administrativas</h4>
+              <p>${appointment.notes}</p>
+            </div>
+          ` : ''}
+          
+          ${appointment.cancellation_reason ? `
+            <div style="background: #f8d7da; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <h4 style="margin: 0 0 10px 0; color: #721c24;">❌ Información de Cancelación</h4>
+              <p><strong>Motivo:</strong> ${appointment.cancellation_reason}</p>
+              ${appointment.cancellation_details ? `<p><strong>Detalles:</strong> ${appointment.cancellation_details}</p>` : ''}
+            </div>
+          ` : ''}
+        </div>
+      `,
+      width: '600px',
+      showConfirmButton: true,
+      confirmButtonText: 'Cerrar'
     });
-  }
-
-  // ✅ CAMBIO DE VISTA
-  setViewMode(mode: string) {
-    this.viewMode = mode;
-    if (mode === 'list') {
-      setTimeout(() => {
-        this.checkScrollNeeded();
-      }, 100);
-    }
-  }
-  
-  checkScrollNeeded() {
-    const listElement = document.querySelector('.appointments-list');
-    if (listElement) {
-      const hasScroll = listElement.scrollHeight > listElement.clientHeight;
-      if (hasScroll) {
-        listElement.classList.add('has-scroll');
-      } else {
-        listElement.classList.remove('has-scroll');
-      }
-    }
-  }
-  // ✅ EXPORTAR DATOS
-  exportAppointments() {
-    Swal.fire({
-      title: 'Exportar Citas',
-      text: 'Funcionalidad de exportación próximamente disponible.',
-      icon: 'info',
-      confirmButtonText: 'Entendido',
-      confirmButtonColor: '#0d6efd'
-    });
-  }
-
-  // ✅ ESTADÍSTICAS RÁPIDAS
-  getAppointmentStats() {
-    const total = this.appointments.length;
-    const scheduled = this.appointments.filter(apt => apt.status === 'scheduled').length;
-    const confirmed = this.appointments.filter(apt => apt.status === 'confirmed').length;
-    const completed = this.appointments.filter(apt => apt.status === 'completed').length;
-    const cancelled = this.appointments.filter(apt => apt.status === 'cancelled').length;
-    const noShow = this.appointments.filter(apt => apt.status === 'no_show').length;
-
-    return {
-      total,
-      scheduled,
-      confirmed,
-      completed,
-      cancelled,
-      noShow
-    };
   }
 }

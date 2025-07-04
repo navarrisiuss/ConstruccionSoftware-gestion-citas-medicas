@@ -306,9 +306,9 @@
   
   /* ===== ESTADOS DE LAS CITAS ===== */
   .appointment-item.confirmed {
-    background: #ffc107;
+    background: #38a169;
     color: #000;
-    border-left: 4px solid #e0a800;
+    border-left: 4px solid #035f2e;
   }
   
   .appointment-item.completed {
@@ -321,6 +321,12 @@
     background: #dc3545;
     color: white;
     border-left: 4px solid #a71e2a;
+    opacity: 0.8;
+  }
+  .appointment-item.no_show {
+    background: #966400;
+    color: white;
+    border-left: 4px solid #d69e2e;
     opacity: 0.8;
   }
   
@@ -429,7 +435,7 @@
   }
   
   .legend-color.confirmed {
-    background: #ffc107;
+    background: #38a169;
   }
   
   .legend-color.completed {
@@ -438,6 +444,9 @@
   
   .legend-color.cancelled {
     background: #dc3545;
+  }
+  .legend-color.no-show { 
+    background: #966400; 
   }
   
   /* ===== ESTILOS PARA VENTANA MODAL ===== */

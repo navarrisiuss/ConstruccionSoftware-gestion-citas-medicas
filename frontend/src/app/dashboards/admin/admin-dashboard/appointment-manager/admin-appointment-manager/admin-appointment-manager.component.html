@@ -73,8 +73,19 @@
     <div class="left-panel">
       <!-- Formulario de Nueva Cita -->
       <form (ngSubmit)="submit()" class="appointment-form admin-form">
-        <h3>➕ Crear Nueva Cita</h3>
-
+        <!-- ✅ NUEVO: Indicador de modo edición -->
+        <div *ngIf="isEditing" class="edit-mode-indicator">
+          <div class="alert alert-warning">
+            <strong>✏️ Modo Edición:</strong> 
+            Editando cita #{{ editingAppointmentId }}
+            <button type="button" (click)="cancelEdit()" class="cancel-edit-btn">
+              ❌ Cancelar Edición
+            </button>
+          </div>
+        </div>
+      
+        <h3>{{ isEditing ? '✏️ Editar Cita' : '➕ Crear Nueva Cita' }}</h3>
+      
         <!-- Búsqueda de Paciente -->
         <div class="form-group">
           <label for="searchPatient">🔍 Buscar Paciente:</label>
@@ -87,7 +98,7 @@
             (input)="onPatientSearch()"
             class="search-input">
         </div>
-
+      
         <!-- Selección de Paciente -->
         <div class="form-group">
           <label for="patient">👤 Paciente *:</label>
@@ -107,7 +118,7 @@
             No se encontraron pacientes
           </small>
         </div>
-
+      
         <!-- Selección de Especialidad -->
         <div class="form-group">
           <label for="specialty">🏥 Especialidad:</label>
@@ -123,7 +134,7 @@
             </option>
           </select>
         </div>
-
+      
         <!-- Selección de Médico -->
         <div class="form-group">
           <label for="physician">👨‍⚕️ Médico *:</label>
@@ -146,7 +157,7 @@
             {{ getFilteredPhysicians().length }} médico(s) disponible(s)
           </small>
         </div>
-
+      
         <!-- Fecha y Hora -->
         <div class="form-row">
           <div class="form-group">
@@ -170,7 +181,7 @@
               class="form-input">
           </div>
         </div>
-
+      
         <!-- Prioridad -->
         <div class="form-group">
           <label for="priority">⚡ Prioridad:</label>
@@ -184,7 +195,7 @@
             </option>
           </select>
         </div>
-
+      
         <!-- Motivo -->
         <div class="form-group">
           <label for="reason">📝 Motivo:</label>
@@ -196,7 +207,7 @@
             rows="2"
             class="form-textarea"></textarea>
         </div>
-
+      
         <!-- Notas Administrativas -->
         <div class="form-group">
           <label for="notes">📋 Notas Admin:</label>
@@ -208,13 +219,26 @@
             rows="2"
             class="form-textarea"></textarea>
         </div>
-
-        <!-- Botones del formulario -->
+      
+        <!-- ✅ BOTONES ACTUALIZADOS -->
         <div class="form-buttons">
-          <button type="submit" class="btn-primary">
-            ➕ Crear Cita
+          <button type="submit" class="btn-primary" [class.btn-warning]="isEditing">
+            {{ isEditing ? '💾 Actualizar Cita' : '➕ Crear Cita' }}
           </button>
-          <button type="button" (click)="clearFilters()" class="btn-secondary">
+          
+          <!-- ✅ Botón cancelar edición (solo en modo edición) -->
+          <button type="button" 
+                  *ngIf="isEditing" 
+                  (click)="cancelEdit()" 
+                  class="btn-secondary">
+            ❌ Cancelar Edición
+          </button>
+          
+          <!-- ✅ Botón limpiar (solo en modo creación) -->
+          <button type="button" 
+                  *ngIf="!isEditing"
+                  (click)="clearFilters()" 
+                  class="btn-secondary">
             🗑️ Limpiar
           </button>
         </div>

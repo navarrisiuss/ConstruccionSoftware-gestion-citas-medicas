@@ -165,7 +165,8 @@
                class="appointment-item assistant-manageable"
                [class.cancelled]="apt.status === 'cancelled'"
                [class.completed]="apt.status === 'completed'"
-               [class.confirmed]="apt.status === 'confirmed'">
+               [class.confirmed]="apt.status === 'confirmed'"
+               [class.no_show]="apt.status === 'no_show'">
 
             <div class="appointment-content">
               <div class="apt-time">{{ apt.time }}</div>
@@ -205,6 +206,9 @@
         <span class="legend-color cancelled"></span>
         <span>Citas Canceladas</span>
       </div>
-    </div>
+      <div class="legend-item">
+        <span class="legend-color no-show"></span>
+        <span>No vinieron</span>
+      </div>
   </div>
 </div>
