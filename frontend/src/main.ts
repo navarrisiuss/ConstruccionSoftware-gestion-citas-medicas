@@ -1,6 +1,14 @@
-import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/config/app.config';
-import { AppComponent } from './app/app.component';
+import {bootstrapApplication} from '@angular/platform-browser';
+import { importProvidersFrom } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+import {AppComponent} from './app/app.component';
+import {appConfig} from './app/config/app.config';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    ...appConfig.providers,
+    importProvidersFrom(BrowserModule)
+  ]
+})
+.catch(err => console.error(err));

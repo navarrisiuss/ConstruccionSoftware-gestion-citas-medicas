@@ -1,0 +1,529 @@
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.appointment-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+  }
+  
+  /* ===== FORMULARIO ===== */
+  .appointment-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: fit-content;
+  }
+  
+  .appointment-form h2 {
+    color: #28a745;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  /* ===== INFORMACIÓN DEL MÉDICO ===== */
+  .physician-info {
+    background: #e8f5e8;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #28a745;
+  }
+  
+  .physician-info p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #333;
+  }
+  
+  .physician-info strong {
+    color: #28a745;
+  }
+  
+  /* ===== GRUPOS DE FORMULARIO ===== */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #28a745;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #28a745;
+  }
+  
+  /* Búsqueda de pacientes */
+  .form-group input[type="text"] {
+    border: 2px solid #28a745;
+  }
+  
+  .form-group input[type="text"]:focus {
+    border-color: #20c997;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+  }
+  
+  /* Área de texto para motivo */
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 80px;
+  }
+  
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #28a745;
+  }
+  
+  /* Ayuda en formularios */
+  .form-help {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: #6c757d;
+  }
+  
+  .form-help.error {
+    color: #dc3545;
+  }
+  
+  select:disabled {
+    background-color: #e9ecef;
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* ===== BOTONES DEL FORMULARIO ===== */
+  .form-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .form-buttons button {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .form-buttons button[type="submit"] {
+    background: #28a745;
+    color: white;
+  }
+  
+  .form-buttons button[type="button"] {
+    background: #6c757d;
+    color: white;
+  }
+  
+  .form-buttons button:hover {
+    opacity: 0.9;
+  }
+  
+  /* ===== CONTENEDOR DEL CALENDARIO ===== */
+  .calendar-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  
+  .calendar-container h2 {
+    color: #28a745;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  /* ===== HEADER DEL CALENDARIO ===== */
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .nav-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+  
+  .nav-btn:hover {
+    background: #1e7e34;
+  }
+  
+  /* ===== GRID DEL CALENDARIO ===== */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #dee2e6;
+    border: 1px solid #dee2e6;
+  }
+  
+  .calendar-day-header {
+    background: #28a745;
+    color: white;
+    padding: 0.75rem;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  /* ===== DÍAS DEL CALENDARIO ===== */
+  .calendar-day {
+    background: white;
+    min-height: 100px;
+    padding: 0.5rem;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  
+  .calendar-day.other-month {
+    background: #f8f9fa;
+    color: #6c757d;
+  }
+  
+  .calendar-day.today {
+    background: #e3f2fd;
+    font-weight: bold;
+    border: 2px solid #28a745;
+  }
+  
+  /* ✅ DÍAS CON CITAS DEL MÉDICO */
+  .calendar-day.has-appointments {
+    background: #e8f5e8;
+    border-left: 3px solid #28a745;
+  }
+  
+  .calendar-day.physician-appointments {
+    border-left: 3px solid #28a745;
+  }
+  
+  /* ✅ DÍAS CLICKEABLES */
+  .calendar-day.clickable {
+    cursor: pointer;
+  }
+  
+  .calendar-day.clickable:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    background-color: #f0f8f0;
+  }
+  
+  .day-number {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  
+  /* ===== CITAS EN EL CALENDARIO ===== */
+  .appointments {
+    font-size: 0.8rem;
+  }
+  
+  /* ✅ CITAS DEL MÉDICO ACTUAL - ESTILOS PRINCIPALES */
+  .appointment-item {
+    padding: 0.2rem 0.4rem;
+    margin: 0.1rem 0;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    transition: all 0.2s ease;
+  }
+  
+  .appointment-item.current-physician {
+    background: #28a745;
+    color: white;
+    border-left: 4px solid #198754;
+  }
+  
+  /* ✅ ESTADOS DE LAS CITAS */
+  .appointment-item.cancelled {
+    background: #dc3545;
+    opacity: 0.8;
+  }
+  
+  .appointment-item.completed {
+    background: #17a2b8;
+    opacity: 0.9;
+  }
+  
+  .appointment-item.confirmed {
+    background: #ffc107;
+    color: #000;
+  }
+  
+  /* ===== CONTENIDO DE LAS CITAS ===== */
+  .own-appointment {
+    position: relative;
+  }
+  
+  .apt-time {
+    font-weight: bold;
+    font-size: 0.75rem;
+  }
+  
+  .apt-patient {
+    font-size: 0.65rem;
+    margin-top: 0.1rem;
+  }
+  
+  .apt-label {
+    font-size: 0.55rem;
+    font-weight: bold;
+    margin-top: 0.1rem;
+    padding: 1px 3px;
+    border-radius: 2px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .apt-status {
+    font-size: 0.6rem;
+    font-style: italic;
+    margin-top: 0.1rem;
+  }
+  
+  /* ===== INDICADOR DE MÁS CITAS ===== */
+  .more-appointments-indicator {
+    background: #ffc107;
+    color: #000;
+    padding: 0.2rem 0.4rem;
+    margin: 0.1rem 0;
+    border-radius: 3px;
+    font-size: 0.6rem;
+    text-align: center;
+    border: 1px solid #e0a800;
+    transition: all 0.2s ease;
+  }
+  
+  .more-text {
+    font-weight: bold;
+    display: block;
+    line-height: 1.2;
+  }
+  
+  .click-hint {
+    font-size: 0.5rem;
+    opacity: 0.8;
+    display: block;
+    margin-top: 1px;
+  }
+  
+  .calendar-day.clickable:hover .more-appointments-indicator {
+    background: #e0a800;
+    transform: scale(1.05);
+  }
+  
+  /* ===== LEYENDA DEL CALENDARIO ===== */
+  .calendar-legend {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+  
+  .calendar-legend h4 {
+    margin: 0 0 0.5rem 0;
+    color: #28a745;
+    font-size: 0.9rem;
+  }
+  
+  .legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.3rem;
+    font-size: 0.8rem;
+  }
+  
+  .legend-color {
+    width: 20px;
+    height: 12px;
+    margin-right: 0.5rem;
+    border-radius: 2px;
+  }
+  
+  .legend-color.current-physician {
+    background: #28a745;
+  }
+  
+  .legend-color.cancelled {
+    background: #dc3545;
+  }
+  
+  .legend-color.completed {
+    background: #17a2b8;
+  }
+  
+  .legend-color.confirmed {
+    background: #ffc107;
+  }
+  
+  /* ===== ESTILOS PARA VENTANA MODAL ===== */
+  .day-details-modal .swal2-html-container {
+    text-align: left !important;
+  }
+  
+  .modal-appointment-item {
+    transition: transform 0.2s ease;
+  }
+  
+  .modal-appointment-item:hover {
+    transform: translateX(5px);
+  }
+
+
+  .medical-notes-section {
+    background: rgba(106, 90, 205, 0.1);
+    border-left: 3px solid #6f42c1;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+  }
+  
+  /* Botones específicos para médicos */
+  .btn-medical {
+    background: #6f42c1;
+    color: white;
+  }
+  
+  .btn-medical:hover {
+    background: #5a2d91;
+  }
+  
+  /* Indicadores de prioridad para médicos */
+  .priority-urgent {
+    background: linear-gradient(45deg, #dc3545, #ff6b6b);
+    animation: pulse-urgent 2s infinite;
+  }
+  
+  @keyframes pulse-urgent {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+  }
+  
+  /* Estados de citas para médicos */
+  .appointment-item.no-show {
+    background: #dc3545 !important;
+    opacity: 0.7;
+    border: 1px dashed #a71e2a;
+  }
+  
+  /* Estilos para el expediente médico */
+  .medical-record-section {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .medical-record-section h4 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  /* Responsive para médicos */
+  @media (max-width: 768px) {
+    .medical-notes-section {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .btn-medical {
+      font-size: 0.8rem;
+      padding: 0.4rem 0.8rem;
+    }
+  }
+  
+  /* ===== RESPONSIVE DESIGN ===== */
+  @media (max-width: 768px) {
+    .appointment-container {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+    
+    .calendar-day {
+      min-height: 60px;
+    }
+    
+    .appointment-item {
+      font-size: 0.6rem;
+    }
+    
+    .calendar-day.clickable:hover {
+      transform: none;
+    }
+    
+    .more-appointments-indicator {
+      font-size: 0.55rem;
+    }
+    
+    .click-hint {
+      font-size: 0.45rem;
+    }
+    
+    .physician-info {
+      padding: 0.75rem;
+    }
+    
+    .form-group textarea {
+      min-height: 60px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .appointment-container {
+      padding: 0.5rem;
+    }
+    
+    .appointment-form,
+    .calendar-container {
+      padding: 1rem;
+    }
+    
+    .form-buttons {
+      flex-direction: column;
+    }
+    
+    .calendar-day {
+      min-height: 50px;
+      padding: 0.25rem;
+    }
+    
+    .day-number {
+      font-size: 0.8rem;
+    }
+    
+    .appointment-item {
+      font-size: 0.55rem;
+      padding: 0.1rem 0.2rem;
+    }
+  }

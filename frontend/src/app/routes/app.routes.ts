@@ -13,7 +13,10 @@ import {AppointmentFormComponent} from '../dashboards/patient/appointments/appoi
 import {ManagePatientsComponent} from '../dashboards/manage-patient/manage-patient.component';
 import {ManagePhysicianComponent} from '../dashboards/admin/manage-phsycian/manage-phsycian.component';
 import {ManageAssistantsComponent} from '../dashboards/admin/manage-assistan/manage-assistan.component';
-
+import { AppointmentCalendarFormComponent } from '../dashboards/physician-dashboard/appointment-calendar-form/appointment-calendar-form/appointment-calendar-form.component';
+import {HelpChatComponent} from '../pages/help-chat/help-chat.component';
+import { AppointmentFormAssistantComponent } from '../dashboards/assitant/appointment-form-assistant/appointment-form-assistant/appointment-form-assistant.component';
+import { AdminAppointmentManagerComponent } from '../dashboards/admin/admin-dashboard/appointment-manager/admin-appointment-manager/admin-appointment-manager.component';
 export const routes: Routes = [
   {path: '', component: HomeComponent},
   {path: 'home', component: HomeComponent},
@@ -27,34 +30,35 @@ export const routes: Routes = [
   {path: 'register-patient', component: RegisterPatientComponent},
   {path: 'register', component: RegisterComponent},
   {path: 'appointment-form', component: AppointmentFormComponent},
-  
+
   // Rutas para gestión de personal médico por admin
   {path: 'admin/manage-physicians', component: ManagePhysicianComponent},
   {path: 'admin/manage-assistants', component: ManageAssistantsComponent},
-  
+
   // Rutas compartidas para gestión de pacientes
   {path: 'manage-patients', component: ManagePatientsComponent},
   {path: 'admin/manage-patients', component: ManagePatientsComponent},
   {path: 'assistant/manage-patients', component: ManagePatientsComponent},
   {path: 'physician/manage-patients', component: ManagePatientsComponent},
-  
+
   // Otras rutas...
-  {path: 'manage-appointments', component: AdminDashboardComponent},
+  {path: 'admin/appointment-manager', component: AdminAppointmentManagerComponent},
   {path: 'medical-history', component: AdminDashboardComponent},
-  {path: 'medical-schedule', component: AdminDashboardComponent},
+  {path: 'admin/appointment-manager', component: AdminAppointmentManagerComponent},
   {path: 'reports', component: AdminDashboardComponent},
-  
+
   // Rutas para asistente
-  {path: 'assistant-manage-appointments', component: AssistantDashboardComponent},
+  {path: 'assistant-manage-appointments', component: AppointmentFormAssistantComponent},
   {path: 'assistant-schedule-appointment', component: AssistantDashboardComponent},
   {path: 'assistant-reports', component: AssistantDashboardComponent},
-  
+
   // Rutas para médico
-  {path: 'physician-schedule', component: PhysicianDashboardComponent},
+  {path: 'physician-schedule', component: AppointmentCalendarFormComponent},
   {path: 'physician-patients', component: PhysicianDashboardComponent},
   {path: 'physician-medical-history', component: PhysicianDashboardComponent},
-  
+
+
   // Rutas para paciente
   {path: 'patient-appointment-history', component: PatientDashboardComponent},
-  {path: 'patient-help-chat', component: PatientDashboardComponent}
+  {path: 'patient-help-chat', component: HelpChatComponent}
 ];

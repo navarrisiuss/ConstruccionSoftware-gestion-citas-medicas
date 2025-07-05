@@ -1,6 +1,15 @@
 const db = require('../config/db.config');
 
 const Physician = {
+  getBySpecialty: async (specialty) => {
+    return db.query('SELECT * FROM physicians WHERE specialty = ?', [specialty])
+      .then(([rows]) => rows)
+      .catch(dbError => {
+        console.error('ERROR AL OBTENER MÉDICOS POR ESPECIALIDAD:', dbError);
+        throw dbError;
+      });
+  },
+
   getAll: async () => {
     const [rows] = await db.query('SELECT * FROM physicians');
     return rows;
@@ -45,7 +54,17 @@ const Physician = {
       console.error('ERROR AL ACTUALIZAR MÉDICO:', dbError);
       throw dbError;
     }
-  }
+  },
+
+  delete: async (id) => {
+    try {
+      const [result] = await db.query('DELETE FROM physicians WHERE id = ?', [id]);
+      return result.affectedRows;
+    } catch (dbError) {
+      console.error('ERROR AL ELIMINAR MÉDICO:', dbError);
+      throw dbError;
+    }
+  },
 };
 
 module.exports = Physician;

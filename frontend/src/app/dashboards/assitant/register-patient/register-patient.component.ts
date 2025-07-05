@@ -1,10 +1,11 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core'; // ✅ Agregar OnInit
 import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {Patient} from '../../../models/patient.model';
 import {Gender} from '../../../models/gender.enum';
 import {NgIf, NgClass} from '@angular/common';
 import {PatientService} from '../../../services/patient.service';
+import {AuthService} from '../../../services/auth.service'; // ✅ Importar AuthService
 import Swal from 'sweetalert2';
 
 @Component({
@@ -16,8 +17,16 @@ import Swal from 'sweetalert2';
   templateUrl: './register-patient.component.html',
   styleUrl: './register-patient.component.css'
 })
-export class RegisterPatientComponent {
-  constructor(private router: Router, private patientService: PatientService) {}
+export class RegisterPatientComponent implements OnInit { // ✅ Implementar OnInit
+  // ✅ Agregar propiedades para gestión del usuario
+  currentUser: any = null;
+  userRole: string = '';
+
+  constructor(
+    private router: Router, 
+    private patientService: PatientService,
+    private authService: AuthService // ✅ Inyectar AuthService
+  ) {}
   
   patient = new Patient('', '', '', '', '', '', new Date(), '', '', null);
   name: string = '';
@@ -29,7 +38,6 @@ export class RegisterPatientComponent {
   birthDate: string = '';
   phone: string = '';
   address: string = '';
-  // 🎯 Cambiar inicialización del gender
   gender: Gender | null = null;
   isLoading: boolean = false;
   
@@ -40,6 +48,25 @@ export class RegisterPatientComponent {
 
   Gender = Gender;
 
+  // ✅ Implementar ngOnInit para detectar el usuario
+  ngOnInit() {
+    this.detectCurrentUser();
+  }
+
+  // ✅ Método para detectar el usuario actual y su rol
+  detectCurrentUser() {
+    this.currentUser = this.authService.getCurrentUser();
+    
+    if (this.currentUser) {
+      this.userRole = this.currentUser.role || '';
+      console.log('Usuario actual en registro:', this.currentUser);
+      console.log('Rol detectado:', this.userRole);
+    } else {
+      // Si no hay usuario, redirigir al login
+      console.warn('No hay usuario autenticado');
+      this.router.navigate(['/login']);
+    }
+  }
   // Método para verificar RUT cuando pierde el foco
   async onRutBlur() {
     if (this.rut.trim() && this.rut.length >= 8) {
@@ -131,6 +158,20 @@ export class RegisterPatientComponent {
       }
     });
   }
+  getRoleDisplayName(): string {
+    switch (this.userRole) {
+      case 'admin':
+        return 'Administrador';
+      case 'assistant':
+        return 'Asistente Médico';
+      case 'physician':
+        return 'Médico';
+      case 'patient':
+        return 'Paciente';
+      default:
+        return 'Usuario';
+    }
+  }
 
   // Cargar datos del paciente existente para editar
   loadExistingPatientData() {
@@ -218,14 +259,23 @@ export class RegisterPatientComponent {
         this.isLoading = false;
         console.log('Paciente actualizado exitosamente:', response);
         
+        const dashboardName = this.getDashboardName();
+        
         Swal.fire({
           title: '¡Paciente Actualizado!',
           text: `Los datos de ${this.name} han sido actualizados exitosamente.`,
           icon: 'success',
           confirmButtonText: 'Continuar',
-          confirmButtonColor: '#28a745'
-        }).then(() => {
-          this.resetForm();
+          showCancelButton: true,
+          cancelButtonText: `Volver al ${dashboardName}`,
+          confirmButtonColor: this.getThemeColor(),
+          cancelButtonColor: '#6c757d'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.resetForm();
+          } else {
+            this.navigateToDashboard();
+          }
         });
       },
       error: (error) => {
@@ -242,6 +292,88 @@ export class RegisterPatientComponent {
       }
     });
   }
+  backToDashboard() {
+    if (this.hasUnsavedChanges()) {
+      const dashboardName = this.getDashboardName();
+      
+      Swal.fire({
+        title: '¿Estás seguro?',
+        text: `Si sales ahora, perderás todos los datos ingresados`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#6c757d',
+        cancelButtonColor: this.getThemeColor(),
+        confirmButtonText: 'Sí, salir',
+        cancelButtonText: 'Continuar editando'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.navigateToDashboard();
+        }
+      });
+    } else {
+      this.navigateToDashboard();
+    }
+  }
+
+  // ✅ Método para navegar al dashboard correcto según el rol
+  private navigateToDashboard() {
+    const dashboardRoute = this.getDashboardRoute();
+    console.log('Navegando a:', dashboardRoute);
+    this.router.navigate([dashboardRoute]);
+  }
+
+  // ✅ Obtener la ruta del dashboard según el rol
+  private getDashboardRoute(): string {
+    switch (this.userRole) {
+      case 'admin':
+        return '/admin-dashboard';
+      case 'assistant':
+        return '/assistant-dashboard';
+      case 'physician':
+        return '/physician-dashboard';
+      case 'patient':
+        return '/patient-dashboard';
+      default:
+        console.warn('Rol no reconocido:', this.userRole);
+        return '/login'; // Si no reconoce el rol, volver al login
+    }
+  }
+
+  // ✅ Obtener el nombre del dashboard para mostrar en mensajes
+  private getDashboardName(): string {
+    switch (this.userRole) {
+      case 'admin':
+        return 'Dashboard de Administrador';
+      case 'assistant':
+        return 'Dashboard de Asistente';
+      case 'physician':
+        return 'Dashboard de Médico';
+      case 'patient':
+        return 'Dashboard de Paciente';
+      default:
+        return 'Dashboard';
+    }
+  }
+
+  get dashboardName(): string {
+    return this.getDashboardName();
+  }
+
+  // ✅ Obtener color del tema según el rol
+  private getThemeColor(): string {
+    switch (this.userRole) {
+      case 'admin':
+        return '#007bff';
+      case 'assistant':
+        return '#17a2b8';
+      case 'physician':
+        return '#28a745';
+      case 'patient':
+        return '#dc3545';
+      default:
+        return '#6c757d';
+    }
+  }
 
   sendHTTPPetition() {
     this.patientService.registerPatient(this.patient).subscribe({
@@ -249,20 +381,22 @@ export class RegisterPatientComponent {
         this.isLoading = false;
         console.log('Paciente registrado exitosamente:', response);
         
+        const dashboardName = this.getDashboardName();
+        
         Swal.fire({
           title: '¡Paciente Registrado!',
           text: `${this.name} ha sido registrado exitosamente en el sistema.`,
           icon: 'success',
           confirmButtonText: 'Registrar Otro',
           showCancelButton: true,
-          cancelButtonText: 'Volver al Dashboard',
-          confirmButtonColor: '#28a745',
+          cancelButtonText: `Volver al ${dashboardName}`,
+          confirmButtonColor: this.getThemeColor(),
           cancelButtonColor: '#6c757d'
         }).then((result) => {
           if (result.isConfirmed) {
             this.resetForm();
           } else {
-            this.backToAssistant();
+            this.navigateToDashboard();
           }
         });
       },
@@ -314,7 +448,6 @@ export class RegisterPatientComponent {
       this.showValidationError('La dirección es requerida');
       return false;
     }
-    // 🎯 Agregar validación para género
     if (this.gender === null) {
       this.showValidationError('Por favor selecciona tu género');
       return false;
@@ -347,31 +480,10 @@ export class RegisterPatientComponent {
     this.birthDate = '';
     this.phone = '';
     this.address = '';
-    this.gender = null; // 🎯 Cambiar aquí
+    this.gender = null;
     this.existingPatient = null;
     this.isEditMode = false;
     this.rutChecked = false;
-  }
-
-  backToAssistant() {
-    if (this.hasUnsavedChanges()) {
-      Swal.fire({
-        title: '¿Estás seguro?',
-        text: 'Si sales ahora, perderás todos los datos ingresados',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#6c757d',
-        cancelButtonColor: '#28a745',
-        confirmButtonText: 'Sí, salir',
-        cancelButtonText: 'Continuar editando'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.router.navigate(['/assistant-dashboard']);
-        }
-      });
-    } else {
-      this.router.navigate(['/assistant-dashboard']);
-    }
   }
 
   hasUnsavedChanges(): boolean {

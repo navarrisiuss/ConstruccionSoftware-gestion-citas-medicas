@@ -18,7 +18,7 @@ import Swal from 'sweetalert2';
 })
 export class RegisterComponent {
   constructor(private router: Router, private patientService: PatientService) {}
-  
+
   patient = new Patient('', '', '', '', '', '', new Date(), '', '', null);
   name: string = '';
   paternalLastName: string = '';
@@ -32,7 +32,7 @@ export class RegisterComponent {
   // 🎯 Cambiar inicialización del gender
   gender: Gender | null = null;
   isLoading: boolean = false;
-  
+
   // Nuevas variables para manejo de paciente existente
   existingPatient: any = null;
   isEditMode: boolean = false;
@@ -47,9 +47,14 @@ export class RegisterComponent {
     }
   }
 
-  // Verificar si el RUT ya existe
+// Verificar si el RUT ya existe
   async checkRutExists() {
-    if (!this.rut.trim()) return;
+    if (!this.rut.trim()) {
+      console.warn('[checkRutExists] RUT vacío o solo espacios en blanco.');
+      return;
+    }
+
+    console.log('[checkRutExists] Iniciando verificación de RUT:', this.rut);
 
     // Mostrar loading
     Swal.fire({
@@ -60,17 +65,33 @@ export class RegisterComponent {
       showConfirmButton: false,
       didOpen: () => {
         Swal.showLoading();
+        console.log('[checkRutExists] Loading mostrado');
       }
     });
 
     this.patientService.checkRutExists(this.rut).subscribe({
       next: (response) => {
         Swal.close();
-        
-        if (response.exists) {
-          this.existingPatient = response.patient;
-          this.showExistingPatientDialog();
+        console.log('[checkRutExists] Respuesta del backend recibida:', response);
+
+        if (response && typeof response.exists !== 'undefined') {
+          if (response.exists) {
+            console.log('[checkRutExists] El RUT ya existe. Mostrando paciente existente.');
+            this.existingPatient = response.patient;
+            this.showExistingPatientDialog();
+          } else {
+            console.log('[checkRutExists] El RUT no existe. Permitido continuar con el registro.');
+            this.rutChecked = true;
+            Swal.fire({
+              title: 'RUT Disponible',
+              text: 'Este RUT no está registrado. Puedes continuar con el registro.',
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          }
         } else {
+          console.warn('[checkRutExists] Respuesta inesperada o malformada. Asumiendo que el RUT no existe.');
           this.rutChecked = true;
           Swal.fire({
             title: 'RUT Disponible',
@@ -83,14 +104,27 @@ export class RegisterComponent {
       },
       error: (error) => {
         Swal.close();
-        console.error('Error verificando RUT:', error);
-        Swal.fire({
-          title: 'Error',
-          text: 'No se pudo verificar el RUT. Intenta nuevamente.',
-          icon: 'error',
-          confirmButtonText: 'Entendido',
-          confirmButtonColor: '#dc3545'
-        });
+        console.error('[checkRutExists] Error verificando RUT:', error);
+
+        if (error.status === 404 || error.status === 500) {
+          console.warn('[checkRutExists] Error del servidor o tabla vacía. Asumiendo RUT no registrado.');
+          this.rutChecked = true;
+          Swal.fire({
+            title: 'RUT Disponible',
+            text: 'Este RUT no está registrado (tabla posiblemente vacía). Puedes continuar con el registro.',
+            icon: 'info',
+            timer: 2500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            title: 'Error',
+            text: 'No se pudo verificar el RUT. Intenta nuevamente.',
+            icon: 'error',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#dc3545'
+          });
+        }
       }
     });
   }
@@ -98,7 +132,7 @@ export class RegisterComponent {
   // Mostrar diálogo con datos del paciente existente
   showExistingPatientDialog() {
     const patient = this.existingPatient;
-    
+
     Swal.fire({
       title: 'Paciente Ya Registrado',
       html: `
@@ -135,7 +169,7 @@ export class RegisterComponent {
   // Cargar datos del paciente existente para editar
   loadExistingPatientData() {
     const patient = this.existingPatient;
-    
+
     this.name = patient.name;
     this.paternalLastName = patient.paternalLastName;
     this.maternalLastName = patient.maternalLastName || '';
@@ -145,7 +179,7 @@ export class RegisterComponent {
     this.phone = patient.phone;
     this.address = patient.address;
     this.gender = patient.gender;
-    
+
     this.isEditMode = true;
     this.rutChecked = true;
 
@@ -178,7 +212,7 @@ export class RegisterComponent {
     }
 
     this.isLoading = true;
-    
+
     // Mostrar loading
     Swal.fire({
       title: this.isEditMode ? 'Actualizando...' : 'Registrando...',
@@ -203,7 +237,7 @@ export class RegisterComponent {
       this.address,
       this.gender
     );
-    
+
     if (this.isEditMode) {
       this.updateExistingPatient();
     } else {
@@ -217,7 +251,7 @@ export class RegisterComponent {
       next: (response) => {
         this.isLoading = false;
         console.log('Paciente actualizado exitosamente:', response);
-        
+
         Swal.fire({
           title: '¡Datos Actualizados!',
           text: `${this.name}, tus datos han sido actualizados exitosamente.`,
@@ -230,13 +264,13 @@ export class RegisterComponent {
             this.router.navigate(['/login']);
           }
         });
-        
+
         this.resetForm();
       },
       error: (error) => {
         this.isLoading = false;
         console.error('Error actualizando paciente:', error);
-        
+
         Swal.fire({
           title: 'Error en la Actualización',
           text: `Hubo un problema: ${error.message}`,
@@ -253,7 +287,7 @@ export class RegisterComponent {
       next: (response) => {
         this.isLoading = false;
         console.log('Paciente registrado exitosamente:', response);
-        
+
         Swal.fire({
           title: '¡Registro Exitoso!',
           text: `¡Bienvenido ${this.name}! Tu cuenta ha sido creada exitosamente.`,
@@ -266,13 +300,13 @@ export class RegisterComponent {
             this.router.navigate(['/login']);
           }
         });
-        
+
         this.resetForm();
       },
       error: (error) => {
         this.isLoading = false;
         console.error('Error registrando paciente:', error);
-        
+
         Swal.fire({
           title: 'Error en el Registro',
           text: `Hubo un problema: ${error.message}`,

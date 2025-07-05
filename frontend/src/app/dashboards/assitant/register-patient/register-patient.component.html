@@ -1,5 +1,12 @@
 <div class="register-container">
   <h2>{{ isEditMode ? 'Editar Datos del Paciente' : 'Registrar Paciente' }}</h2>
+  
+  <!-- ✅ Mostrar información del usuario actual -->
+  <div class="user-info" *ngIf="currentUser">
+    <p><strong>Usuario:</strong> {{ currentUser.name }} {{ currentUser.paternalLastName }}</p>
+    <p><strong>Rol:</strong> {{ getRoleDisplayName() }}</p>
+  </div>
+
   <form (submit)="register(); $event.preventDefault()">
     <div class="form-row">
       <div class="form-group">
@@ -140,12 +147,14 @@
         <span *ngIf="isLoading && !isEditMode">Registrando...</span>
         <span *ngIf="isLoading && isEditMode">Actualizando...</span>
       </button>
+      
+      <!-- ✅ Actualizar texto del botón según el rol -->
       <button 
         type="button" 
         class="back-btn"
-        (click)="backToAssistant()"
+        (click)="backToDashboard()"
         [disabled]="isLoading">
-        Volver al Dashboard
+        Volver al {{ dashboardName }}
       </button>
     </div>
   </form>

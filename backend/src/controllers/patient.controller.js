@@ -64,3 +64,22 @@ exports.updatePatient = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Método para buscar paciente por correo electrónico
+exports.searchPatientByEmail = async (req, res) => {
+    try {
+        const { email } = req.query;
+
+        if (!email || email.trim() === '') {
+            return res.status(400).json({ message: 'Parámetro "email" es requerido' });
+        }
+
+        const patients = await Patient.getByEmail(email);
+
+        // Siempre responde 200 con un arreglo (vacío o no)
+        res.json(patients);
+    } catch (error) {
+        console.error('ERROR AL BUSCAR PACIENTE POR CORREO:', error);
+        res.status(500).json({ message: error.message });
+    }
+};

@@ -33,13 +33,45 @@ const Appointment = {
     
     create: async (appointment) => {
         try {
+            console.log('📝 Creando cita con datos:', appointment);
+            console.log('📋 preparation_notes recibido:', appointment.preparation_notes);
             const [result] = await db.query(
-                'INSERT INTO appointments (patient_id, physician_id, date, time, reason, status) VALUES (?, ?, ?, ?, ?, ?)',
-                [appointment.patient_id, appointment.physician_id, appointment.date, appointment.time, appointment.reason, appointment.status || 'scheduled']
+                `INSERT INTO appointments 
+                 (patient_id, physician_id, date, time, reason, status, priority, notes, medical_notes, preparation_notes, created_at) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+                [
+                    appointment.patient_id, 
+                    appointment.physician_id, 
+                    appointment.date, 
+                    appointment.time, 
+                    appointment.reason || '', 
+                    appointment.status || 'scheduled',
+                    appointment.priority || 'normal',
+                    appointment.notes || '',
+                    appointment.medical_notes || '',
+                    appointment.preparation_notes || '', // ✅ AGREGADO
+                ]
             );
+            console.log('✅ Cita creada con ID:', result.insertId);
             return result.insertId;
         } catch (dbError) {
             console.error('ERROR DE BASE DE DATOS:', dbError);
+            throw dbError;
+        }
+    },
+    checkConflict: async (physicianId, date, time) => {
+        try {
+            const [rows] = await db.query(`
+                SELECT id FROM appointments 
+                WHERE physician_id = ? 
+                AND date = ? 
+                AND time = ? 
+                AND status != 'cancelled'
+            `, [physicianId, date, time]);
+            
+            return rows.length > 0 ? rows[0] : null;
+        } catch (dbError) {
+            console.error('ERROR AL VERIFICAR CONFLICTO:', dbError);
             throw dbError;
         }
     },
@@ -47,8 +79,32 @@ const Appointment = {
     update: async (id, appointment) => {
         try {
             const [result] = await db.query(
-                'UPDATE appointments SET date = ?, time = ?, reason = ?, status = ? WHERE id = ?',
-                [appointment.date, appointment.time, appointment.reason, appointment.status, id]
+                `UPDATE appointments 
+                 SET patient_id = ?, 
+                     physician_id = ?, 
+                     date = ?, 
+                     time = ?, 
+                     reason = ?, 
+                     status = ?, 
+                     priority = ?, 
+                     notes = ?,
+                     medical_notes = ?,
+                     preparation_notes = ?, -- ✅ AGREGADO
+                     updated_at = NOW() 
+                 WHERE id = ?`,
+                [
+                    appointment.patient_id, 
+                    appointment.physician_id, 
+                    appointment.date, 
+                    appointment.time, 
+                    appointment.reason || '', 
+                    appointment.status || 'scheduled',
+                    appointment.priority || 'normal',
+                    appointment.notes || '',
+                    appointment.medical_notes || '',
+                    appointment.preparation_notes || '', // ✅ AGREGADO
+                    id
+                ]
             );
             return result.affectedRows;
         } catch (dbError) {
@@ -66,6 +122,7 @@ const Appointment = {
             throw dbError;
         }
     }
+
 };
 
 module.exports = Appointment;

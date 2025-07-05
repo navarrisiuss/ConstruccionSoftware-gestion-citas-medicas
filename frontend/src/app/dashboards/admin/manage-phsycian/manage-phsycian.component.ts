@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { NgIf, NgFor, CommonModule } from '@angular/common';
-import { AdminService } from '../../../services/admin.service';
+import {Component, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {FormsModule} from '@angular/forms';
+import {NgIf, NgFor, CommonModule} from '@angular/common';
+import {AdminService} from '../../../services/admin.service';
+import {PhysicianService} from '../../../services/physician.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -14,121 +15,133 @@ import Swal from 'sweetalert2';
 })
 
 export class ManagePhysicianComponent implements OnInit {
-    physicians: any[] = [];
-    filteredPhysicians: any[] = [];
-    isLoading: boolean = false;
+  physicians: any[] = [];
+  filteredPhysicians: any[] = [];
+  isLoading: boolean = false;
 
-    //filtros
-    searchName: string = '';
-    searchEmail: string = '';
-    searchSpecialty: string = '';
+  //filtros
+  searchName: string = '';
+  searchEmail: string = '';
+  searchSpecialty: string = '';
 
-    //paginación
-    currentPage: number = 1;
-    physiciansPerPage: number = 10;
-    totalPages: number = 0;
+  //paginación
+  currentPage: number = 1;
+  physiciansPerPage: number = 10;
+  totalPages: number = 0;
 
-    //lista de especialidades para filtros
-    specialties: string[] = [
-        'Cardiología',
-        'Dermatología',
-        'Endocrinología',
-        'Gastroenterología',
-        'Ginecología',
-        'Neurología',
-        'Oftalmología',
-        'Ortopedia',
-        'Pediatría',
-        'Psiquiatría',
-        'Radiología',
-        'Urología',
-        'Medicina General'
-      ];
+  //lista de especialidades para filtros
+  specialties: string[] = [
+    'Cardiología',
+    'Dermatología',
+    'Endocrinología',
+    'Gastroenterología',
+    'Ginecología',
+    'Neurología',
+    'Oftalmología',
+    'Ortopedia',
+    'Pediatría',
+    'Psiquiatría',
+    'Radiología',
+    'Urología',
+    'Medicina General'
+  ];
 
-    constructor( 
-        private adminService: AdminService,
-        private router: Router
-    ){}
-    ngOnInit(): void {
-        this.loadPhysicians();
-    }
+  constructor(
+    private adminService: AdminService,
+    private physicianService: PhysicianService,
+    private router: Router
+  ) {
+  }
 
-    loadPhysicians() {
-        this.isLoading = true;
-    
-        // Mostrar loading
+  ngOnInit(): void {
+    this.loadPhysicians();
+    // Obtener array de medicos desde el servicio e imprimirlo en consola
+    this.adminService.getAllPhysicians().subscribe({
+      next: (physicians) => {
+        console.log('Lista de médicos:', physicians);
+      },
+      error: (error) => {
+        console.error('Error al obtener médicos:', error);
+      }
+    });
+  }
+
+  loadPhysicians() {
+    this.isLoading = true;
+
+    // Mostrar loading
+    Swal.fire({
+      title: 'Cargando Médicos...',
+      text: 'Por favor espera',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    this.adminService.getAllPhysicians().subscribe({
+      next: (physicians) => {
+        this.physicians = physicians;
+        this.filteredPhysicians = [...physicians];
+        this.calculateTotalPages();
+        this.isLoading = false;
+        Swal.close();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        Swal.close();
+        console.error('Error cargando médicos:', error);
+
         Swal.fire({
-            title: 'Cargando Médicos...',
-            text: 'Por favor espera',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
+          title: 'Error',
+          text: 'No se pudieron cargar los médicos. Intenta nuevamente.',
+          icon: 'error',
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#dc3545'
         });
+      }
+    });
+  }
 
-        this.adminService.getAllPhysicians().subscribe({
-            next: (physicians) => {
-                this.physicians = physicians;
-                this.filteredPhysicians = [...physicians];
-                this.calculateTotalPages();
-                this.isLoading = false;
-                Swal.close();
-            },
-            error: (error) => {
-                this.isLoading = false;
-                Swal.close();
-                console.error('Error cargando médicos:', error);
-                
-                Swal.fire({
-                title: 'Error',
-                text: 'No se pudieron cargar los médicos. Intenta nuevamente.',
-                icon: 'error',
-                confirmButtonText: 'Entendido',
-                confirmButtonColor: '#dc3545'
-                });
-            }
-        });
-    }
-    
+  applyFilters() {
+    this.filteredPhysicians = this.physicians.filter(physician => {
+      const matchesName = !this.searchName ||
+        physician.name.toLowerCase().includes(this.searchName.toLowerCase()) ||
+        physician.paternalLastName.toLowerCase().includes(this.searchName.toLowerCase()) ||
+        (physician.maternalLastName && physician.maternalLastName.toLowerCase().includes(this.searchName.toLowerCase()));
 
-    applyFilters() {
-        this.filteredPhysicians = this.physicians.filter(physician => {
-          const matchesName = !this.searchName || 
-            physician.name.toLowerCase().includes(this.searchName.toLowerCase()) ||
-            physician.paternalLastName.toLowerCase().includes(this.searchName.toLowerCase()) ||
-            (physician.maternalLastName && physician.maternalLastName.toLowerCase().includes(this.searchName.toLowerCase()));
-          
-          const matchesEmail = !this.searchEmail || 
-            physician.email.toLowerCase().includes(this.searchEmail.toLowerCase());
-          
-          const matchesSpecialty = !this.searchSpecialty || 
-            physician.specialty === this.searchSpecialty;
-          
-          return matchesName && matchesEmail && matchesSpecialty;
-        });
-        
-        this.currentPage = 1;
-        this.calculateTotalPages();
-    }
-    clearFilters() {
-        this.searchName = '';
-        this.searchEmail = '';
-        this.searchSpecialty = '';
-        this.filteredPhysicians = [...this.physicians];
-        this.currentPage = 1;
-        this.calculateTotalPages();
-    }
+      const matchesEmail = !this.searchEmail ||
+        physician.email.toLowerCase().includes(this.searchEmail.toLowerCase());
 
-    //formatear fecha para mostrar
-    formatDate(dateString: string): string {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('es-CL');
-    }
+      const matchesSpecialty = !this.searchSpecialty ||
+        physician.specialty === this.searchSpecialty;
 
-    // paginación
+      return matchesName && matchesEmail && matchesSpecialty;
+    });
+
+    this.currentPage = 1;
+    this.calculateTotalPages();
+  }
+
+  clearFilters() {
+    this.searchName = '';
+    this.searchEmail = '';
+    this.searchSpecialty = '';
+    this.filteredPhysicians = [...this.physicians];
+    this.currentPage = 1;
+    this.calculateTotalPages();
+  }
+
+  //formatear fecha para mostrar
+  formatDate(dateString: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-CL');
+  }
+
+  // paginación
   calculateTotalPages() {
     this.totalPages = Math.ceil(this.filteredPhysicians.length / this.physiciansPerPage);
   }
@@ -183,12 +196,12 @@ export class ManagePhysicianComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         // redirigir al formulario de edición
-        this.router.navigate(['/register-physician'], { 
-          queryParams: { 
-            edit: true, 
+        this.router.navigate(['/register-physician'], {
+          queryParams: {
+            edit: true,
             physicianId: physician.id,
             email: physician.email
-          } 
+          }
         });
       }
     });
@@ -227,13 +240,29 @@ export class ManagePhysicianComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Implementar eliminación cuando tengas el endpoint
-        Swal.fire({
-          title: 'Función no disponible',
-          text: 'La eliminación de médicos aún no está implementada por seguridad.',
-          icon: 'info',
-          confirmButtonText: 'Entendido',
-          confirmButtonColor: '#007bff'
+        console.log(physician.id);
+        this.physicianService.deletePhysician(physician.id).subscribe({
+          next: () => {
+            Swal.fire({
+              title: 'Médico Eliminado',
+              text: `El médico Dr. ${physician.name} ${physician.paternalLastName} ha sido eliminado correctamente.`,
+              icon: 'success',
+              confirmButtonText: 'Entendido',
+              confirmButtonColor: '#007bff'
+            });
+            // Recargar la lista de médicos
+            this.loadPhysicians();
+          },
+          error: (error) => {
+            console.error('Error eliminando médico:', error);
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudo eliminar el médico. Intenta nuevamente.',
+              icon: 'error',
+              confirmButtonText: 'Entendido',
+              confirmButtonColor: '#dc3545'
+            });
+          }
         });
       }
     });
@@ -243,7 +272,7 @@ export class ManagePhysicianComponent implements OnInit {
   addNewPhysician() {
     // Indicar que viene desde gestión
     this.router.navigate(['/register-physician'], {
-      queryParams: { from: 'manage' }
+      queryParams: {from: 'manage'}
     });
   }
 

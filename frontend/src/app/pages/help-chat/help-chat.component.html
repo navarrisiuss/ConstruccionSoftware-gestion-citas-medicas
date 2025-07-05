@@ -1,0 +1,31 @@
+<div class="assistant-box" *ngIf="visible">
+  <div class="header">
+    Asistente de Ayuda
+    <button (click)="toggle()" aria-label="Cerrar Asistente">✖</button>
+  </div>
+
+  <div class="content" #chatContent>
+    <ng-container *ngFor="let msg of messages">
+      <div [ngClass]="{'user-message': msg.type === 'user', 'ai-message': msg.type === 'ai'}">
+        <span *ngIf="msg.type === 'user'" class="label">Tú:</span>
+        <span *ngIf="msg.type === 'ai'" class="label">Asistente:</span>
+        {{ msg.text }}
+      </div>
+    </ng-container>
+    <div *ngIf="loading" class="loading-indicator">
+      <em>Asistente está escribiendo...</em>
+    </div>
+  </div>
+
+  <div class="input-container">
+    <input
+      [(ngModel)]="userInput"
+      (keydown.enter)="sendMessage()"
+      placeholder="Escribe aquí..."
+      [disabled]="loading" /> <button (click)="sendMessage()" [disabled]="loading">Enviar</button>
+  </div>
+</div>
+
+<button class="assistant-toggle" *ngIf="!visible" (click)="toggle()" aria-label="Abrir Asistente">
+  💬
+</button>
