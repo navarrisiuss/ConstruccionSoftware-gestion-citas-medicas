@@ -71,6 +71,10 @@ export class AdminService {
   updateAppointment(appointmentId: number, appointmentData: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/appointments/${appointmentId}`, appointmentData);
   }
+
+  updateAppointmentNotes(appointmentId: number, notesData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/appointments/${appointmentId}/notes`, notesData);
+  }
   //Metodo para eliminar una cita
   deleteAppointment(appointmentId: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/appointments/${appointmentId}`);

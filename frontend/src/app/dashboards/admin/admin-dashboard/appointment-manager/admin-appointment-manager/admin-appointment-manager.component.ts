@@ -50,12 +50,21 @@ interface AppointmentEvent {
   physicianId: number;
   status: string;
   isManageable: boolean;
-  cancellation_reason?: string;
-  cancellation_details?: string;
-  priority?: string;
-  notes?: string;
   reason?: string;
   specialty?: string;
+  priority?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+  cancellation_reason?: string;
+  cancellation_details?: string;
+  cancelled_by?: string;
+  cancelled_at?: string;
+  physician_phone?: string;
+  physician_email?: string;
+  duration?: number;
+  location?: string;
+  preparation_notes?: string;
 }
 
 @Component({
@@ -215,9 +224,11 @@ export class AdminAppointmentManagerComponent implements OnInit {
       });
   }
 
-  // ✅ NUEVO MÉTODO: Actualizar cita existente
   updateAppointment() {
     console.log('Actualizando cita ID:', this.editingAppointmentId, 'con datos:', this.newAppt);
+    
+    // ✅ Obtener la cita original para preservar el status
+    const originalAppointment = this.allAppointments.find(apt => apt.id === this.editingAppointmentId);
     
     const appointmentData = {
       patient_id: parseInt(this.newAppt.patient_id),
@@ -226,8 +237,13 @@ export class AdminAppointmentManagerComponent implements OnInit {
       time: this.newAppt.time,
       reason: this.newAppt.reason,
       priority: this.newAppt.priority,
-      notes: this.newAppt.notes
+      notes: this.newAppt.notes,
+      // ✅ PRESERVAR: El status original de la cita
+      status: originalAppointment?.status || 'scheduled'
     };
+    
+    console.log('Datos completos a enviar:', appointmentData);
+    console.log('Status preservado:', appointmentData.status);
     
     this.adminSvc.updateAppointment(this.editingAppointmentId!, appointmentData)
       .subscribe({
@@ -264,6 +280,7 @@ export class AdminAppointmentManagerComponent implements OnInit {
       console.log('✅ Cita encontrada para editar:', appointment);
       console.log('✅ Pacientes disponibles:', this.patients);
       console.log('✅ Médicos disponibles:', this.allPhysicians);
+      console.log('✅ Status original:', appointment.status); // ✅ NUEVO
       
       // ✅ Marcar como modo edición
       this.isEditing = true;
@@ -287,6 +304,7 @@ export class AdminAppointmentManagerComponent implements OnInit {
       this.newAppt.notes = appointment.notes || '';
       
       console.log('✅ Datos cargados en formulario:', this.newAppt);
+      console.log('✅ Status que se debe preservar:', appointment.status); // ✅ NUEVO
       
       // ✅ Actualizar filtros si es necesario
       this.onSpecialtyChange();
@@ -365,8 +383,6 @@ export class AdminAppointmentManagerComponent implements OnInit {
     this.filteredPatients = [...this.patients];
   }
 
-  // ... [Resto de métodos existentes permanecen igual] ...
-
   loadAllPatients() {
     this.adminSvc.getAllPatients()
       .subscribe({
@@ -436,19 +452,33 @@ export class AdminAppointmentManagerComponent implements OnInit {
               id: a.id,
               date: formattedDate,
               time: a.time,
-              // ✅ VERIFICAR: Nombres de médicos y pacientes
               physician: a.physician_name || a.physician || 'Sin nombre',
               patient: a.patient_name || a.patient || 'Sin nombre',
               patientId: a.patient_id,
               physicianId: a.physician_id,
               status: a.status,
               isManageable: true,
-              cancellation_reason: a.cancellation_reason,
-              cancellation_details: a.cancellation_details,
+              
+              // ✅ NUEVOS CAMPOS completos de información
+              reason: a.reason || '',
+              specialty: a.specialty || '',
               priority: a.priority || 'normal',
               notes: a.notes || '',
-              reason: a.reason || '',
-              specialty: a.specialty || ''
+              created_at: a.created_at,
+              updated_at: a.updated_at,
+              cancellation_reason: a.cancellation_reason || '',
+              cancellation_details: a.cancellation_details || '',
+              cancelled_by: a.cancelled_by || '',
+              cancelled_at: a.cancelled_at,
+              
+              // ✅ Información del médico (si está disponible)
+              physician_phone: a.physician_phone || '',
+              physician_email: a.physician_email || '',
+              
+              // ✅ Detalles adicionales
+              duration: a.duration || 30,
+              location: a.location || 'Consulta externa',
+              preparation_notes: a.preparation_notes || ''
             };
           });
           
@@ -584,7 +614,7 @@ export class AdminAppointmentManagerComponent implements OnInit {
         hasConfirmed: dayAppointments.some(apt => apt.status === 'confirmed'),
         hasCompleted: dayAppointments.some(apt => apt.status === 'completed'),
         hasCancelled: dayAppointments.some(apt => apt.status === 'cancelled'),
-        hasNoShow: dayAppointments.some(apt => apt.status === 'no_show')
+        hasNoShow: dayAppointments.some(apt => apt.status === 'no_show') // ✅ NUEVO
       });
     }
     
@@ -758,132 +788,230 @@ export class AdminAppointmentManagerComponent implements OnInit {
     if (!calDay.allAppointments || calDay.allAppointments.length === 0) {
       return;
     }
-
-    const appointments = calDay.allAppointments;
-    const dateString = calDay.dateString || calDay.allAppointments[0].date;
-
-    // Crear HTML para las citas
-    let appointmentsHtml = appointments.map((apt: any) => {
-      const statusClass = apt.status;
-      const statusText = apt.status === 'scheduled' ? 'Programada' :
-                        apt.status === 'confirmed' ? 'Confirmada' :
-                        apt.status === 'completed' ? 'Completada' :
-                        apt.status === 'cancelled' ? 'Cancelada' :
-                        'No vino';
-
-      const priorityColor = apt.priority === 'urgent' ? '#dc3545' :
-                           apt.priority === 'high' ? '#fd7e14' :
-                           apt.priority === 'normal' ? '#28a745' : '#6c757d';
-
+  
+    const appointmentsHtml = calDay.allAppointments.map((apt: any) => {
+      const backgroundColor = apt.status === 'cancelled' ? '#dc3545' : 
+                             apt.status === 'completed' ? '#28a745' : 
+                             apt.status === 'confirmed' ? '#0d6efd' : 
+                             apt.status === 'no_show' ? '#dc3545' : '#17a2b8';
+      
+      const statusText = apt.status === 'cancelled' ? 'CANCELADA' :
+                        apt.status === 'completed' ? 'COMPLETADA' : 
+                        apt.status === 'confirmed' ? 'CONFIRMADA' :
+                        apt.status === 'scheduled' ? 'PROGRAMADA' : 
+                        apt.status === 'no_show' ? 'NO ASISTIÓ' : 'PENDIENTE';
+      
+      // ✅ Definir prioridades con colores
+      const priorityColors = {
+        'urgent': '#dc3545',
+        'high': '#fd7e14', 
+        'normal': '#28a745',
+        'low': '#6c757d'
+      };
+      
+      const priorityColor = priorityColors[apt.priority as keyof typeof priorityColors] || '#28a745';
+      const priorityText = apt.priority === 'urgent' ? 'URGENTE' :
+                          apt.priority === 'high' ? 'ALTA' :
+                          apt.priority === 'low' ? 'BAJA' : 'NORMAL';
+  
+      // ✅ Estilo especial para citas canceladas Y no_show
+      const extraStyle = (apt.status === 'cancelled' || apt.status === 'no_show') ? 
+        'text-decoration: line-through; opacity: 0.9; border: 2px solid #a71e2a;' : '';
+  
       return `
-        <div class="appointment-detail ${statusClass}" style="margin-bottom: 15px; padding: 12px; border-left: 4px solid ${priorityColor}; background: #f8f9fa; border-radius: 8px;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-            <div>
-              <strong style="color: #2d3748;">🕐 ${apt.time}</strong>
-              <span class="status-badge ${statusClass}" style="margin-left: 10px; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+        <div class="modal-appointment-item" style="
+          background: ${backgroundColor};
+          color: white;
+          padding: 1rem;
+          margin: 0.75rem 0;
+          border-radius: 8px;
+          border-left: 4px solid ${priorityColor};
+          ${extraStyle}
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        ">
+          <!-- Encabezado principal -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <div style="font-weight: bold; font-size: 1.1rem;">
+              🕐 ${apt.time} ${(apt.status === 'cancelled' || apt.status === 'no_show') ? '❌' : ''}
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <span style="background: rgba(0,0,0,0.2); padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem;">
                 ${statusText}
               </span>
-            </div>
-            <div style="font-size: 0.8rem; color: #666;">
-              Prioridad: <strong style="color: ${priorityColor};">${apt.priority || 'normal'}</strong>
+              <span style="background: ${priorityColor}; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem;">
+                ${priorityText}
+              </span>
             </div>
           </div>
-          
-          <div style="margin-bottom: 8px;">
-            <div><strong>👤 Paciente:</strong> ${apt.patient}</div>
-            <div><strong>👨‍⚕️ Médico:</strong> Dr. ${apt.physician}</div>
+  
+          <!-- Información del paciente y médico -->
+          <div style="margin-bottom: 0.5rem;">
+            <div style="font-weight: bold;">👤 Paciente: ${apt.patient}</div>
+            <div style="font-weight: bold;">👨‍⚕️ Dr. ${apt.physician}</div>
+            ${apt.specialty ? `<div style="font-size: 0.9rem; opacity: 0.9;">🏥 ${apt.specialty}</div>` : ''}
+            ${apt.physician_phone ? `<div style="font-size: 0.8rem; opacity: 0.8;">📞 ${apt.physician_phone}</div>` : ''}
           </div>
-          
-          ${apt.reason ? `<div style="margin-bottom: 8px;"><strong>📝 Motivo:</strong> ${apt.reason}</div>` : ''}
-          ${apt.notes ? `<div style="margin-bottom: 8px;"><strong>📋 Notas:</strong> ${apt.notes}</div>` : ''}
-          ${apt.cancellation_reason ? `<div style="margin-bottom: 8px; color: #dc3545;"><strong>❌ Motivo cancelación:</strong> ${apt.cancellation_reason}</div>` : ''}
-          
-          <div class="appointment-actions" style="margin-top: 10px; text-align: center;">
-            ${apt.status === 'scheduled' ? `
-              <button onclick="confirmAppointment(${apt.id})" style="background: #38a169; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✓ Confirmar</button>
-            ` : ''}
-            
-            ${apt.status === 'scheduled' || apt.status === 'confirmed' ? `
-              <button onclick="completeAppointment(${apt.id})" style="background: #319795; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✓ Completar</button>
-              <button onclick="editAppointment(${apt.id})" style="background: #667eea; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✏️ Editar</button>
-              <button onclick="cancelAppointment(${apt.id})" style="background: #e53e3e; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✗ Cancelar</button>
-            ` : ''}
-            
-            ${apt.status === 'confirmed' ? `
-              <button onclick="markNoShow(${apt.id})" style="background: #d69e2e; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">⚠️ No vino</button>
-            ` : ''}
-            
-            ${apt.status === 'cancelled' || apt.status === 'completed' || apt.status === 'no_show' ? `
-              <button onclick="reactivateAppointment(${apt.id})" style="background: #3182ce; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">🔄 Reactivar</button>
-            ` : ''}
-            
-            ${apt.status === 'cancelled' ? `
-              <button onclick="deleteAppointment(${apt.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">🗑️ Eliminar</button>
-            ` : ''}
-            
-            <button onclick="viewDetails(${apt.id})" style="background: #6c757d; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">👁️ Ver Detalles</button>
+  
+          <!-- Detalles de la cita -->
+          <div style="background: rgba(0,0,0,0.1); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;">
+            ${apt.reason ? `<div style="margin-bottom: 0.25rem;"><strong>📝 Motivo:</strong> ${apt.reason}</div>` : ''}
+            ${apt.duration ? `<div style="margin-bottom: 0.25rem;"><strong>⏱️ Duración:</strong> ${apt.duration} minutos</div>` : ''}
+            ${apt.location ? `<div style="margin-bottom: 0.25rem;"><strong>📍 Ubicación:</strong> ${apt.location}</div>` : ''}
+            ${apt.notes ? `<div style="margin-bottom: 0.25rem;"><strong>📋 Notas Admin:</strong> ${apt.notes}</div>` : ''}
+          </div>
+  
+          <!-- Información de preparación -->
+          ${apt.preparation_notes ? `
+            <div style="background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;">
+              <strong>⚠️ Instrucciones de preparación:</strong><br>
+              <em>${apt.preparation_notes}</em>
+            </div>
+          ` : ''}
+  
+          <!-- Información de cancelación -->
+          ${apt.status === 'cancelled' ? `
+            <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;">
+              <strong>❌ Información de cancelación:</strong><br>
+              ${apt.cancellation_reason ? `<div><strong>Motivo:</strong> ${apt.cancellation_reason}</div>` : ''}
+              ${apt.cancellation_details ? `<div><strong>Detalles:</strong> ${apt.cancellation_details}</div>` : ''}
+              ${apt.cancelled_by ? `<div><strong>Cancelado por:</strong> ${apt.cancelled_by}</div>` : ''}
+              ${apt.cancelled_at ? `<div><strong>Fecha de cancelación:</strong> ${new Date(apt.cancelled_at).toLocaleDateString('es-ES')}</div>` : ''}
+            </div>
+          ` : ''}
+  
+          <!-- ✅ NUEVO: Información de no_show -->
+          ${apt.status === 'no_show' ? `
+            <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;">
+              <strong>⚠️ Información de no asistencia:</strong><br>
+              <div>El paciente no se presentó a la cita programada</div>
+              ${apt.updated_at ? `<div><strong>Fecha de registro:</strong> ${new Date(apt.updated_at).toLocaleDateString('es-ES')}</div>` : ''}
+            </div>
+          ` : ''}
+  
+          <!-- Fechas de seguimiento -->
+          <div style="margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.8rem; opacity: 0.8;">
+            ${apt.created_at ? `<div>📅 Creada: ${new Date(apt.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>` : ''}
+            ${apt.updated_at && apt.updated_at !== apt.created_at ? `<div>🔄 Actualizada: ${new Date(apt.updated_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>` : ''}
+          </div>
+  
+          <!-- Botones de acción para administradores -->
+          <div style="margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.2);">
+            <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+              ${apt.status === 'scheduled' ? `
+                <button onclick="confirmAppointment(${apt.id})" style="background: #38a169; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✓ Confirmar</button>
+              ` : ''}
+              
+              ${apt.status === 'scheduled' || apt.status === 'confirmed' ? `
+                <button onclick="completeAppointment(${apt.id})" style="background: #319795; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✓ Completar</button>
+                <button onclick="editAppointment(${apt.id})" style="background: #667eea; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✏️ Editar</button>
+                <button onclick="cancelAppointment(${apt.id})" style="background: #e53e3e; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">✗ Cancelar</button>
+              ` : ''}
+              
+              ${apt.status === 'confirmed' ? `
+                <button onclick="markNoShow(${apt.id})" style="background: #d69e2e; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">⚠️ No vino</button>
+              ` : ''}
+              
+              ${apt.status === 'cancelled' || apt.status === 'completed' || apt.status === 'no_show' ? `
+                <button onclick="reactivateAppointment(${apt.id})" style="background: #3182ce; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">🔄 Reactivar</button>
+              ` : ''}
+              
+              ${apt.status === 'cancelled' ? `
+                <button onclick="deleteAppointment(${apt.id})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">🗑️ Eliminar</button>
+              ` : ''}
+              
+              <button onclick="viewDetails(${apt.id})" style="background: #6c757d; color: white; border: none; padding: 5px 10px; margin: 2px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">👁️ Ver Detalles</button>
+            </div>
           </div>
         </div>
       `;
     }).join('');
-
-    // Definir funciones globales
+  
+    const dateFormatted = new Date(calDay.dateString + 'T00:00:00').toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  
+    // ✅ ACTUALIZAR: Resumen de estado incluyendo no_show
+    const cancelledCount = calDay.allAppointments.filter((apt: any) => apt.status === 'cancelled').length;
+    const noShowCount = calDay.allAppointments.filter((apt: any) => apt.status === 'no_show').length;
+    const activeCount = calDay.allAppointments.filter((apt: any) => apt.status !== 'cancelled' && apt.status !== 'no_show').length;
+    const completedCount = calDay.allAppointments.filter((apt: any) => apt.status === 'completed').length;
+    
+    const statusSummary = `
+      <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center; color: #666;">
+        <div style="font-weight: bold; margin-bottom: 0.5rem; color: #333;">
+          📊 Resumen del día: ${calDay.allAppointments.length} cita(s)
+        </div>
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+          ${activeCount > 0 ? `<span style="color: #28a745; font-weight: bold;">✓ ${activeCount} activa(s)</span>` : ''}
+          ${cancelledCount > 0 ? `<span style="color: #dc3545; font-weight: bold;">❌ ${cancelledCount} cancelada(s)</span>` : ''}
+          ${completedCount > 0 ? `<span style="color: #17a2b8; font-weight: bold;">📋 ${completedCount} completada(s)</span>` : ''}
+          ${noShowCount > 0 ? `<span style="color: #dc3545; font-weight: bold;">⚠️ ${noShowCount} no asistió</span>` : ''}
+        </div>
+      </div>
+    `;
+  
+    // Definir funciones globales (mantener las existentes)
     (window as any).deleteAppointment = (appointmentId: number) => {
       console.log('Función global deleteAppointment llamada para ID:', appointmentId);
       this.deleteAppointment(appointmentId);
     };
-
+  
     (window as any).cancelAppointment = (appointmentId: number) => {
       console.log('Función global cancelAppointment llamada para ID:', appointmentId);
       this.cancelAppointmentWithReason(appointmentId);
     };
-
+  
     (window as any).confirmAppointment = (appointmentId: number) => {
       this.updateAppointmentStatus(appointmentId, 'confirmed');
       Swal.close();
     };
-
+  
     (window as any).completeAppointment = (appointmentId: number) => {
       this.updateAppointmentStatus(appointmentId, 'completed');
       Swal.close();
     };
-
+  
     (window as any).markNoShow = (appointmentId: number) => {
       this.updateAppointmentStatus(appointmentId, 'no_show');
       Swal.close();
     };
-
+  
     (window as any).reactivateAppointment = (appointmentId: number) => {
       this.updateAppointmentStatus(appointmentId, 'scheduled');
       Swal.close();
     };
-
-    // ✅ FUNCIÓN GLOBAL PARA EDITAR
+  
     (window as any).editAppointment = (appointmentId: number) => {
       this.editAppointment(appointmentId);
       Swal.close();
     };
-
+  
     (window as any).viewDetails = (appointmentId: number) => {
       Swal.close();
       setTimeout(() => {
         this.viewAppointmentDetails(appointmentId);
       }, 100);
     };
-
+  
     Swal.fire({
-      title: `📅 Citas del ${dateString}`,
+      title: `📅 Citas del ${dateFormatted}`,
       html: `
-        <div style="max-height: 400px; overflow-y: auto; text-align: left;">
+        <div style="text-align: left; max-height: 500px; overflow-y: auto;">
+          ${statusSummary}
           ${appointmentsHtml}
         </div>
       `,
-      showConfirmButton: false,
-      showCloseButton: true,
       width: '800px',
-      heightAuto: false,
-      customClass: {
-        popup: 'appointment-details-popup'
+      confirmButtonText: 'Cerrar',
+      confirmButtonColor: '#17a2b8',
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp'
       }
     });
   }
@@ -1094,35 +1222,44 @@ export class AdminAppointmentManagerComponent implements OnInit {
   viewAppointmentDetails(appointmentId: number) {
     const appointment = this.allAppointments.find(apt => apt.id === appointmentId);
     if (!appointment) return;
-
+  
     const statusText = appointment.status === 'scheduled' ? 'Programada' :
                       appointment.status === 'confirmed' ? 'Confirmada' :
                       appointment.status === 'completed' ? 'Completada' :
                       appointment.status === 'cancelled' ? 'Cancelada' :
-                      'No se presentó';
-
+                      appointment.status === 'no_show' ? 'No Asistió' : 'Pendiente';
+  
     Swal.fire({
-      title: `📋 Detalles de la Cita #${appointment.id}`,
+      title: `📋 Detalles Completos - Cita #${appointment.id}`,
       html: `
-        <div style="text-align: left; max-height: 400px; overflow-y: auto;">
+        <div style="text-align: left; max-height: 500px; overflow-y: auto;">
+          <!-- Información general -->
           <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
             <h4 style="margin: 0 0 10px 0; color: #2d3748;">📅 Información General</h4>
             <p><strong>Fecha:</strong> ${appointment.date}</p>
             <p><strong>Hora:</strong> ${appointment.time}</p>
             <p><strong>Estado:</strong> <span style="color: ${appointment.status === 'completed' ? '#28a745' : appointment.status === 'cancelled' ? '#dc3545' : '#007bff'};">${statusText}</span></p>
-            <p><strong>Prioridad:</strong> ${appointment.priority || 'Normal'}</p>
+            <p><strong>Prioridad:</strong> <span style="color: ${appointment.priority === 'urgent' ? '#dc3545' : appointment.priority === 'high' ? '#fd7e14' : '#28a745'};">${appointment.priority === 'urgent' ? 'URGENTE' : appointment.priority === 'high' ? 'ALTA' : appointment.priority === 'low' ? 'BAJA' : 'NORMAL'}</span></p>
+            <p><strong>Duración:</strong> ${appointment.duration || 30} minutos</p>
+            <p><strong>Ubicación:</strong> ${appointment.location || 'Consulta externa'}</p>
           </div>
           
+          <!-- Información del paciente -->
           <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
             <h4 style="margin: 0 0 10px 0; color: #2d3748;">👤 Paciente</h4>
             <p><strong>Nombre:</strong> ${appointment.patient}</p>
           </div>
           
+          <!-- Información del médico -->
           <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
             <h4 style="margin: 0 0 10px 0; color: #2d3748;">👨‍⚕️ Médico</h4>
             <p><strong>Nombre:</strong> Dr. ${appointment.physician}</p>
+            ${appointment.specialty ? `<p><strong>Especialidad:</strong> ${appointment.specialty}</p>` : ''}
+            ${appointment.physician_phone ? `<p><strong>Teléfono:</strong> ${appointment.physician_phone}</p>` : ''}
+            ${appointment.physician_email ? `<p><strong>Email:</strong> ${appointment.physician_email}</p>` : ''}
           </div>
           
+          <!-- Motivo y detalles -->
           ${appointment.reason ? `
             <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
               <h4 style="margin: 0 0 10px 0; color: #2d3748;">📝 Motivo de Consulta</h4>
@@ -1130,25 +1267,54 @@ export class AdminAppointmentManagerComponent implements OnInit {
             </div>
           ` : ''}
           
+          <!-- Notas administrativas -->
           ${appointment.notes ? `
             <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
               <h4 style="margin: 0 0 10px 0; color: #2d3748;">📋 Notas Administrativas</h4>
               <p>${appointment.notes}</p>
             </div>
           ` : ''}
-          
-          ${appointment.cancellation_reason ? `
-            <div style="background: #f8d7da; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-              <h4 style="margin: 0 0 10px 0; color: #721c24;">❌ Información de Cancelación</h4>
-              <p><strong>Motivo:</strong> ${appointment.cancellation_reason}</p>
-              ${appointment.cancellation_details ? `<p><strong>Detalles:</strong> ${appointment.cancellation_details}</p>` : ''}
+  
+          <!-- Instrucciones de preparación -->
+          ${appointment.preparation_notes ? `
+            <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <h4 style="margin: 0 0 10px 0; color: #2d3748;">⚠️ Instrucciones de Preparación</h4>
+              <p>${appointment.preparation_notes}</p>
             </div>
           ` : ''}
+          
+          <!-- Información de cancelación -->
+          ${appointment.status === 'cancelled' ? `
+            <div style="background: #f8d7da; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <h4 style="margin: 0 0 10px 0; color: #721c24;">❌ Información de Cancelación</h4>
+              ${appointment.cancellation_reason ? `<p><strong>Motivo:</strong> ${appointment.cancellation_reason}</p>` : ''}
+              ${appointment.cancellation_details ? `<p><strong>Detalles:</strong> ${appointment.cancellation_details}</p>` : ''}
+              ${appointment.cancelled_by ? `<p><strong>Cancelado por:</strong> ${appointment.cancelled_by}</p>` : ''}
+              ${appointment.cancelled_at ? `<p><strong>Fecha de cancelación:</strong> ${new Date(appointment.cancelled_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>` : ''}
+            </div>
+          ` : ''}
+  
+          <!-- Información de no asistencia -->
+          ${appointment.status === 'no_show' ? `
+            <div style="background: #ffeaa7; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <h4 style="margin: 0 0 10px 0; color: #8b6914;">⚠️ No Asistencia</h4>
+              <p>El paciente no se presentó a la cita programada.</p>
+              ${appointment.updated_at ? `<p><strong>Registrado:</strong> ${new Date(appointment.updated_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>` : ''}
+            </div>
+          ` : ''}
+  
+          <!-- Timestamps -->
+          <div style="background: #f1f3f4; padding: 15px; border-radius: 8px; border-top: 3px solid #6c757d;">
+            <h4 style="margin: 0 0 10px 0; color: #2d3748;">🕐 Historial</h4>
+            ${appointment.created_at ? `<p><strong>📅 Creada:</strong> ${new Date(appointment.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>` : ''}
+            ${appointment.updated_at && appointment.updated_at !== appointment.created_at ? `<p><strong>🔄 Última actualización:</strong> ${new Date(appointment.updated_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>` : ''}
+          </div>
         </div>
       `,
-      width: '600px',
+      width: '700px',
       showConfirmButton: true,
-      confirmButtonText: 'Cerrar'
+      confirmButtonText: 'Cerrar',
+      confirmButtonColor: '#6c757d'
     });
   }
 }

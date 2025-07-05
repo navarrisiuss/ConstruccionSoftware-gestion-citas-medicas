@@ -1,7 +1,7 @@
 <div class="appointment-container">
   <form (ngSubmit)="submit()" class="appointment-form">
     <h2>Agendar Nueva Cita</h2>
-
+  
     <div class="patient-info" *ngIf="currentUser">
       <p><strong>Paciente:</strong> {{ getPatientInfo() }}</p>
       <p><strong>ID:</strong> {{ patientId }}</p>
@@ -38,7 +38,6 @@
         </option>
       </select>
 
-      <!-- ✅ Mostrar información adicional -->
       <small class="form-help" *ngIf="newAppt.specialty && filteredPhysicians.length > 0">
         {{ filteredPhysicians.length }} médico(s) disponible(s) en {{ newAppt.specialty }}
       </small>
@@ -48,23 +47,60 @@
       </small>
     </div>
 
-      <div class="form-group">
-        <label for="date">Fecha:</label>
-        <input type="date" [(ngModel)]="newAppt.date" name="date" id="date" required>
-      </div>
+    <div class="form-group">
+      <label for="date">Fecha:</label>
+      <input type="date" [(ngModel)]="newAppt.date" name="date" id="date" required>
+    </div>
 
-      <div class="form-group">
-        <label for="time">Hora:</label>
-        <input type="time" [(ngModel)]="newAppt.time" name="time" id="time" required>
-      </div>
+    <div class="form-group">
+      <label for="time">Hora:</label>
+      <input type="time" [(ngModel)]="newAppt.time" name="time" id="time" required>
+    </div>
 
-      <div class="form-buttons">
-        <button type="submit">Agendar Cita</button>
-        <button type="button" (click)="goToPatientDashboard()">Volver</button>
-        <button type="button" (click)="loadAppointments()" style="background: #28a745;">🔄 Recargar Citas</button>
-      </div>
+    <div class="form-group">
+      <label for="reason">📝 Motivo de la consulta:</label>
+      <textarea 
+        [(ngModel)]="newAppt.reason"
+        name="reason"
+        id="reason"
+        placeholder="Describa brevemente el motivo de su consulta..."
+        rows="3"
+        class="form-textarea"></textarea>
+    </div>
+  
+    <div class="form-group">
+      <label for="priority">⚡ Prioridad:</label>
+      <select
+        [(ngModel)]="newAppt.priority"
+        name="priority"
+        id="priority"
+        class="form-select">
+        <option value="normal">Normal</option>
+        <option value="high">Alta</option>
+        <option value="urgent">Urgente</option>
+      </select>
+      <small class="form-help">Seleccione "Urgente" solo en casos de emergencia</small>
+    </div>
+  
+    <div class="form-group">
+      <label for="notes">📋 Notas adicionales (opcional):</label>
+      <textarea 
+        [(ngModel)]="newAppt.notes"
+        name="notes"
+        id="notes"
+        placeholder="Información adicional que considere relevante..."
+        rows="2"
+        class="form-textarea"></textarea>
+    </div>
+
+    <div class="form-buttons">
+      <button type="submit">Agendar Cita</button>
+      <button type="button" (click)="goToPatientDashboard()">Volver</button>
+      <button type="button" (click)="loadAppointments()" style="background: #28a745;">🔄 Recargar Citas</button>
+    </div>
   </form>
 
+  <!-- ✅ ACTUALIZADO: Calendario solo con citas del paciente -->
   <div class="calendar-container">
     <h2>Mis Citas</h2>
 
@@ -84,70 +120,87 @@
       <div class="calendar-day-header">Sáb</div>
 
       <div *ngFor="let calDay of calendarDays"
-      class="calendar-day"
-      [class.other-month]="calDay.isOtherMonth"
-      [class.today]="calDay.isToday"
-      [class.has-appointments]="calDay.appointments?.length > 0"
-      [class.mixed-appointments]="calDay.isMixedDay"
-      [class.own-appointments-only]="calDay.hasOwnAppointments && !calDay.hasOtherAppointments"
-      [class.other-appointments-only]="calDay.hasOtherAppointments && !calDay.hasOwnAppointments"
-      [class.clickable]="calDay.allAppointments?.length > 0"
-      (click)="showDayDetails(calDay)">
+     class="calendar-day"
+     [class.other-month]="calDay.isOtherMonth"
+     [class.today]="calDay.isToday"
+     [class.has-appointments]="calDay.hasAppointments"
+     [class.has-cancelled]="calDay.hasCancelled"
+     [class.only-cancelled]="calDay.cancelledCount === calDay.totalAppointments && calDay.totalAppointments > 0"
+     [class.mixed-status]="calDay.hasCancelled && calDay.hasActive"
+     [class.clickable]="calDay.allAppointments?.length > 0"
+     (click)="showDayDetails(calDay)">
 
-    <span class="day-number">{{ calDay.day }}</span>
+  <span class="day-number">{{ calDay.day }}</span>
 
-    <div *ngIf="calDay.appointments?.length > 0" class="appointments">
-      <!-- Mostrar las primeras 2 citas -->
-      <div *ngFor="let apt of calDay.appointments"
-          class="appointment-item"
-          [class.current-patient]="apt.isCurrentPatient"
-          [class.other-patient]="!apt.isCurrentPatient"
-          [class.cancelled]="apt.status === 'cancelled'"
-          [class.completed]="apt.status === 'completed'">
+  <!-- ✅ NUEVO: Indicador de estado -->
+  <div *ngIf="calDay.hasAppointments" 
+       class="day-status-indicator"
+       [class.has-cancelled]="calDay.hasCancelled && !calDay.hasActive"
+       [class.has-active]="calDay.hasActive && !calDay.hasCancelled"
+       [class.mixed]="calDay.hasCancelled && calDay.hasActive"
+       [title]="calDay.activeCount + ' activas, ' + calDay.cancelledCount + ' canceladas'">
+  </div>
 
-        <!-- Citas del paciente actual -->
-        <div *ngIf="apt.isCurrentPatient" class="own-appointment">
-          <div class="apt-time">{{ apt.time }}</div>
-          <div class="apt-doctor">Dr. {{ apt.physician }}</div>
-          <div class="apt-label">Mi Cita</div>
-        </div>
+  <!-- ✅ Citas con mejor diferenciación de estado -->
+  <div *ngIf="calDay.appointments?.length > 0" class="appointments">
+    <div *ngFor="let apt of calDay.appointments"
+      class="appointment-item"
+      [class.cancelled]="apt.status === 'cancelled'"
+      [class.completed]="apt.status === 'completed'"
+      [class.confirmed]="apt.status === 'confirmed'"
+      [class.scheduled]="apt.status === 'scheduled'"
+      [class.no-show]="apt.status === 'no_show'">
+      
+      <div class="apt-time">{{ apt.time }}</div>
+      <div class="apt-doctor">Dr. {{ apt.physician }}</div>
+      <div class="apt-status">{{ 
+        apt.status === 'scheduled' ? 'Programada' : 
+        apt.status === 'confirmed' ? 'Confirmada' : 
+        apt.status === 'completed' ? 'Completada' : 
+        apt.status === 'cancelled' ? 'CANCELADA' :
+        apt.status === 'no_show' ? 'NO ASISTIÓ' : 'PENDIENTE'
+      }}</div>
+    </div>
 
-        <!-- Citas de otros pacientes -->
-        <div *ngIf="!apt.isCurrentPatient" class="other-appointment">
-          <div class="apt-time">{{ apt.time }}</div>
-          <div class="apt-doctor">Dr. {{ apt.physician }}</div>
-          <div class="apt-patient">{{ apt.patient }}</div>
-          <div class="apt-label">Ocupado</div>
-        </div>
-      </div>
-
-      <!-- ✅ Indicador de más citas -->
-      <div *ngIf="calDay.hasMoreAppointments" class="more-appointments-indicator">
-        <span class="more-text">
-          +{{ calDay.totalAppointments - 2 }} más
-        </span>
-        <span class="click-hint">👆 Click para ver todas</span>
-      </div>
+    <!-- ✅ Indicador de más citas con información de estado -->
+    <div *ngIf="calDay.hasMoreAppointments" class="more-appointments-indicator">
+      <span class="more-text">
+        +{{ calDay.totalAppointments - 3 }} más
+      </span>
+      <span class="click-hint" *ngIf="calDay.hasCancelled">
+        ({{ calDay.cancelledCount }} canceladas)
+      </span>
+      <span class="click-hint" *ngIf="!calDay.hasCancelled">
+        👆 Click para ver todas
+      </span>
     </div>
   </div>
-      <div class="calendar-legend">
-        <h4>Leyenda:</h4>
-        <div class="legend-item">
-          <span class="legend-color current-patient"></span>
-          <span>Mis Citas</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color other-patient"></span>
-          <span>Citas de Otros Pacientes</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color cancelled"></span>
-          <span>Citas Canceladas</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-color completed"></span>
-          <span>Citas Completadas</span>
-        </div>
+</div>
+    </div>
+
+    <!-- ✅ ACTUALIZADO: Leyenda simplificada -->
+    <div class="calendar-legend">
+      <h4>Leyenda de mis citas:</h4>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #17a2b8;"></span>
+        <span>Citas Programadas/Confirmadas</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #28a745;"></span>
+        <span>Citas Completadas</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color cancelled"></span>
+        <span>Citas Canceladas</span>
+      </div>
+      <!-- ✅ NUEVO: Indicadores de días -->
+      <div class="legend-item">
+        <span class="legend-color" style="background: linear-gradient(45deg, #d4edda 50%, #f8d7da 50%);"></span>
+        <span>Días con citas mixtas (activas y canceladas)</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color" style="background: #f8d7da;"></span>
+        <span>Días solo con citas canceladas</span>
       </div>
     </div>
   </div>

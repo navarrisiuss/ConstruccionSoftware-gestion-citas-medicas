@@ -32,37 +32,90 @@ exports.createAppointment = async (req, res) => {
     try {
         console.log('Datos recibidos:', req.body);
         
-        // Verificar si ya existe una cita en el mismo día, hora y médico
-        const conflictingAppointment = await Appointment.checkConflict(
-            req.body.physician_id, 
-            req.body.date, 
-            req.body.time
-        );
+        const appointmentData = {
+            patient_id: req.body.patient_id,
+            physician_id: req.body.physician_id,
+            date: req.body.date,
+            time: req.body.time,
+            reason: req.body.reason,
+            status: req.body.status || 'scheduled',
+            priority: req.body.priority || 'normal',
+            notes: req.body.notes || '',
+            medical_notes: req.body.medical_notes || '',
+            preparation_notes: req.body.preparation_notes || '', // ✅ ASEGURAR que se incluya
+            specialty: req.body.specialty || '',
+            location: req.body.location || ''
+        };
         
-        if (conflictingAppointment) {
-            return res.status(409).json({ 
-                message: 'Ya existe una cita agendada para este médico en la fecha y hora seleccionada',
-                conflict: true
-            });
-        }
+        console.log('Datos procesados para guardar:', appointmentData);
         
-        const newAppointmentId = await Appointment.create(req.body);
-        res.status(201).json({ id: newAppointmentId, ...req.body });
+        const appointmentId = await Appointment.create(appointmentData);
+        
+        res.status(201).json({ 
+            id: appointmentId, 
+            message: 'Cita creada exitosamente',
+            preparation_notes: appointmentData.preparation_notes // ✅ CONFIRMAR en respuesta
+        });
     } catch (error) {
-        console.error('ERROR AL CREAR CITA:', error);
-        res.status(500).json({ message: error.message, stack: error.stack });
+        console.error('Error creando cita:', error);
+        res.status(500).json({ message: error.message });
     }
 };
 
 exports.updateAppointment = async (req, res) => {
     try {
-        const affectedRows = await Appointment.update(req.params.id, req.body);
+        const { id } = req.params;
+        const appointmentData = req.body;
+        
+        console.log('Actualizando cita ID:', id);
+        console.log('Datos recibidos:', appointmentData);
+        
+        // ✅ ASEGURAR que el status no sea null
+        if (!appointmentData.status) {
+            appointmentData.status = 'scheduled';
+        }
+        
+        console.log('Datos con status validado:', appointmentData);
+        
+        const affectedRows = await Appointment.update(id, appointmentData);
+        
         if (affectedRows > 0) {
-            res.json({ message: 'Cita actualizada exitosamente' });
+            res.json({ 
+                message: 'Cita actualizada exitosamente',
+                status: appointmentData.status 
+            });
         } else {
             res.status(404).json({ message: 'Cita no encontrada' });
         }
     } catch (error) {
+        console.error('Error actualizando cita:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.updateAppointmentNotes = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { medical_notes, updated_at } = req.body;
+        
+        console.log('Actualizando notas médicas para cita:', id);
+        console.log('Notas recibidas:', medical_notes);
+
+        const [result] = await db.query(
+            'UPDATE appointments SET medical_notes = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [medical_notes, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Cita no encontrada' });
+        }
+
+        res.json({ 
+            message: 'Notas médicas actualizadas correctamente',
+            medical_notes: medical_notes
+        });
+    } catch (error) {
+        console.error('Error actualizando notas médicas:', error);
         res.status(500).json({ message: error.message });
     }
 };
