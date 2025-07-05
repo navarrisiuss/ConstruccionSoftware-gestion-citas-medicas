@@ -67,6 +67,19 @@ export class AdminService {
   updateAppointmentStatus(appointmentId: number, status: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/appointments/${appointmentId}/status`, { status });
   }
+
+  updateAppointment(appointmentId: number, appointmentData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/appointments/${appointmentId}`, appointmentData);
+  }
+  //Metodo para eliminar una cita
+  deleteAppointment(appointmentId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/appointments/${appointmentId}`);
+  }
+
+  //Metodo para obtener todas las especialidades de un medico
+  getAllSpecialties(physicianId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/physicians/${physicianId}/specialties`);
+  }
   
   // ✅ Cancelar cita con detalles
   cancelAppointment(appointmentId: number, cancelData: any): Observable<any> {

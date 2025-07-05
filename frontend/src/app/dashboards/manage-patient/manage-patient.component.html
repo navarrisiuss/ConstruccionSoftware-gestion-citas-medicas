@@ -3,7 +3,7 @@
   <div class="header">
     <h1>{{ getTitle() }}</h1>
     <div class="header-actions">
-      <button (click)="addNewPatient()" class="btn-primary">
+      <button *ngIf="userRole !== 'physician'" (click)="addNewPatient()" class="btn-primary">
         <i class="icon">👤➕</i>
         Nuevo Paciente
       </button>
@@ -125,7 +125,7 @@
       <div class="no-results-icon">🔍</div>
       <h3>No se encontraron pacientes</h3>
       <p>Intenta ajustar los filtros de búsqueda o agregar un nuevo paciente.</p>
-      <button (click)="addNewPatient()" class="btn-primary">
+      <button *ngIf="userRole !== 'physician'" (click)="addNewPatient()" class="btn-primary">
         <i class="icon">👤➕</i>
         Agregar Primer Paciente
       </button>

@@ -458,7 +458,7 @@ export class AppointmentCalendarFormComponent implements OnInit {
       });
       return;
     }
-
+  
     if (!this.physicianId) {
       Swal.fire({
         title: 'Error de Sesión',
@@ -468,13 +468,16 @@ export class AppointmentCalendarFormComponent implements OnInit {
       });
       return;
     }
-
-    // Validación de fechas pasadas
-    const selectedDate = new Date(this.newAppt.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+  
+    // ✅ VALIDACIÓN CORREGIDA: Usar directamente los strings de fecha
+    const selectedDateStr = this.newAppt.date; // Formato: "YYYY-MM-DD"
+    const todayStr = new Date().toISOString().split('T')[0]; // Formato: "YYYY-MM-DD"
     
-    if (selectedDate < today) {
+    console.log('Fecha seleccionada:', selectedDateStr);
+    console.log('Fecha de hoy:', todayStr);
+  
+    // ✅ Comparar strings directamente
+    if (selectedDateStr < todayStr) {
       Swal.fire({
         title: 'Error',
         text: 'No puede agendar citas en fechas pasadas',
@@ -483,9 +486,24 @@ export class AppointmentCalendarFormComponent implements OnInit {
       });
       return;
     }
-
+  
+    // ✅ Si es HOY, validar que la hora no haya pasado
+    if (selectedDateStr === todayStr) {
+      const [hour, minute] = this.newAppt.time.split(':').map(Number);
+      const now = new Date();
+      
+      if (hour < now.getHours() || (hour === now.getHours() && minute <= now.getMinutes())) {
+        Swal.fire({
+          title: 'Error',
+          text: 'No puede agendar una cita en una hora que ya pasó',
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        });
+        return;
+      }
+    }
+  
     this.newAppt.physician_id = this.physicianId;
-
     console.log('Enviando cita:', this.newAppt);
     
     this.adminSvc.createAppointment(this.newAppt)

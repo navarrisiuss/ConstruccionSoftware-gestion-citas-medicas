@@ -39,8 +39,4 @@ export class AssistantDashboardComponent implements OnInit {
   goToManageAppointments() {
     this.router.navigate(['/assistant-manage-appointments']).then(r => r);
   }
-
-  goToScheduleAppointment() {
-    this.router.navigate(['/assistant-schedule-appointment']).then(r => r);
-  }
 }

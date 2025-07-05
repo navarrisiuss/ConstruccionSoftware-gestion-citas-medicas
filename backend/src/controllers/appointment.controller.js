@@ -67,7 +67,6 @@ exports.updateAppointment = async (req, res) => {
     }
 };
 
-// ✅ Actualizar estado de cita - MÉTODO CORREGIDO
 exports.updateAppointmentStatus = async (req, res) => {
     try {
         const { id } = req.params;
@@ -75,7 +74,7 @@ exports.updateAppointmentStatus = async (req, res) => {
         
         console.log('Actualizando estado de cita:', id, 'nuevo estado:', status);
         
-        const validStatuses = ['scheduled', 'confirmed', 'completed', 'cancelled'];
+        const validStatuses = ['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ message: 'Estado inválido' });
         }
@@ -98,13 +97,22 @@ exports.updateAppointmentStatus = async (req, res) => {
     }
 };
 
-// ✅ Cancelar cita con detalles - MÉTODO CORREGIDO
 exports.cancelAppointment = async (req, res) => {
     try {
         const { id } = req.params;
         const { status, cancellation_reason, cancellation_details, cancelled_by } = req.body;
 
         console.log('Cancelando cita:', id, 'datos:', req.body);
+
+        // Verificar que la cita existe
+        const [existingAppointment] = await db.query(
+            'SELECT id FROM appointments WHERE id = ?', 
+            [id]
+        );
+
+        if (existingAppointment.length === 0) {
+            return res.status(404).json({ message: 'Cita no encontrada' });
+        }
 
         const [result] = await db.query(`
             UPDATE appointments 
@@ -120,11 +128,12 @@ exports.cancelAppointment = async (req, res) => {
         console.log('Resultado de la cancelación:', result);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Cita no encontrada' });
+            return res.status(500).json({ message: 'No se pudo actualizar la cita' });
         }
 
         res.json({ 
             message: 'Cita cancelada correctamente',
+            appointmentId: id,
             cancellation_reason,
             cancelled_at: new Date()
         });
@@ -136,13 +145,21 @@ exports.cancelAppointment = async (req, res) => {
 
 exports.deleteAppointment = async (req, res) => {
     try {
-        const affectedRows = await Appointment.delete(req.params.id);
+        const { id } = req.params;
+        console.log('Eliminando cita con ID:', id);
+        
+        const affectedRows = await Appointment.delete(id);
+        
         if (affectedRows > 0) {
-            res.json({ message: 'Cita eliminada exitosamente' });
+            res.json({ 
+                message: 'Cita eliminada exitosamente',
+                deletedId: id 
+            });
         } else {
             res.status(404).json({ message: 'Cita no encontrada' });
         }
     } catch (error) {
+        console.error('Error eliminando cita:', error);
         res.status(500).json({ message: error.message });
     }
 };
