@@ -17,6 +17,8 @@
     "all": "^0.0.0",
     "axios": "^1.10.0",
     "gestion-citas-medicas": "file:",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "sweetalert2": "^11.22.0"
   }
 }
