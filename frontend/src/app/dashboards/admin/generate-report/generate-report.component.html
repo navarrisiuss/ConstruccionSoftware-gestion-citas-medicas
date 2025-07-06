@@ -1,0 +1,20 @@
+<div #pdfContent>
+    <h2>Listado de Usuarios (HTML)</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Edad</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let usuario of usuarios">
+        <td>{{ usuario.nombre }}</td>
+        <td>{{ usuario.edad }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <button (click)="generatePDF()">Exportar sección HTML a PDF</button>
+  <button (click)="exportarTablaPDF()">Exportar tabla con AutoTable</button>
