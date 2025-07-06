@@ -450,11 +450,27 @@
               <div class="apt-date-time">
                 <span class="apt-date">{{ apt.date }}</span>
                 <span class="apt-time">{{ apt.time }}</span>
+                <!-- ✅ NUEVO: Indicador de prioridad -->
+                <span class="priority-indicator" 
+                      [style.background]="apt.priority === 'urgent' ? '#dc3545' : 
+                                         apt.priority === 'high' ? '#fd7e14' : 
+                                         apt.priority === 'normal' ? '#28a745' : '#6c757d'"
+                      [title]="'Prioridad: ' + (apt.priority === 'urgent' ? 'Urgente' : 
+                                               apt.priority === 'high' ? 'Alta' : 
+                                               apt.priority === 'low' ? 'Baja' : 'Normal')">
+                  {{ apt.priority === 'urgent' ? '🚨' : 
+                     apt.priority === 'high' ? '⚡' : 
+                     apt.priority === 'normal' ? '📋' : '📄' }}
+                </span>
               </div>
+              
               <div class="apt-people">
                 <div class="apt-patient">👤 {{ apt.patient }}</div>
                 <div class="apt-physician">👨‍⚕️ Dr. {{ apt.physician }}</div>
+                <!-- ✅ NUEVO: Mostrar motivo si existe -->
+                <div *ngIf="apt.reason" class="apt-reason">📝 {{ apt.reason | slice:0:50 }}{{ apt.reason.length > 50 ? '...' : '' }}</div>
               </div>
+              
               <div class="apt-status">
                 <span class="status-badge" 
                       [class.scheduled]="apt.status === 'scheduled'"
@@ -466,11 +482,12 @@
                      apt.status === 'confirmed' ? 'Confirmada' :
                      apt.status === 'completed' ? 'Completada' :
                      apt.status === 'cancelled' ? 'Cancelada' :
-                     'No vino' }}
+                     apt.status === 'no_show' ? 'No Asistió' :
+                     'Pendiente' }}
                 </span>
               </div>
             </div>
-
+        
             <div class="apt-actions">
               <button (click)="showDayDetails({allAppointments: [apt], dateString: apt.date})" 
                       class="btn-action view">
@@ -485,6 +502,16 @@
                       (click)="updateAppointmentStatus(apt.id, 'completed')"
                       class="btn-action complete">
                 ✓ Completar
+              </button>
+              <button *ngIf="apt.status === 'confirmed'" 
+                      (click)="updateAppointmentStatus(apt.id, 'no_show')"
+                      class="btn-action no-show">
+                ⚠️ No vino
+              </button>
+              <button *ngIf="apt.status === 'scheduled' || apt.status === 'confirmed'" 
+                      (click)="editAppointment(apt.id)"
+                      class="btn-action edit">
+                ✏️ Editar
               </button>
               <button *ngIf="apt.status !== 'cancelled' && apt.status !== 'completed'" 
                       (click)="cancelAppointmentWithReason(apt.id)"

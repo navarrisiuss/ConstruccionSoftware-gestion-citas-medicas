@@ -910,6 +910,85 @@ min-width: 0;
     box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
   }
   
+  .priority-indicator {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    color: white;
+    text-align: center;
+    line-height: 20px;
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+  }
+  
+  /* Motivo de la cita en lista */
+  .apt-reason {
+    font-size: 0.8rem;
+    color: #666;
+    font-style: italic;
+    margin-top: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Estilo para citas no_show */
+  .appointment-list-item.no-show {
+    border-left-color: #966400;
+    background: #fefcbf;
+  }
+  
+  .status-badge.no-show {
+    background: #fefcbf;
+    color: #966400;
+  }
+  
+  .btn-action.no-show {
+    background: #d69e2e;
+    color: white;
+  }
+  
+  .btn-action.edit {
+    background: #667eea;
+    color: white;
+  }
+  
+  /* Animaciones para los modales */
+  .animate__animated {
+    animation-duration: 0.3s;
+  }
+  
+  .animate__fadeInDown {
+    animation-name: fadeInDown;
+  }
+  
+  .animate__fadeOutUp {
+    animation-name: fadeOutUp;
+  }
+  
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translate3d(0, -20px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  
+  @keyframes fadeOutUp {
+    from {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      opacity: 0;
+      transform: translate3d(0, -20px, 0);
+    }
+  }
+
   /* ============ RESPONSIVE PARA MODO EDICIÓN ============ */
   @media (max-width: 768px) {
     .alert {

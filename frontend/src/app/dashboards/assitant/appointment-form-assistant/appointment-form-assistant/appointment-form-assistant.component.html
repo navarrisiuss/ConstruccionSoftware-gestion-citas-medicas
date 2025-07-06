@@ -115,6 +115,58 @@
         placeholder="Motivo de la consulta (opcional)"
         rows="3"></textarea>
     </div>
+    
+    <!-- ✅ NUEVOS CAMPOS -->
+    <div class="form-group">
+      <label for="priority">⚡ Prioridad:</label>
+      <select
+        [(ngModel)]="newAppt.priority"
+        name="priority"
+        id="priority"
+        class="form-select">
+        <option value="normal">Normal</option>
+        <option value="high">Alta</option>
+        <option value="urgent">Urgente</option>
+      </select>
+      <small class="form-help">Seleccione "Urgente" solo en casos de emergencia</small>
+    </div>
+    
+    <div class="form-group">
+      <label for="duration">⏱️ Duración (minutos):</label>
+      <select
+        [(ngModel)]="newAppt.duration"
+        name="duration"
+        id="duration"
+        class="form-select">
+        <option value="15">15 minutos</option>
+        <option value="30" selected>30 minutos</option>
+        <option value="45">45 minutos</option>
+        <option value="60">60 minutos</option>
+        <option value="90">90 minutos</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="preparation_notes">⚠️ Instrucciones de preparación (opcional):</label>
+      <textarea 
+        [(ngModel)]="newAppt.preparation_notes"
+        name="preparation_notes"
+        id="preparation_notes"
+        placeholder="Instrucciones especiales para el paciente antes de la consulta..."
+        rows="2"
+        class="form-textarea"></textarea>
+    </div>
+    
+    <div class="form-group">
+      <label for="administrative_notes">🏢 Notas administrativas (opcional):</label>
+      <textarea 
+        [(ngModel)]="newAppt.administrative_notes"
+        name="administrative_notes"
+        id="administrative_notes"
+        placeholder="Notas internas para el equipo administrativo..."
+        rows="2"
+        class="form-textarea"></textarea>
+    </div>
 
     <div class="form-buttons">
       <button type="submit">Agendar Cita</button>

@@ -9,5 +9,6 @@ router.post('/', appointmentController.createAppointment);
 router.put('/:id', appointmentController.updateAppointment);
 router.put('/:id/status', appointmentController.updateAppointmentStatus); // ✅ Ruta correcta
 router.put('/:id/cancel', appointmentController.cancelAppointment);
+router.put('/:id/notes', appointmentController.updateAppointmentNotes);
 router.delete('/:id', appointmentController.deleteAppointment);
 module.exports = router;
