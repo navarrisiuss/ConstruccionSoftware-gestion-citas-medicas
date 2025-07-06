@@ -1,21 +1,17 @@
 // appointment-form.component.ts
-// appointment-form.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AdminService } from '../../../../services/admin.service';
 import { AuthService } from '../../../../services/auth.service';
 import { PhysicianService } from '../../../../services/physician.service';
-import { PhysicianService } from '../../../../services/physician.service';
 import { Router } from '@angular/router';
-import { MEDICAL_SPECIALTIES } from '../../../../constants/medical-specialties';
 import { MEDICAL_SPECIALTIES } from '../../../../constants/medical-specialties';
 import Swal from 'sweetalert2';
 
 interface PhysicianDto {
   id: number;
   fullName: string;
-  specialty: string;
   specialty: string;
 }
 
@@ -49,32 +45,10 @@ interface AppointmentEvent {
   duration?: number;                 // Duración estimada en minutos
   location?: string;                 // Ubicación de la consulta
   preparation_notes?: string;        // Instrucciones de preparación
-  physician: string;                  // Nombre del médico
-  patient: string;                    // Nombre del paciente
-  patientId: number;                  // ID del paciente
-  physicianId: number;                // ID del médico
-  status?: string;                    // Estado de la cita (scheduled, confirmed, completed, cancelled)
-  isCurrentPatient: boolean;          // Si la cita es del paciente actual  
-  reason?: string;                    // Motivo de la consulta
-  specialty?: string;                 // Especialidad médica
-  priority?: string;                  // Prioridad (normal, urgent, etc.)
-  notes?: string;                     // Notas del paciente
-  created_at?: string;               // Cuándo se creó la cita
-  updated_at?: string;               // Última actualización
-  cancellation_reason?: string;      // Motivo de cancelación
-  cancellation_details?: string;     // Detalles de cancelación
-  cancelled_by?: string;             // Quién canceló
-  cancelled_at?: string;             // Cuándo se canceló
-  physician_phone?: string;          // Teléfono del médico
-  physician_email?: string;          // Email del médico
-  duration?: number;                 // Duración estimada en minutos
-  location?: string;                 // Ubicación de la consulta
-  preparation_notes?: string;        // Instrucciones de preparación
 }
 
 @Component({
   standalone: true,
-  imports: [FormsModule, CommonModule],
   imports: [FormsModule, CommonModule],
   selector: 'app-appointment-form',
   templateUrl: './appointment-form.component.html',
@@ -91,25 +65,7 @@ export class AppointmentFormComponent implements OnInit {
     priority: 'normal', // ✅ NUEVO
     notes: ''          // ✅ NUEVO
   };
-  newAppt = { 
-    patient_id: '', 
-    physician_id: '', 
-    date: '', 
-    time: '', 
-    specialty: '',
-    reason: '',        // ✅ NUEVO
-    priority: 'normal', // ✅ NUEVO
-    notes: ''          // ✅ NUEVO
-  };
   physicians: PhysicianDto[] = [];
-  allPhysicians: PhysicianDto[] = [];
-  filteredPhysicians: PhysicianDto[] = [];
-  specialtyCounts: SpecialtyCount[] = [];
-  
-  // ✅ Separar citas del paciente de todas las citas
-  patientAppointments: AppointmentEvent[] = []; // Solo las del paciente (para mostrar)
-  allAppointments: AppointmentEvent[] = []; // Todas las citas (para validación)
-  
   allPhysicians: PhysicianDto[] = [];
   filteredPhysicians: PhysicianDto[] = [];
   specialtyCounts: SpecialtyCount[] = [];
@@ -219,15 +175,10 @@ export class AppointmentFormComponent implements OnInit {
   loadAppointments() {
     console.log('Cargando citas...');
     
-    console.log('Cargando citas...');
-    
     this.adminSvc.getAllAppointments()
       .subscribe({
         next: (list: any[]) => {
           console.log('Todas las citas desde el servidor:', list);
-  
-          //Mapear TODAS las citas con información completa
-          this.allAppointments = list.map(a => {
   
           //Mapear TODAS las citas con información completa
           this.allAppointments = list.map(a => {
@@ -237,8 +188,6 @@ export class AppointmentFormComponent implements OnInit {
             }
   
             return {
-  
-            return {
               id: a.id,
               date: formattedDate,
               time: a.time,
@@ -246,41 +195,7 @@ export class AppointmentFormComponent implements OnInit {
               patient: a.patient_name || 'Sin nombre',
               patientId: a.patient_id,
               physicianId: a.physician_id,
-              physicianId: a.physician_id,
               status: a.status,
-              isCurrentPatient: a.patient_id.toString() === this.patientId,
-              
-              //NUEVOS CAMPOS de información
-              reason: a.reason || '',
-              specialty: a.specialty || '',
-              priority: a.priority || 'normal',
-              notes: a.notes || '',
-              created_at: a.created_at,
-              updated_at: a.updated_at,
-              cancellation_reason: a.cancellation_reason || '',
-              cancellation_details: a.cancellation_details || '',
-              cancelled_by: a.cancelled_by || '',
-              cancelled_at: a.cancelled_at,
-              
-              //Información del médico (si está disponible)
-              physician_phone: a.physician_phone || '',
-              physician_email: a.physician_email || '',
-              
-              // Detalles adicionales
-              duration: a.duration || 30, // Duración por defecto 30 minutos
-              location: a.location || 'Consulta externa',
-              preparation_notes: a.preparation_notes || ''
-            };
-          });
-  
-          // Filtrar solo las citas del paciente actual
-          this.patientAppointments = this.allAppointments.filter(apt => 
-            apt.isCurrentPatient
-          );
-  
-          console.log('Citas del paciente (completas):', this.patientAppointments);
-          console.log('Total de citas (para validación):', this.allAppointments.length);
-          
               isCurrentPatient: a.patient_id.toString() === this.patientId,
               
               //NUEVOS CAMPOS de información
@@ -329,7 +244,6 @@ export class AppointmentFormComponent implements OnInit {
     return 'Usuario';
   }
 
-
   generateCalendar() {
     const year = this.currentDate.getFullYear();
     const month = this.currentDate.getMonth();
@@ -338,36 +252,16 @@ export class AppointmentFormComponent implements OnInit {
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
   
-  
     this.calendarDays = [];
-  
   
     // Días vacíos del mes anterior
     for (let i = 0; i < startingDayOfWeek; i++) {
       this.calendarDays.push({ day: '', isOtherMonth: true, appointments: [] });
     }
   
-  
     // Días del mes actual
     for (let day = 1; day <= daysInMonth; day++) {
       const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-  
-      const dayAppointments = this.patientAppointments.filter(apt => apt.date === dateString);
-      
-      const sortedAppointments = dayAppointments.sort((a, b) => a.time.localeCompare(b.time));
-      const visibleAppointments = sortedAppointments.slice(0, 3);
-      const hasMoreAppointments = sortedAppointments.length > 3;
-  
-      // ✅ ACTUALIZAR: Detectar tipos de citas incluyendo no_show
-      const cancelledCount = sortedAppointments.filter(apt => apt.status === 'cancelled').length;
-      const noShowCount = sortedAppointments.filter(apt => apt.status === 'no_show').length;
-      const activeCount = sortedAppointments.filter(apt => apt.status !== 'cancelled' && apt.status !== 'no_show').length;
-      const completedCount = sortedAppointments.filter(apt => apt.status === 'completed').length;
-  
-      // ✅ ACTUALIZAR: Determinar clases CSS según el estado
-      let dayClass = '';
-      let statusIndicator = '';
-  
   
       const dayAppointments = this.patientAppointments.filter(apt => apt.date === dateString);
       
@@ -396,40 +290,17 @@ export class AppointmentFormComponent implements OnInit {
           dayClass = 'has-appointments';
           statusIndicator = 'has-active';
         }
-        if ((cancelledCount + noShowCount) > 0 && activeCount > 0) {
-          dayClass = 'mixed-status';
-          statusIndicator = 'mixed';
-        } else if ((cancelledCount + noShowCount) === sortedAppointments.length) {
-          dayClass = 'only-cancelled';
-          statusIndicator = 'has-cancelled';
-        } else if (activeCount > 0) {
-          dayClass = 'has-appointments';
-          statusIndicator = 'has-active';
-        }
       }
-  
   
       this.calendarDays.push({
         day: day,
         isOtherMonth: false,
         dateString: dateString,
         appointments: visibleAppointments,
-        appointments: visibleAppointments,
         allAppointments: sortedAppointments,
         hasMoreAppointments: hasMoreAppointments,
         totalAppointments: sortedAppointments.length,
         isToday: this.isToday(year, month, day),
-        hasAppointments: sortedAppointments.length > 0,
-        dayClass: dayClass,
-        statusIndicator: statusIndicator,
-        cancelledCount: cancelledCount,
-        noShowCount: noShowCount, // ✅ NUEVO
-        activeCount: activeCount,
-        completedCount: completedCount,
-        hasCancelled: cancelledCount > 0,
-        hasNoShow: noShowCount > 0, // ✅ NUEVO
-        hasActive: activeCount > 0,
-        hasCompleted: completedCount > 0
         hasAppointments: sortedAppointments.length > 0,
         dayClass: dayClass,
         statusIndicator: statusIndicator,
@@ -480,40 +351,7 @@ export class AppointmentFormComponent implements OnInit {
       const extraStyle = (apt.status === 'cancelled' || apt.status === 'no_show') ? 
         'text-decoration: line-through; opacity: 0.9; border: 2px solid #a71e2a;' : '';
   
-  
-    const appointmentsHtml = calDay.allAppointments.map((apt: any) => {
-      const backgroundColor = apt.status === 'cancelled' ? '#dc3545' : 
-                             apt.status === 'completed' ? '#28a745' : 
-                             apt.status === 'confirmed' ? '#0d6efd' : 
-                             apt.status === 'no_show' ? '#dc3545' : '#17a2b8';
-      
-      // ✅ CORREGIR: Usar operador ternario correcto
-      const statusText = apt.status === 'cancelled' ? 'CANCELADA' :
-                        apt.status === 'completed' ? 'COMPLETADA' : 
-                        apt.status === 'confirmed' ? 'CONFIRMADA' :
-                        apt.status === 'scheduled' ? 'PROGRAMADA' : 
-                        apt.status === 'no_show' ? 'NO ASISTIÓ' : 'PENDIENTE';
-      
-      // ✅ Definir prioridades con colores
-      const priorityColors = {
-        'urgent': '#dc3545',
-        'high': '#fd7e14', 
-        'normal': '#28a745',
-        'low': '#6c757d'
-      };
-      
-      const priorityColor = priorityColors[apt.priority as keyof typeof priorityColors] || '#28a745';
-      const priorityText = apt.priority === 'urgent' ? 'URGENTE' :
-                          apt.priority === 'high' ? 'ALTA' :
-                          apt.priority === 'low' ? 'BAJA' : 'NORMAL';
-  
-      // ✅ Estilo especial para citas canceladas Y no_show
-      const extraStyle = (apt.status === 'cancelled' || apt.status === 'no_show') ? 
-        'text-decoration: line-through; opacity: 0.9; border: 2px solid #a71e2a;' : '';
-  
       return `
-        <div class="modal-appointment-item" style="
-          background: ${backgroundColor};
         <div class="modal-appointment-item" style="
           background: ${backgroundColor};
           color: white;
@@ -552,13 +390,6 @@ export class AppointmentFormComponent implements OnInit {
             ${apt.duration ? `<div style="margin-bottom: 0.25rem;"><strong>⏱️ Duración:</strong> ${apt.duration} minutos</div>` : ''}
             ${apt.location ? `<div style="margin-bottom: 0.25rem;"><strong>📍 Ubicación:</strong> ${apt.location}</div>` : ''}
             ${apt.notes ? `<div style="margin-bottom: 0.25rem;"><strong>📋 Notas:</strong> ${apt.notes}</div>` : ''}
-  
-          <!-- Detalles de la cita -->
-          <div style="background: rgba(0,0,0,0.1); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;">
-            ${apt.reason ? `<div style="margin-bottom: 0.25rem;"><strong>📝 Motivo:</strong> ${apt.reason}</div>` : ''}
-            ${apt.duration ? `<div style="margin-bottom: 0.25rem;"><strong>⏱️ Duración:</strong> ${apt.duration} minutos</div>` : ''}
-            ${apt.location ? `<div style="margin-bottom: 0.25rem;"><strong>📍 Ubicación:</strong> ${apt.location}</div>` : ''}
-            ${apt.notes ? `<div style="margin-bottom: 0.25rem;"><strong>📋 Notas:</strong> ${apt.notes}</div>` : ''}
           </div>
   
           <!-- Información de preparación -->
@@ -593,49 +424,7 @@ export class AppointmentFormComponent implements OnInit {
           <div style="margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.8rem; opacity: 0.8;">
             ${apt.created_at ? `<div>📅 Creada: ${new Date(apt.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>` : ''}
             ${apt.updated_at && apt.updated_at !== apt.created_at ? `<div>🔄 Actualizada: ${new Date(apt.updated_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>` : ''}
-  
-          <!-- Información de preparación -->
-          ${apt.preparation_notes ? `
-            <div style="background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;">
-              <strong>⚠️ Instrucciones de preparación:</strong><br>
-              <em>${apt.preparation_notes}</em>
-            </div>
-          ` : ''}
-  
-          <!-- ✅ CORREGIR: Información de cancelación O no_show -->
-          ${apt.status === 'cancelled' ? `
-            <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;">
-              <strong>❌ Información de cancelación:</strong><br>
-              ${apt.cancellation_reason ? `<div><strong>Motivo:</strong> ${apt.cancellation_reason}</div>` : ''}
-              ${apt.cancellation_details ? `<div><strong>Detalles:</strong> ${apt.cancellation_details}</div>` : ''}
-              ${apt.cancelled_by ? `<div><strong>Cancelado por:</strong> ${apt.cancelled_by}</div>` : ''}
-              ${apt.cancelled_at ? `<div><strong>Fecha de cancelación:</strong> ${new Date(apt.cancelled_at).toLocaleDateString('es-ES')}</div>` : ''}
-            </div>
-          ` : ''}
-  
-          <!-- ✅ NUEVO: Información de no_show -->
-          ${apt.status === 'no_show' ? `
-            <div style="background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 4px; margin: 0.5rem 0;">
-              <strong>⚠️ Información de no asistencia:</strong><br>
-              <div>El paciente no se presentó a la cita programada</div>
-              ${apt.updated_at ? `<div><strong>Fecha de registro:</strong> ${new Date(apt.updated_at).toLocaleDateString('es-ES')}</div>` : ''}
-            </div>
-          ` : ''}
-  
-          <!-- Fechas de seguimiento -->
-          <div style="margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.8rem; opacity: 0.8;">
-            ${apt.created_at ? `<div>📅 Creada: ${new Date(apt.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>` : ''}
-            ${apt.updated_at && apt.updated_at !== apt.created_at ? `<div>🔄 Actualizada: ${new Date(apt.updated_at).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>` : ''}
           </div>
-  
-          <!-- Botones de acción (solo para citas activas) -->
-          ${apt.status === 'scheduled' || apt.status === 'confirmed' ? `
-            <div style="margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.2); text-align: center;">
-              <div style="font-size: 0.8rem; opacity: 0.9; margin-bottom: 0.25rem;">
-                ℹ️ Para reagendar o cancelar, contacte a recepción
-              </div>
-            </div>
-          ` : ''}
   
           <!-- Botones de acción (solo para citas activas) -->
           ${apt.status === 'scheduled' || apt.status === 'confirmed' ? `
@@ -648,7 +437,6 @@ export class AppointmentFormComponent implements OnInit {
         </div>
       `;
     }).join('');
-  
   
     const dateFormatted = new Date(calDay.dateString + 'T00:00:00').toLocaleDateString('es-ES', {
       weekday: 'long',
@@ -674,36 +462,14 @@ export class AppointmentFormComponent implements OnInit {
       </div>
     `;
   
-  
-    // ✅ CORREGIR: Resumen de estado incluyendo no_show
-    const noShowCount = calDay.allAppointments.filter((apt: any) => apt.status === 'no_show').length;
-    
-    const statusSummary = `
-      <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: center; color: #666;">
-        <div style="font-weight: bold; margin-bottom: 0.5rem; color: #333;">
-          📊 Resumen del día: ${calDay.allAppointments.length} cita(s)
-        </div>
-        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-          ${calDay.activeCount > 0 ? `<span style="color: #28a745; font-weight: bold;">✓ ${calDay.activeCount} activa(s)</span>` : ''}
-          ${calDay.cancelledCount > 0 ? `<span style="color: #dc3545; font-weight: bold;">❌ ${calDay.cancelledCount} cancelada(s)</span>` : ''}
-          ${calDay.completedCount > 0 ? `<span style="color: #17a2b8; font-weight: bold;">📋 ${calDay.completedCount} completada(s)</span>` : ''}
-          ${noShowCount > 0 ? `<span style="color: #dc3545; font-weight: bold;">⚠️ ${noShowCount} no asistió</span>` : ''}
-        </div>
-      </div>
-    `;
-  
     Swal.fire({
       title: `📅 Mis Citas del ${dateFormatted}`,
-      title: `📅 Mis Citas del ${dateFormatted}`,
       html: `
-        <div style="text-align: left; max-height: 500px; overflow-y: auto;">
-          ${statusSummary}
         <div style="text-align: left; max-height: 500px; overflow-y: auto;">
           ${statusSummary}
           ${appointmentsHtml}
         </div>
       `,
-      width: '700px',
       width: '700px',
       confirmButtonText: 'Cerrar',
       confirmButtonColor: '#17a2b8',
@@ -712,15 +478,9 @@ export class AppointmentFormComponent implements OnInit {
       },
       hideClass: {
         popup: 'animate__animated animate__fadeOutUp'
-      showClass: {
-        popup: 'animate__animated animate__fadeInDown'
-      },
-      hideClass: {
-        popup: 'animate__animated animate__fadeOutUp'
       }
     });
   }
-  
   
   submit() {
     if (!this.newAppt.physician_id || !this.newAppt.date || !this.newAppt.time) {
@@ -732,7 +492,6 @@ export class AppointmentFormComponent implements OnInit {
       });
       return;
     }
-
 
     if (!this.patientId) {
       Swal.fire({
@@ -748,11 +507,6 @@ export class AppointmentFormComponent implements OnInit {
     const selectedDateStr = this.newAppt.date;
     const todayStr = new Date().toISOString().split('T')[0];
 
-
-    // ✅ Validar fechas pasadas
-    const selectedDateStr = this.newAppt.date;
-    const todayStr = new Date().toISOString().split('T')[0];
-
     if (selectedDateStr < todayStr) {
       Swal.fire({
         title: 'Error',
@@ -762,8 +516,6 @@ export class AppointmentFormComponent implements OnInit {
       });
       return;
     }
-
-    // ✅ Validar hora de hoy
 
     // ✅ Validar hora de hoy
     if (selectedDateStr === todayStr) {
@@ -937,27 +689,6 @@ export class AppointmentFormComponent implements OnInit {
           }
         }
       });
-  }
-
-  isToday(year: number, month: number, day: number): boolean {
-    const today = new Date();
-    return today.getFullYear() === year &&
-           today.getMonth() === month &&
-           today.getDate() === day;
-  }
-
-  previousMonth() {
-    this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-    this.generateCalendar();
-  }
-
-  nextMonth() {
-    this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-    this.generateCalendar();
-  }
-
-  getMonthName(): string {
-    return this.currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
   }
 
   isToday(year: number, month: number, day: number): boolean {
