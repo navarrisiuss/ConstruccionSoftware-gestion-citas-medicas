@@ -1,18 +1,24 @@
 <h2>Historial de Citas Médicas</h2>
 
-<table>
+<table class="tabla-citas">
   <thead>
   <tr>
     <th>Fecha de Atención</th>
+    <th>Hora</th>
     <th>Médico</th>
+    <th>Especialidad</th>
+    <th>Razón</th>
   </tr>
   </thead>
   <tbody>
   <tr *ngFor="let cita of historialCitas">
     <td>{{ cita.fecha }}</td>
+    <td>{{ cita.hora }}</td>
     <td>{{ cita.medico }}</td>
+    <td>{{ cita.especialidad }}</td>
+    <td>{{ cita.razon }}</td>
   </tr>
   </tbody>
 </table>
 
-<button (click)="exportarPDF()">Exportar a PDF</button>
+<button class="btn-exportar" (click)="exportarPDF()">Exportar a PDF</button>

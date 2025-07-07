@@ -1,25 +1,53 @@
-table {
+h2 {
+  color: #16648d;
+  text-align: center;
+  margin-bottom: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.tabla-citas {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-th, td {
-  border: 1px solid #ccc;
-  padding: 8px 12px;
-  text-align: left;
+.tabla-citas thead tr {
+  background-color: #16a085;
+  color: white;
 }
 
-th {
-  background-color: #f2f2f2;
+.tabla-citas th,
+.tabla-citas td {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  text-align: center;
 }
 
-button {
-  padding: 10px 20px;
-  font-size: 14px;
+.tabla-citas tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.tabla-citas tbody tr:hover {
+  background-color: #d1f0e1;
+  transition: background-color 0.3s ease;
+}
+
+.btn-exportar {
+  display: block;
+  margin: 0 auto;
   background-color: #16a085;
   color: white;
   border: none;
-  border-radius: 5px;
+  padding: 12px 25px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.25s ease;
+}
+
+.btn-exportar:hover {
+  background-color: #13856a;
 }
