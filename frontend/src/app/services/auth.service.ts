@@ -49,19 +49,19 @@ getCurrentUser(): any {
 
   getUserRole(): string {
     if (!this.currentUser) return '';
-
+    
     if (this.currentUser.role === 'admin' || this.currentUser.email?.includes('@admin.')) {
       return 'admin';
     }
-
+    
     if (this.currentUser.specialty) {
       return 'physician';
     }
-
+    
     if (this.currentUser.role === 'assistant') {
       return 'assistant';
     }
-
+    
     return 'patient';
   }
 }

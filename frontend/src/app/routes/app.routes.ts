@@ -18,7 +18,6 @@ import {HelpChatComponent} from '../pages/help-chat/help-chat.component';
 import { AppointmentFormAssistantComponent } from '../dashboards/assitant/appointment-form-assistant/appointment-form-assistant/appointment-form-assistant.component';
 import { AdminAppointmentManagerComponent } from '../dashboards/admin/admin-dashboard/appointment-manager/admin-appointment-manager/admin-appointment-manager.component';
 import {GenerateReportComponent} from '../dashboards/admin/generate-report/generate-report.component';
-import {AppointmentHistoryComponent} from '../dashboards/patient/appointments/appointment-history/appointment-history.component';
 
 
 
@@ -65,6 +64,6 @@ export const routes: Routes = [
 
 
   // Rutas para paciente
-  {path: 'patient-appointment-history', component: AppointmentHistoryComponent},
+  {path: 'patient-appointment-history', component: PatientDashboardComponent},
   {path: 'patient-help-chat', component: HelpChatComponent}
 ];
