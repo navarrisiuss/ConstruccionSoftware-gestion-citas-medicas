@@ -136,17 +136,18 @@ npm run install-all
         );
 
         Tabla de reportes:
-            CREATE TABLE report_history (
+            CREATE TABLE IF NOT EXISTS report_history (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            report_type ENUM('appointments', 'physicians', 'patients', 'general') NOT NULL,
+            report_type VARCHAR(50) NOT NULL,
             file_name VARCHAR(255) NOT NULL,
-            file_path TEXT NOT NULL,
+            file_path VARCHAR(500) NOT NULL,
             generated_by VARCHAR(100) NOT NULL,
             report_summary JSON,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             
             INDEX idx_report_type (report_type),
-            INDEX idx_created_at (created_at)
+            INDEX idx_created_at (created_at),
+            INDEX idx_generated_by (generated_by)
         );
     Insertar datos de prueba
         Administrador por defecto:
