@@ -14,6 +14,7 @@ const assistantRoutes = require('./routes/assistant.routes');
 const adminRoutes = require('./routes/admin.routes');
 const appointmentRoutes = require('./routes/appointment.routes');
 const authRoutes = require('./routes/auth.routes');
+const reportRoutes = require('./routes/report.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -103,6 +104,7 @@ app.use('/api/assistants', assistantRoutes);
 app.use('/api/admins', adminRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Ruta de prueba
 app.get('/', (req, res) => {

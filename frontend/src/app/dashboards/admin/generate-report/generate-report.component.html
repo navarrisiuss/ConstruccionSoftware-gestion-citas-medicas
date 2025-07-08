@@ -1,20 +1,339 @@
-<div #pdfContent>
-    <h2>Listado de Usuarios (HTML)</h2>
-    <table>
-      <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Edad</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let usuario of usuarios">
-        <td>{{ usuario.nombre }}</td>
-        <td>{{ usuario.edad }}</td>
-      </tr>
-      </tbody>
-    </table>
+<div class="reports-container">
+  <!-- Header -->
+  <div class="reports-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1>📊 Generador de Reportes Médicos</h1>
+        <p>Genere reportes detallados y estadísticas de la clínica</p>
+      </div>
+      <!-- ✅ BOTÓN DE REGRESO -->
+      <div class="header-actions">
+        <button (click)="backToAdminDashboardWithConfirmation()" class="btn-back">
+          <i class="icon">🏠</i>
+          <span>Volver al Dashboard</span>
+        </button>
+      </div>
+    </div>
   </div>
-  
-  <button (click)="generatePDF()">Exportar sección HTML a PDF</button>
-  <button (click)="exportarTablaPDF()">Exportar tabla con AutoTable</button>
+
+  <!-- Filtros de Reporte -->
+  <div class="filters-section">
+    <h2>🔍 Configurar Reporte</h2>
+    
+    <div class="filters-grid">
+      <!-- Tipo de Reporte -->
+      <div class="filter-group">
+        <label for="reportType">Tipo de Reporte:</label>
+        <select id="reportType" [(ngModel)]="filters.reportType" class="form-control">
+          <option value="appointments">📅 Reporte de Citas</option>
+          <option value="physicians">👨‍⚕️ Reporte de Médicos</option>
+          <option value="patients">🧑‍🤝‍🧑 Reporte de Pacientes</option>
+        </select>
+      </div>
+
+      <!-- Rango de Fechas -->
+      <div class="filter-group" *ngIf="filters.reportType === 'appointments' || filters.reportType === 'patients'">
+        <label for="startDate">Fecha Inicio:</label>
+        <input type="date" id="startDate" [(ngModel)]="filters.startDate" class="form-control">
+      </div>
+
+      <div class="filter-group" *ngIf="filters.reportType === 'appointments' || filters.reportType === 'patients'">
+        <label for="endDate">Fecha Fin:</label>
+        <input type="date" id="endDate" [(ngModel)]="filters.endDate" class="form-control">
+      </div>
+
+      <!-- Filtros específicos para citas -->
+      <div class="filter-group" *ngIf="filters.reportType === 'appointments'">
+        <label for="physicianId">Médico:</label>
+        <select id="physicianId" [(ngModel)]="filters.physicianId" class="form-control">
+          <option value="">Todos los médicos</option>
+          <option *ngFor="let physician of physicians" [value]="physician.id">
+            {{ physician.fullName }} - {{ physician.specialty }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Especialidad -->
+      <div class="filter-group" *ngIf="filters.reportType === 'appointments' || filters.reportType === 'physicians'">
+        <label for="specialty">Especialidad:</label>
+        <select id="specialty" [(ngModel)]="filters.specialty" class="form-control">
+          <option value="">Todas las especialidades</option>
+          <option *ngFor="let specialty of specialties" [value]="specialty">
+            {{ specialty }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Estado de citas -->
+      <div class="filter-group" *ngIf="filters.reportType === 'appointments'">
+        <label for="status">Estado:</label>
+        <select id="status" [(ngModel)]="filters.status" class="form-control">
+          <option *ngFor="let status of statusOptions" [value]="status.value">
+            {{ status.label }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="action-buttons">
+      <button (click)="generateReport()" [disabled]="isLoading" class="btn btn-primary">
+        <span *ngIf="!isLoading">📊 Generar Reporte</span>
+        <span *ngIf="isLoading">⏳ Generando...</span>
+      </button>
+      
+      <button (click)="clearFilters()" class="btn btn-secondary">
+        🗑️ Limpiar Filtros
+      </button>
+    </div>
+  </div>
+
+  <!-- Gráfico General de Estados -->
+  <div class="chart-section" *ngIf="generalStatistics">
+    <h2>📈 Estadísticas Generales</h2>
+    <div class="chart-container">
+      <canvas #chartCanvas></canvas>
+    </div>
+  </div>
+
+  <!-- Resultados del Reporte -->
+  <div class="report-results" *ngIf="reportData" #pdfContent>
+    <div class="report-header">
+      <h2>{{ getReportTypeLabel() }}</h2>
+      <div class="report-info">
+        <p><strong>Generado:</strong> {{ reportData.reportInfo.generatedAt | date:'dd/MM/yyyy HH:mm' }}</p>
+        <p *ngIf="reportData.reportInfo.dateRange">
+          <strong>Período:</strong> {{ reportData.reportInfo.dateRange.startDate }} - {{ reportData.reportInfo.dateRange.endDate }}
+        </p>
+        <p><strong>Total de registros:</strong> {{ reportData.reportInfo.totalRecords }}</p>
+      </div>
+    </div>
+
+    <!-- Estadísticas del reporte -->
+    <div class="statistics-section" *ngIf="reportData.statistics">
+      
+      <!-- Estadísticas de Citas -->
+      <div *ngIf="filters.reportType === 'appointments'" class="stats-grid">
+        <h3>📊 Distribución por Estado</h3>
+        <div class="stats-cards">
+          <div *ngFor="let stat of reportData.statistics.statusDistribution" class="stat-card">
+            <div class="stat-number">{{ stat.count }}</div>
+            <div class="stat-label">{{ getStatusLabel(stat.status) }}</div>
+            <div class="stat-percentage">{{ stat.percentage }}%</div>
+          </div>
+        </div>
+
+        <!-- Top Especialidades -->
+        <div *ngIf="reportData.statistics.specialtyBreakdown?.length > 0" class="specialty-stats">
+          <h4>🏥 Por Especialidad</h4>
+          <div class="specialty-list">
+            <div *ngFor="let spec of reportData.statistics.specialtyBreakdown" class="specialty-item">
+              <span class="specialty-name">{{ spec.specialty }}</span>
+              <span class="specialty-count">{{ spec.count }} citas</span>
+              <span class="specialty-completed">{{ spec.completed }} completadas</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance de Médicos -->
+        <div *ngIf="reportData.statistics.physicianPerformance?.length > 0" class="physician-stats">
+          <h4>👨‍⚕️ Rendimiento por Médico</h4>
+          <div class="physician-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Médico</th>
+                  <th>Especialidad</th>
+                  <th>Total</th>
+                  <th>Completadas</th>
+                  <th>Canceladas</th>
+                  <th>No Show</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let phy of reportData.statistics.physicianPerformance">
+                  <td>{{ phy.physician_name }}</td>
+                  <td>{{ phy.specialty }}</td>
+                  <td>{{ phy.total_appointments }}</td>
+                  <td class="success">{{ phy.completed }}</td>
+                  <td class="danger">{{ phy.cancelled }}</td>
+                  <td class="warning">{{ phy.no_show }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas de Médicos -->
+      <div *ngIf="filters.reportType === 'physicians'" class="physician-summary">
+        <h3>👨‍⚕️ Resumen de Médicos</h3>
+        <div class="specialty-distribution">
+          <div *ngFor="let spec of reportData.statistics.specialtyDistribution" class="specialty-card">
+            <h4>{{ spec.specialty }}</h4>
+            <p>{{ spec.physician_count }} médico(s)</p>
+            <small>Promedio {{ spec.avg_days_registered }} días registrados</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas de Pacientes -->
+      <div *ngIf="filters.reportType === 'patients'" class="patient-summary">
+        <h3>🧑‍🤝‍🧑 Resumen de Pacientes</h3>
+        <div class="gender-stats">
+          <div *ngFor="let gender of reportData.statistics.genderDistribution" class="gender-card">
+            <h4>{{ gender.gender === 'M' ? 'Masculino' : gender.gender === 'F' ? 'Femenino' : 'Otro' }}</h4>
+            <p>{{ gender.count }} paciente(s)</p>
+            <small>Edad promedio: {{ gender.avg_age }} años</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Datos -->
+    <div class="data-table-section">
+      <h3>📋 Datos Detallados</h3>
+      
+      <!-- Tabla de Citas -->
+      <div *ngIf="filters.reportType === 'appointments'" class="appointments-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Paciente</th>
+              <th>Médico</th>
+              <th>Especialidad</th>
+              <th>Estado</th>
+              <th>Prioridad</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let apt of reportData.appointments" 
+                [class]="'status-' + apt.status">
+              <td>{{ apt.date }}</td>
+              <td>{{ apt.time }}</td>
+              <td>{{ apt.patient_name }}</td>
+              <td>{{ apt.physician_name }}</td>
+              <td>{{ apt.physician_specialty }}</td>
+              <td>
+                <span class="status-badge" [class]="'status-' + apt.status">
+                  {{ getStatusLabel(apt.status) }}
+                </span>
+              </td>
+              <td>
+                <span class="priority-badge" [class]="'priority-' + apt.priority">
+                  {{ apt.priority }}
+                </span>
+              </td>
+              <td>{{ apt.reason || 'N/A' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tabla de Médicos -->
+      <div *ngIf="filters.reportType === 'physicians'" class="physicians-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Especialidad</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Total Citas</th>
+              <th>Completadas</th>
+              <th>Canceladas</th>
+              <th>Próximas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let phy of reportData.physicians">
+              <td>{{ phy.name }} {{ phy.paternalLastName }} {{ phy.maternalLastName }}</td>
+              <td>{{ phy.specialty }}</td>
+              <td>{{ phy.email }}</td>
+              <td>{{ phy.phone || 'N/A' }}</td>
+              <td>{{ phy.total_appointments }}</td>
+              <td class="success">{{ phy.completed_appointments }}</td>
+              <td class="danger">{{ phy.cancelled_appointments }}</td>
+              <td class="info">{{ phy.upcoming_appointments }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Tabla de Pacientes -->
+      <div *ngIf="filters.reportType === 'patients'" class="patients-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>RUT</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Género</th>
+              <th>Total Citas</th>
+              <th>Completadas</th>
+              <th>Canceladas</th>
+              <th>No Show</th>
+              <th>Última Cita</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pat of reportData.patients">
+              <td>{{ pat.name }} {{ pat.paternalLastName }} {{ pat.maternalLastName }}</td>
+              <td>{{ pat.rut }}</td>
+              <td>{{ pat.email }}</td>
+              <td>{{ pat.phone || 'N/A' }}</td>
+              <td>{{ pat.gender === 'M' ? 'Masculino' : pat.gender === 'F' ? 'Femenino' : 'Otro' }}</td>
+              <td>{{ pat.total_appointments }}</td>
+              <td class="success">{{ pat.completed_appointments }}</td>
+              <td class="danger">{{ pat.cancelled_appointments }}</td>
+              <td class="warning">{{ pat.no_show_appointments }}</td>
+              <td>{{ pat.last_appointment_date || 'N/A' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Botones de Exportación -->
+    <div class="export-buttons">
+      <button (click)="exportToPDF()" [disabled]="isLoading" class="btn btn-success">
+        📄 Exportar PDF Completo
+      </button>
+      
+      <button (click)="exportTableToPDF()" [disabled]="isLoading" class="btn btn-info">
+        📊 Exportar Solo Tabla
+      </button>
+    </div>
+  </div>
+
+  <!-- Historial de Reportes -->
+  <div class="report-history" *ngIf="reportHistory.length > 0">
+    <h2>📚 Historial de Reportes</h2>
+    <div class="history-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Archivo</th>
+            <th>Generado por</th>
+            <th>Fecha</th>
+            <th>Registros</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let report of reportHistory">
+            <td>{{ report.report_type }}</td>
+            <td>{{ report.file_name }}</td>
+            <td>{{ report.generated_by }}</td>
+            <td>{{ report.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ report.report_summary ? parseJSON(report.report_summary).totalRecords : 'N/A' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
