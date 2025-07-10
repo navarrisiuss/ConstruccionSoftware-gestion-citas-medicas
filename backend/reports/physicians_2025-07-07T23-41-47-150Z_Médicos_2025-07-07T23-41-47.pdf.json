@@ -1,0 +1,92 @@
+{
+  "reportInfo": {
+    "type": "physicians",
+    "generatedAt": "2025-07-07T23:41:41.534Z",
+    "filters": {
+      "specialty": ""
+    },
+    "totalRecords": 5
+  },
+  "physicians": [
+    {
+      "id": 1,
+      "name": "Genesis",
+      "paternalLastName": "Martinez",
+      "maternalLastName": "Huisca",
+      "email": "gm@medico.com",
+      "specialty": "Cardiología",
+      "total_appointments": 1,
+      "completed_appointments": 0,
+      "cancelled_appointments": 0,
+      "upcoming_appointments": 1
+    },
+    {
+      "id": 3,
+      "name": "F",
+      "paternalLastName": "F",
+      "maternalLastName": "F",
+      "email": "f@gmail.com",
+      "specialty": "Dermatología",
+      "total_appointments": 0,
+      "completed_appointments": 0,
+      "cancelled_appointments": 0,
+      "upcoming_appointments": 0
+    },
+    {
+      "id": 4,
+      "name": "Juan",
+      "paternalLastName": "Pérez",
+      "maternalLastName": "Soto",
+      "email": "juan.perez@ejemplo.com",
+      "specialty": "Medicina General",
+      "total_appointments": 3,
+      "completed_appointments": 0,
+      "cancelled_appointments": 0,
+      "upcoming_appointments": 3
+    },
+    {
+      "id": 5,
+      "name": "María",
+      "paternalLastName": "Ramírez",
+      "maternalLastName": "Fuentes",
+      "email": "maria.ramirez@ejemplo.com",
+      "specialty": "Medicina General",
+      "total_appointments": 0,
+      "completed_appointments": 0,
+      "cancelled_appointments": 0,
+      "upcoming_appointments": 0
+    },
+    {
+      "id": 2,
+      "name": "Maite",
+      "paternalLastName": "G",
+      "maternalLastName": "B",
+      "email": "m@medico.cl",
+      "specialty": "Neurología",
+      "total_appointments": 1,
+      "completed_appointments": 0,
+      "cancelled_appointments": 0,
+      "upcoming_appointments": 1
+    }
+  ],
+  "statistics": {
+    "specialtyDistribution": [
+      {
+        "specialty": "Medicina General",
+        "physician_count": 2
+      },
+      {
+        "specialty": "Cardiología",
+        "physician_count": 1
+      },
+      {
+        "specialty": "Neurología",
+        "physician_count": 1
+      },
+      {
+        "specialty": "Dermatología",
+        "physician_count": 1
+      }
+    ]
+  }
+}

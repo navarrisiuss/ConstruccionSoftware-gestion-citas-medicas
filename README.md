@@ -31,11 +31,11 @@ npm run install-all
 
 ## Configurar la base de datos:
 
-     **Crear la base de datos**
-        ```bash
+     Crear la base de datos
+        
         CREATE DATABASE gestion_citas;
         USE gestion_citas;
-        ```
+        
         Tabla de Pacientes:
         CREATE TABLE patients (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -134,7 +134,22 @@ npm run install-all
             INDEX idx_status (status),
             INDEX idx_priority (priority)
         );
-     **Insertar datos de prueba**
+
+        Tabla de reportes:
+            CREATE TABLE IF NOT EXISTS report_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            report_type VARCHAR(50) NOT NULL,
+            file_name VARCHAR(255) NOT NULL,
+            file_path VARCHAR(500) NOT NULL,
+            generated_by VARCHAR(100) NOT NULL,
+            report_summary JSON,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            
+            INDEX idx_report_type (report_type),
+            INDEX idx_created_at (created_at),
+            INDEX idx_generated_by (generated_by)
+        );
+    Insertar datos de prueba
         Administrador por defecto:
             INSERT INTO administrators (name, paternalLastName, maternalLastName, email, password, role)
             VALUES ('Admin', 'Sistema', 'Principal', 'admin@mediconnect.com', 'admin123', 'super_admin');

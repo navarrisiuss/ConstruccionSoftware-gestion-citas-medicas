@@ -95,6 +95,30 @@ export class AdminService {
     return this.http.post<any>(`${this.apiUrl}/reports`, { type: reportType, dateRange });
   }
 
+  generateAppointmentsReport(filters: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reports/appointments`, filters);
+  }
+
+  generatePhysiciansReport(filters: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reports/physicians`, filters);
+  }
+
+  generatePatientsReport(filters: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reports/patients`, filters);
+  }
+
+  saveReport(reportData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reports/save`, reportData);
+  }
+
+  getReportHistory(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/reports/history`);
+  }
+
+  getGeneralStatistics(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/reports/statistics`);
+  }
+
   // Historiales médicos
   getMedicalHistory(patientId?: string): Observable<any[]> {
     const url = patientId ?

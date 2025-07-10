@@ -379,7 +379,7 @@ export class AppointmentFormComponent implements OnInit {
   
           <!-- Información del médico -->
           <div style="margin-bottom: 0.5rem;">
-            <div style="font-weight: bold;">👨‍⚕️ Dr. ${apt.physician}</div>
+            <div style="font-weight: bold;">👨‍⚕️/👩‍⚕️ Dr. ${apt.physician}</div>
             ${apt.specialty ? `<div style="font-size: 0.9rem; opacity: 0.9;">🏥 ${apt.specialty}</div>` : ''}
             ${apt.physician_phone ? `<div style="font-size: 0.8rem; opacity: 0.8;">📞 ${apt.physician_phone}</div>` : ''}
           </div>
@@ -564,7 +564,17 @@ export class AppointmentFormComponent implements OnInit {
       return;
     }
 
-    // ✅ Crear la cita si no hay conflictos
+    const appointmentInfo = {
+      date: this.newAppt.date,
+      time: this.newAppt.time,
+      physicianId: this.newAppt.physician_id,
+      physicianName: this.allPhysicians.find(p => p.id.toString() === this.newAppt.physician_id)?.fullName || 'Médico no encontrado',
+      specialty: this.newAppt.specialty,
+      reason: this.newAppt.reason,
+      priority: this.newAppt.priority,
+      notes: this.newAppt.notes
+    };
+
     const appointmentData = {
       patient_id: this.patientId,
       physician_id: this.newAppt.physician_id,
@@ -597,20 +607,33 @@ export class AppointmentFormComponent implements OnInit {
             priority: 'normal',
             notes: ''
           };
+
+          this.filteredPhysicians = [...this.allPhysicians];
+
+          const priorityText = appointmentInfo.priority === 'urgent' ? 'Urgente' : 
+                              appointmentInfo.priority === 'high' ? 'Alta' : 
+                              appointmentInfo.priority === 'low' ? 'Baja' : 'Normal';
+
+          const formattedDate = new Date(appointmentInfo.date + 'T00:00:00').toLocaleDateString('es-ES', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          });
           
-          // ✅ Mensaje de confirmación mejorado
           Swal.fire({
             title: '✅ ¡Cita creada con éxito!',
             html: `
               <div style="text-align: left;">
                 <p><strong>Su cita ha sido agendada:</strong></p>
                 <div style="background: #d4edda; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #28a745;">
-                  <div style="margin-bottom: 0.5rem;">📅 <strong>Fecha:</strong> ${this.newAppt.date}</div>
-                  <div style="margin-bottom: 0.5rem;">🕐 <strong>Hora:</strong> ${this.newAppt.time}</div>
-                  <div style="margin-bottom: 0.5rem;">👨‍⚕️ <strong>Médico:</strong> Dr. ${this.filteredPhysicians.find(p => p.id.toString() === this.newAppt.physician_id)?.fullName}</div>
-                  <div style="margin-bottom: 0.5rem;">🏥 <strong>Especialidad:</strong> ${this.newAppt.specialty}</div>
-                  ${appointmentData.reason ? `<div style="margin-bottom: 0.5rem;">📝 <strong>Motivo:</strong> ${appointmentData.reason}</div>` : ''}
-                  <div style="margin-bottom: 0.5rem;">⚡ <strong>Prioridad:</strong> ${appointmentData.priority === 'urgent' ? 'Urgente' : appointmentData.priority === 'high' ? 'Alta' : 'Normal'}</div>
+                  <div style="margin-bottom: 0.5rem;">📅 <strong>Fecha:</strong> ${formattedDate}</div>
+                  <div style="margin-bottom: 0.5rem;">🕐 <strong>Hora:</strong> ${appointmentInfo.time}</div>
+                  <div style="margin-bottom: 0.5rem;">👨‍⚕️/👩‍⚕️ <strong>Médico:</strong> Dr. ${appointmentInfo.physicianName}</div>
+                  <div style="margin-bottom: 0.5rem;">🏥 <strong>Especialidad:</strong> ${appointmentInfo.specialty || 'No especificada'}</div>
+                  ${appointmentInfo.reason ? `<div style="margin-bottom: 0.5rem;">📝 <strong>Motivo:</strong> ${appointmentInfo.reason}</div>` : ''}
+                  <div style="margin-bottom: 0.5rem;">⚡ <strong>Prioridad:</strong> ${priorityText}</div>
+                  ${appointmentInfo.notes ? `<div style="margin-bottom: 0.5rem;">📋 <strong>Notas:</strong> ${appointmentInfo.notes}</div>` : ''}
                 </div>
                 <div style="background: #cff4fc; padding: 0.75rem; border-radius: 8px; border-left: 4px solid #17a2b8;">
                   <div style="font-weight: bold; margin-bottom: 0.5rem;">📋 Próximos pasos:</div>
@@ -618,16 +641,32 @@ export class AppointmentFormComponent implements OnInit {
                     <li>Recibirá confirmación por correo electrónico</li>
                     <li>Llegue 15 minutos antes de su cita</li>
                     <li>Traiga su documento de identidad</li>
-                    ${appointmentData.priority === 'urgent' ? '<li style="color: #dc3545;"><strong>⚠️ Su cita es URGENTE - Se procesará prioritariamente</strong></li>' : ''}
+                    ${appointmentInfo.specialty ? `<li>Se dirigirá al área de <strong>${appointmentInfo.specialty}</strong></li>` : ''}
+                    ${appointmentInfo.priority === 'urgent' ? '<li style="color: #dc3545;"><strong>⚠️ Su cita es URGENTE - Se procesará prioritariamente</strong></li>' : ''}
                   </ul>
                 </div>
+                ${appointmentInfo.reason && appointmentInfo.reason.toLowerCase().includes('dolor') ? `
+                  <div style="background: #fff3cd; padding: 0.75rem; border-radius: 8px; border-left: 4px solid #ffc107; margin-top: 1rem;">
+                    <div style="font-weight: bold; margin-bottom: 0.5rem;">⚠️ Recomendaciones adicionales:</div>
+                    <ul style="margin: 0; padding-left: 1.5rem;">
+                      <li>Si el dolor se intensifica, contacte inmediatamente</li>
+                      <li>Evite medicamentos sin prescripción médica</li>
+                    </ul>
+                  </div>
+                ` : ''}
               </div>
             `,
             icon: 'success',
             confirmButtonText: 'Entendido',
-            width: '600px',
-            timer: 8000,
-            timerProgressBar: true
+            width: '650px',
+            timer: 10000,
+            timerProgressBar: true,
+            showClass: {
+              popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+              popup: 'animate__animated animate__fadeOutUp'
+            }
           });
         },
         error: (error) => {
