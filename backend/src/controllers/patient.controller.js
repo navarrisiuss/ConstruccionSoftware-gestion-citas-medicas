@@ -83,3 +83,18 @@ exports.searchPatientByEmail = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// Método para buscar paciente por ID
+exports.getPatientById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const patients = await Patient.getById(id); // asegúrate de que esta función exista
+    if (patients.length > 0) {
+      res.json(patients[0]);
+    } else {
+      res.status(404).json({ message: 'Paciente no encontrado' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
