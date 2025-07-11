@@ -671,12 +671,6 @@ export class AdminAppointmentManagerComponent implements OnInit {
       }
     }
   }
-
-  exportAppointments() {
-    console.log('Exportando citas...');
-    // Implementar exportación
-  }
-
   getMonthName(): string {
     return this.currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
   }
