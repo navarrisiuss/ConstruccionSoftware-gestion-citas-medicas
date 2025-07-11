@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AppointmentsService } from '../../../services/appointments.service';
 import { PatientService } from '../../../services/patient.service';
 import { PhysicianService } from '../../../services/physician.service';
-import {DatePipe, NgForOf} from '@angular/common';
+import { DatePipe, NgForOf } from '@angular/common';
 import { forkJoin, map, mergeMap, of } from 'rxjs';
 
 @Component({
@@ -31,9 +31,8 @@ export class MedicalHistoryComponent implements OnInit {
         mergeMap(appointments => {
           const detailedAppointments$ = appointments.map(app => {
             const formattedDate = this.datePipe.transform(app.date, 'dd/MM/yyyy');
-            const formattedTime = this.datePipe.transform(app.date, 'HH:mm');
+            const formattedTime = this.formatTime(app.time); // ✅ corregido aquí
 
-            // Validación: Si no hay IDs, usar 'Desconocido'
             const patient$ = app.patient_id
               ? this.patientService.getPatientById(app.patient_id)
               : of({ name: 'Desconocido' });
@@ -64,5 +63,11 @@ export class MedicalHistoryComponent implements OnInit {
           console.error('Error al cargar historial médico:', error);
         }
       });
+  }
+
+  // ✅ Nuevo método para formatear hora correctamente
+  private formatTime(timeString: string): string {
+    const [hours, minutes] = timeString.split(':');
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
   }
 }
