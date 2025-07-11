@@ -22,7 +22,6 @@
     background-color: rgba(23, 162, 184, 0.9); /* Color turquesa para asistentes */
     color: white;
     padding: 2vh 3vw;
-    border-radius: 1vw;
     margin-bottom: 2vh;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }

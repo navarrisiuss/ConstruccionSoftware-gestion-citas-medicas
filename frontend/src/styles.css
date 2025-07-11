@@ -1,1 +1,55 @@
-/* You can add global styles to this file, and also import other style files */
+/* ✅ AGREGAR en src/styles.css (archivo principal de estilos) */
+
+/* Reset CSS Global */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    height: 100%;
+  }
+  
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Eliminar márgenes por defecto de elementos comunes */
+  h1, h2, h3, h4, h5, h6, p, ul, ol, li, div, section, article, header, footer, nav, aside {
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Asegurar que los componentes Angular ocupen todo el espacio */
+  app-root {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Aplicar a todos los componentes de dashboard */
+  app-admin-appointment-manager,
+  app-admin-dashboard,
+  app-patient-dashboard,
+  app-physician-dashboard,
+  app-assistant-dashboard {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }

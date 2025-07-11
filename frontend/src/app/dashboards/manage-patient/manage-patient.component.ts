@@ -259,17 +259,6 @@ export class ManagePatientsComponent implements OnInit {
     this.router.navigate([registerRoute]);
   }
 
-  // Exportar lista (funcionalidad futura)
-  exportPatients() {
-    Swal.fire({
-      title: 'Exportar Lista',
-      text: 'Funcionalidad de exportación próximamente disponible.',
-      icon: 'info',
-      confirmButtonText: 'Entendido',
-      confirmButtonColor: this.getThemeColor()
-    });
-  }
-
   // Volver al dashboard correspondiente
   backToDashboard() {
     const dashboardRoute = this.getDashboardRoute();
