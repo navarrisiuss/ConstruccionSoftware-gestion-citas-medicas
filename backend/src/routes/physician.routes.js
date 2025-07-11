@@ -8,5 +8,6 @@ router.get('/specialty', physicianController.getPhysiciansBySpecialty); // Nueva
 router.post('/', physicianController.createPhysician);
 router.put('/:id', physicianController.updatePhysician); // Nueva ruta para actualización
 router.delete('/:id', physicianController.deletePhysician);
+router.get('/:id', physicianController.getPhysicianById); // Nueva ruta para obtener un médico por ID
 
 module.exports = router;
