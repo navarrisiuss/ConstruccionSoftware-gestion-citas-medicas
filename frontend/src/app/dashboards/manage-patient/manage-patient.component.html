@@ -1,0 +1,224 @@
+<div class="manage-patients-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>{{ getTitle() }}</h1>
+    <div class="header-actions">
+      <button
+        *ngIf="userRole !== 'physician'"
+        (click)="addNewPatient()"
+        class="btn-primary"
+      >
+        <i class="icon">👤➕</i>
+        Nuevo Paciente
+      </button>
+      <button (click)="backToDashboard()" class="btn-back">
+        <i class="icon">🏠</i>
+        Dashboard
+      </button>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filters-section">
+    <h3>Filtros de Búsqueda</h3>
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label>Buscar por Nombre:</label>
+        <input
+          type="text"
+          [(ngModel)]="searchName"
+          (input)="applyFilters()"
+          placeholder="Nombre, apellido paterno o materno"
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label>Buscar por RUT:</label>
+        <input
+          type="text"
+          [(ngModel)]="searchRut"
+          (input)="applyFilters()"
+          placeholder="12.345.678-9"
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label>Fecha de Registro:</label>
+        <input
+          type="date"
+          [(ngModel)]="searchDate"
+          (change)="applyFilters()"
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <button (click)="clearFilters()" class="btn-clear">
+          <i class="icon">🗑️</i>
+          Limpiar Filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resultados -->
+  <div class="results-section">
+    <div class="results-header">
+      <h3>
+        Pacientes Encontrados: {{ filteredPatients.length }}
+        <span *ngIf="filteredPatients.length !== patients.length">
+          (de {{ patients.length }} totales)
+        </span>
+      </h3>
+      <div class="results-info">
+        Página {{ currentPage }} de {{ totalPages }}
+      </div>
+    </div>
+
+    <!-- Tabla de Pacientes -->
+    <div
+      class="table-container"
+      *ngIf="!isLoading && filteredPatients.length > 0"
+    >
+      <table class="patients-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>RUT</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let patient of getPaginatedPatients()"
+            [class.table-warning]="
+              patient.active === 0 || patient.active === false
+            "
+          >
+            <td>
+              {{ patient.name }} {{ patient.paternalLastName }}
+              {{ patient.maternalLastName }}
+            </td>
+            <td>{{ patient.email }}</td>
+            <td>{{ patient.rut }}</td>
+            <td>{{ patient.phone }}</td>
+
+            <!-- ✅ Columna de estado mejorada -->
+            <td>
+              <span
+                *ngIf="patient.active === 1 || patient.active === true"
+                class="badge badge-success"
+              >
+                <i class="fas fa-check-circle"></i>
+                Activo
+              </span>
+              <span
+                *ngIf="patient.active === 0 || patient.active === false"
+                class="badge badge-warning"
+              >
+                <i class="fas fa-pause-circle"></i>
+                Inactivo
+              </span>
+            </td>
+
+            <!-- ✅ Acciones mejoradas -->
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <!-- Botón Ver -->
+                <button
+                  class="btn-action view"
+                  (click)="viewPatientDetails(patient)"
+                  title="Ver detalles del paciente"
+                >👁️
+                  <i class="fas fa-eye"></i>
+                </button>
+
+                <!-- Botón Editar -->
+                <button
+                  class="btn-action edit"
+                  (click)="editPatient(patient)"
+                  title="Editar información del paciente"
+                >✏️
+                  <i class="fas fa-edit"></i>
+                </button>
+
+                <!-- ✅ Botón Estado mejorado -->
+                <button
+                  *ngIf="patient.active === 1 || patient.active === true"
+                  class="btn-action"
+                  style="background: linear-gradient(135deg, #ff6b6b, #ee5a52)"
+                  (click)="deletePatient(patient)"
+                  title="Desactivar paciente"
+                >🗑️
+                  <i class="fas fa-user-slash"></i>
+                </button>
+
+                <button
+                  *ngIf="patient.active === 0 || patient.active === false"
+                  class="btn-action"
+                  style="background: linear-gradient(135deg, #4ecdc4, #44a08d)"
+                  (click)="deletePatient(patient)"
+                  title="Reactivar paciente"
+                >🔄️
+                  <i class="fas fa-user-check"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mensaje cuando no hay resultados -->
+    <div *ngIf="!isLoading && filteredPatients.length === 0" class="no-results">
+      <div class="no-results-icon">🔍</div>
+      <h3>No se encontraron pacientes</h3>
+      <p>
+        Intenta ajustar los filtros de búsqueda o agregar un nuevo paciente.
+      </p>
+      <button
+        *ngIf="userRole !== 'physician'"
+        (click)="addNewPatient()"
+        class="btn-primary"
+      >
+        <i class="icon">👤➕</i>
+        Agregar Primer Paciente
+      </button>
+    </div>
+
+    <!-- Paginación -->
+    <div *ngIf="totalPages > 1" class="pagination">
+      <button
+        (click)="previousPage()"
+        [disabled]="currentPage === 1"
+        class="btn-pagination"
+      >
+        ⬅️ Anterior
+      </button>
+
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of getPaginationNumbers(); let i = index"
+          (click)="goToPage(i + 1)"
+          [class.active]="currentPage === i + 1"
+          class="btn-page"
+        >
+          {{ i + 1 }}
+        </button>
+      </div>
+
+      <button
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+        class="btn-pagination"
+      >
+        Siguiente ➡️
+      </button>
+    </div>
+  </div>
+</div>

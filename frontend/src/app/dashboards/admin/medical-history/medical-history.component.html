@@ -1,0 +1,257 @@
+<div class="medical-history-container">
+  <!-- Header del historial médico -->
+  <div class="header">
+    <div class="header-content">
+      <h2 class="page-title">
+        <i class="fas fa-hospital"></i>
+        Historial Médico General
+      </h2>
+      <p class="page-description">
+        Registro completo de todas las citas médicas del sistema
+      </p>
+    </div>
+    
+    <!-- Controles de vista -->
+    <div class="view-controls">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Buscar por paciente, médico, motivo..." [(ngModel)]="searchTerm" (input)="filterAppointments()">
+      </div>
+      
+      <div class="filter-controls">
+        <select [(ngModel)]="statusFilter" (change)="filterAppointments()" class="filter-select">
+          <option value="">Todos los estados</option>
+          <option value="completed">Completadas</option>
+          <option value="cancelled">Canceladas</option>
+          <option value="scheduled">Programadas</option>
+          <option value="confirmed">Confirmadas</option>
+        </select>
+        
+        <select [(ngModel)]="specialtyFilter" (change)="filterAppointments()" class="filter-select">
+          <option value="">Todas las especialidades</option>
+          <option *ngFor="let specialty of availableSpecialties" [value]="specialty">
+            {{ specialty }}
+          </option>
+        </select>
+        
+        <select [(ngModel)]="priorityFilter" (change)="filterAppointments()" class="filter-select">
+          <option value="">Todas las prioridades</option>
+          <option value="high">Alta</option>
+          <option value="normal">Normal</option>
+          <option value="low">Baja</option>
+        </select>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="btn-refresh" (click)="loadAppointments()">
+          <i class="fas fa-sync-alt"></i>
+          🔄️Actualiza
+        </button>
+        <button class="btn-back" (click)="goToAdminDashboard()">
+          <i class="fas fa-arrow-left"></i>
+          🏠 Volver al Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas rápidas -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <div class="stat-icon completed">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ getCompletedCount() }}</span>
+        <span class="stat-label">Completadas</span>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon total">
+        <i class="fas fa-calendar-alt"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ filteredAppointments.length }}</span>
+        <span class="stat-label">Total de Citas</span>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon cancelled">
+        <i class="fas fa-times-circle"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ getCancelledCount() }}</span>
+        <span class="stat-label">Canceladas</span>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon physicians">
+        <i class="fas fa-user-md"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ getUniquePhysicians() }}</span>
+        <span class="stat-label">Médicos Activos</span>
+      </div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon patients">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-content">
+        <span class="stat-number">{{ getUniquePatients() }}</span>
+        <span class="stat-label">Pacientes Únicos</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de historial -->
+  <div class="history-table-container">
+    <div class="table-header">
+      <h3>
+        <i class="fas fa-history"></i>
+        Registro General de Citas Médicas
+      </h3>
+      <span class="results-count">
+        Mostrando {{ filteredAppointments.length }} de {{ appointments.length }} citas
+      </span>
+    </div>
+
+    <div class="table-wrapper" *ngIf="filteredAppointments.length > 0; else noAppointments">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th (click)="sortBy('patientName')" class="sortable">
+              <span>Paciente</span>
+              <i class="fas fa-sort"></i>
+            </th>
+            <th (click)="sortBy('physicianName')" class="sortable">
+              <span>Médico</span>
+              <i class="fas fa-sort"></i>
+            </th>
+            <th (click)="sortBy('formattedDate')" class="sortable">
+              <span>Fecha</span>
+              <i class="fas fa-sort"></i>
+            </th>
+            <th (click)="sortBy('formattedTime')" class="sortable">
+              <span>Hora</span>
+              <i class="fas fa-sort"></i>
+            </th>
+            <th>Especialidad</th>
+            <th>Motivo</th>
+            <th (click)="sortBy('status')" class="sortable">
+              <span>Estado</span>
+              <i class="fas fa-sort"></i>
+            </th>
+            <th (click)="sortBy('priority')" class="sortable">
+              <span>Prioridad</span>
+              <i class="fas fa-sort"></i>
+            </th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let appointment of filteredAppointments; let i = index" 
+              class="appointment-row"
+              [attr.data-status]="appointment.status">
+            <td class="patient-cell">
+              <div class="patient-info">
+                <div class="patient-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="patient-details">
+                  <span class="patient-name">{{ appointment.patientName }}</span>
+                  <span class="patient-id">ID: {{ appointment.patient_id }}</span>
+                </div>
+              </div>
+            </td>
+            
+            <td class="physician-cell">
+              <div class="physician-info">
+                <div class="physician-avatar">
+                  <i class="fas fa-user-md"></i>
+                </div>
+                <div class="physician-details">
+                  <span class="physician-name">{{ appointment.physicianName }}</span>
+                  <span class="physician-id">ID: {{ appointment.physician_id }}</span>
+                </div>
+              </div>
+            </td>
+            
+            <td class="date-cell">
+              <div class="date-info">
+                <span class="date">{{ appointment.formattedDate }}</span>
+                <span class="day">{{ getDayOfWeek(appointment.date) }}</span>
+              </div>
+            </td>
+            
+            <td class="time-cell">
+              <span class="time">{{ appointment.formattedTime }}</span>
+            </td>
+            
+            <td class="specialty-cell">
+              <span class="specialty-badge">
+                <i class="fas fa-stethoscope"></i>
+                {{ appointment.specialty || 'No especificada' }}
+              </span>
+            </td>
+            
+            <td class="reason-cell">
+              <div class="reason-text" [title]="appointment.reason">
+                {{ appointment.reason | slice:0:40 }}{{ appointment.reason && appointment.reason.length > 40 ? '...' : '' }}
+              </div>
+            </td>
+            
+            <td class="status-cell">
+              <span class="status-badge" [ngClass]="'status-' + appointment.status">
+                <i [class]="getStatusIcon(appointment.status)"></i>
+                {{ getStatusText(appointment.status) }}
+              </span>
+            </td>
+            
+            <td class="priority-cell">
+              <span class="priority-badge" [ngClass]="'priority-' + (appointment.priority || 'medium')">
+                <i [class]="getPriorityIcon(appointment.priority || 'medium')"></i>
+                {{ getPriorityText(appointment.priority || 'medium') }}
+              </span>
+            </td>
+            
+            <td class="actions-cell">
+              <div class="action-buttons-row">
+                <button class="btn-action btn-view" 
+                        (click)="viewAppointmentDetails(appointment)"
+                        title="Ver detalles">👁️
+                  <i class="fas fa-eye"></i>
+                </button>
+                
+                <button class="btn-action btn-edit" 
+                        (click)="editAppointment(appointment)"
+                        title="Gestionar cita">✏️
+                  <i class="fas fa-cog"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Estado vacío -->
+    <ng-template #noAppointments>
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="fas fa-calendar-times"></i>
+        </div>
+        <h3>No se encontraron citas</h3>
+        <p>No hay citas médicas que coincidan con los filtros seleccionados.</p>
+        <button class="btn-primary" (click)="clearFilters()">
+          <i class="fas fa-filter"></i>
+          Limpiar Filtros
+        </button>
+      </div>
+    </ng-template>
+  </div>
+</div>

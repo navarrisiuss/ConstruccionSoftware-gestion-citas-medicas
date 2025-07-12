@@ -50,10 +50,6 @@ export class AdminDashboardComponent implements OnInit {
     this.router.navigate(['/manage-patients']).then(r => r);
   }
 
-  // Gestión de citas
-  goToManageAppointments() {
-    this.router.navigate(['/manage-appointments']).then(r => r);
-  }
 
   // Historiales médicos
   goToMedicalHistory() {
@@ -61,8 +57,8 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   // Agenda médica
-  goToMedicalSchedule() {
-    this.router.navigate(['/medical-schedule']).then(r => r);
+  goToAdvancedAppointmentManager() {
+    this.router.navigate(['/admin/appointment-manager']);
   }
 
   // Reportes

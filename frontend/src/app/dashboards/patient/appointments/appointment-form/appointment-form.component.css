@@ -1,0 +1,625 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(0, 123, 255, 0.9); /* Color azul para admin */
+  color: white;
+  padding: 2vh 3vw;
+  border-radius: 1vw;
+  margin-bottom: 2vh;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.header-actions {
+  display: flex;
+  gap: 1vw;
+}
+
+/* Botones */
+.btn-primary, .btn-secondary, .btn-back, .btn-clear {
+  padding: 1vh 2vw;
+  border: none;
+  border-radius: 0.5vw;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5vw;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+}
+
+.btn-back {
+  background: linear-gradient(135deg, #6c757d, #495057);
+  color: white;
+}
+
+.appointment-container {
+    max-width: 100vw;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1rem;
+  }
+
+  .appointment-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    height: fit-content;
+    border-top: 4px solid #17a2b8;
+  }
+
+  .appointment-form h2 {
+    color: #17a2b8;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #096775;
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: #17a2b8;
+  }
+
+  .form-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .form-buttons button {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .form-buttons button[type="submit"] {
+    background: #17a2b8;
+    color: white;
+  }
+
+  .form-buttons button[type="button"] {
+    background: #6c757d;
+    color: white;
+  }
+
+  .form-buttons button:hover {
+    opacity: 0.9;
+  }
+
+  .calendar-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-top: 4px solid #17a2b8;
+  }
+
+  .calendar-container h2 {
+    color: #17a2b8;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .nav-btn {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+  }
+
+  .nav-btn:hover {
+    background: #096775;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #dee2e6;
+    border: 1px solid #dee2e6;
+  }
+
+  .calendar-day-header {
+    background: #17a2b8;
+    color: white;
+    padding: 0.75rem;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .calendar-day {
+    background: white;
+    min-height: 100px;
+    padding: 0.5rem;
+    position: relative;
+  }
+
+  .calendar-day.other-month {
+    background: #f8f9fa;
+    color: #6c757d;
+  }
+
+  .calendar-day.today {
+    background: #e3f2fd;
+    font-weight: bold;
+  }
+
+  .calendar-day.has-appointments {
+    background: #fff3cd;
+  }
+
+  .calendar-day.has-appointments.has-cancelled {
+    background: linear-gradient(135deg, #fff3cd 0%, #f8d7da 100%);
+    border: 1px solid #f5c6cb;
+  }
+  
+  /* Días solo con citas canceladas */
+  .calendar-day.only-cancelled {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+  }
+  
+  /* Días con citas mixtas (activas y canceladas) */
+  .calendar-day.mixed-status {
+    background: linear-gradient(45deg, #d4edda 50%, #f8d7da 50%);
+    border: 1px solid #c3e6cb;
+  }
+
+  .day-number {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  /* Indicador en el día del calendario */
+  .day-status-indicator {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .day-status-indicator.has-cancelled {
+    background: #dc3545;
+  }
+
+  .day-status-indicator.has-active {
+    background: #28a745;
+  }
+
+  .day-status-indicator.mixed {
+    background: linear-gradient(45deg, #28a745 50%, #dc3545 50%);
+  }
+
+  .appointments {
+    font-size: 0.8rem;
+  }
+
+  .appointment-item {
+    background: #17a2b8;
+    color: white;
+    padding: 0.2rem 0.4rem;
+    margin: 0.1rem 0;
+    border-radius: 3px;
+    font-size: 0.7rem;
+  }
+  .appointment-item.cancelled {
+    background: #dc3545 !important;
+    opacity: 0.8;
+    border: 1px solid #a71e2a;
+    position: relative;
+  }
+
+  .appointment-item.cancelled::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    right: 5px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-50%);
+    z-index: 1;
+  }
+
+  .appointment-item.cancelled .apt-time,
+  .appointment-item.cancelled .apt-doctor,
+  .appointment-item.cancelled .apt-status {
+    position: relative;
+    z-index: 2;
+  }
+
+  .appointment-item.cancelled:hover {
+    background: #c82333 !important;
+    transform: scale(1.02);
+  }
+
+  .appointment-item.completed {
+    background: #28a745 !important;
+    border: 1px solid #1e7e34;
+  }
+  
+  .appointment-item.completed:hover {
+    background: #218838 !important;
+    transform: scale(1.02);
+  }
+
+  .appointment-item:not(.cancelled):not(.completed) {
+    background: #17a2b8 !important;
+    border: 1px solid #117a8b;
+  }
+  
+  .appointment-item:not(.cancelled):not(.completed):hover {
+    background: #138496 !important;
+    transform: scale(1.02);
+  }
+
+  .apt-time {
+    font-weight: bold;
+    font-size: 0.75rem;
+  }
+
+  .apt-doctor {
+    font-size: 0.65rem;
+    margin-top: 0.1rem;
+  }
+
+  .apt-status {
+    font-size: 0.6rem;
+    font-style: italic;
+    margin-top: 0.1rem;
+  }
+
+/* Etiquetas identificativas */
+.apt-label {
+  font-size: 0.55rem;
+  font-weight: bold;
+  margin-top: 0.1rem;
+  padding: 1px 3px;
+  border-radius: 2px;
+  text-align: center;
+}
+
+
+.calendar-legend {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.calendar-legend h4 {
+  margin: 0 0 0.5rem 0;
+  color: #17a2b8;
+  font-size: 0.9rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 12px;
+  margin-right: 0.5rem;
+  border-radius: 2px;
+}
+.legend-color.cancelled {
+  background: #dc3545;
+}
+
+.legend-color.completed {
+  background: #28a745;
+}
+
+.patient-info {
+  background: #e3f2fd;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #17a2b8;
+}
+
+.patient-info p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.patient-info strong {
+  color: #17a2b8;
+}
+.form-help {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.form-help.error {
+  color: #dc3545;
+}
+
+select:disabled {
+  background-color: #e9ecef;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.specialty-count {
+  font-weight: normal;
+  color: #6c757d;
+  font-size: 0.9em;
+}
+/* ✅ Estilos para días clickeables */
+.calendar-day.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-day.clickable:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  background-color: #f8f9fa;
+}
+
+/* ✅ Indicador de más citas */
+.more-appointments-indicator {
+  background: #ffc107;
+  color: #000;
+  padding: 0.2rem 0.4rem;
+  margin: 0.1rem 0;
+  border-radius: 3px;
+  font-size: 0.6rem;
+  text-align: center;
+  border: 1px solid #e0a800;
+}
+
+.more-text {
+  font-weight: bold;
+  display: block;
+  line-height: 1.2;
+}
+
+.click-hint {
+  font-size: 0.5rem;
+  opacity: 0.8;
+  display: block;
+  margin-top: 1px;
+}
+
+/* ✅ Efectos hover para el indicador */
+.calendar-day.clickable:hover .more-appointments-indicator {
+  background: #e0a800;
+  transform: scale(1.05);
+}
+
+/* ✅ Estilos para la ventana modal */
+.day-details-modal .swal2-html-container {
+  text-align: left !important;
+}
+
+.modal-appointment-item {
+  transition: transform 0.2s ease;
+}
+
+.modal-appointment-item:hover {
+  transform: translateX(5px);
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #17a2b8;
+  box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+}
+
+/* Estilos para prioridades */
+select[name="priority"] option[value="urgent"] {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+select[name="priority"] option[value="high"] {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+select[name="priority"] option[value="normal"] {
+  background-color: #d4edda;
+  color: #155724;
+}
+.appointment-item.no-show {
+  background: #dc3545 !important;
+  opacity: 0.8;
+  border: 1px solid #a71e2a;
+  position: relative;
+}
+
+.appointment-item.no-show::before {
+  content: '⚠️';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 0.6rem;
+  z-index: 3;
+}
+
+.appointment-item.no-show:hover {
+  background: #c82333 !important;
+  transform: scale(1.02);
+}
+
+/* Días con citas no_show */
+.calendar-day.has-no-show {
+  background: linear-gradient(135deg, #fff3cd 0%, #f8d7da 100%);
+  border: 1px solid #f5c6cb;
+}
+
+/* Indicador de prioridad en el calendario */
+.appointment-item.priority-urgent {
+  border-left: 3px solid #dc3545 !important;
+}
+
+.appointment-item.priority-high {
+  border-left: 3px solid #fd7e14 !important;
+}
+
+.appointment-item.priority-normal {
+  border-left: 3px solid #28a745 !important;
+}
+
+/* Estilos para información adicional en el modal */
+.appointment-detail-section {
+  background: rgba(0,0,0,0.1);
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin: 0.5rem 0;
+}
+
+.appointment-detail-section strong {
+  display: inline-block;
+  min-width: 80px;
+}
+
+/* Animaciones para los modales */
+.animate__animated {
+  animation-duration: 0.3s;
+}
+
+.animate__fadeInDown {
+  animation-name: fadeInDown;
+}
+
+.animate__fadeOutUp {
+  animation-name: fadeOutUp;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeOutUp {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+}
+
+/* Responsive para campos de texto */
+@media (max-width: 768px) {
+  .form-textarea {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
+  
+  .appointment-detail-section {
+    font-size: 0.8rem;
+  }
+}
+
+/* ✅ Responsive para dispositivos móviles */
+@media (max-width: 768px) {
+  .calendar-day.clickable:hover {
+    transform: none;
+  }
+
+  .more-appointments-indicator {
+    font-size: 0.55rem;
+  }
+
+  .click-hint {
+    font-size: 0.45rem;
+  }
+}
+
+  @media (max-width: 768px) {
+    .appointment-container {
+      grid-template-columns: 1fr;
+    }
+
+    .calendar-day {
+      min-height: 60px;
+    }
+
+    .appointment-item {
+      font-size: 0.6rem;
+    }
+  }

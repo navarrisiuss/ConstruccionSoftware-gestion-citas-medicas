@@ -1,0 +1,236 @@
+<div class="history-container">
+  <!-- Header -->
+  <div class="history-header">
+    <div class="header-content">
+      <h1>📋 Mi Historial de Citas</h1>
+      <button (click)="goToPatientDashboard()" class="btn-back">
+        ← Volver al Dashboard
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <p>Cargando tu historial médico...</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!isLoading" class="history-content">
+    
+    <!-- Estadísticas -->
+    <div class="stats-section">
+      <h2>📊 Resumen de mis citas</h2>
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="stat-number">{{ totalAppointments }}</div>
+          <div class="stat-label">Total de Citas</div>
+        </div>
+        <div class="stat-card completed">
+          <div class="stat-number">{{ completedAppointments }}</div>
+          <div class="stat-label">Completadas</div>
+        </div>
+        <div class="stat-card cancelled">
+          <div class="stat-number">{{ cancelledAppointments }}</div>
+          <div class="stat-label">Canceladas</div>
+        </div>
+        <div class="stat-card no-show">
+          <div class="stat-number">{{ noShowAppointments }}</div>
+          <div class="stat-label">No Asistí</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-section">
+      <h3>🔍 Filtrar historial</h3>
+      <div class="filters-grid">
+        
+        <!-- Filtro por Estado -->
+        <div class="filter-group">
+          <label for="statusFilter">Estado:</label>
+          <select 
+            id="statusFilter"
+            [(ngModel)]="selectedStatus" 
+            (change)="applyFilters()"
+            class="filter-select">
+            <option *ngFor="let status of statusOptions" [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Filtro por Año -->
+        <div class="filter-group">
+          <label for="yearFilter">Año:</label>
+          <select 
+            id="yearFilter"
+            [(ngModel)]="selectedYear" 
+            (change)="applyFilters()"
+            class="filter-select">
+            <option value="">Todos los años</option>
+            <option *ngFor="let year of availableYears" [value]="year">
+              {{ year }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Filtro por Especialidad -->
+        <div class="filter-group">
+          <label for="specialtyFilter">Especialidad:</label>
+          <select 
+            id="specialtyFilter"
+            [(ngModel)]="selectedSpecialty" 
+            (change)="applyFilters()"
+            class="filter-select">
+            <option value="">Todas las especialidades</option>
+            <option *ngFor="let specialty of availableSpecialties" [value]="specialty">
+              {{ specialty }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Buscar por Médico -->
+        <div class="filter-group">
+          <label for="doctorSearch">Buscar médico:</label>
+          <input 
+            type="text" 
+            id="doctorSearch"
+            [(ngModel)]="searchDoctor"
+            (input)="applyFilters()"
+            placeholder="Nombre del médico..."
+            class="filter-input">
+        </div>
+
+        <!-- Botón Limpiar -->
+        <div class="filter-group">
+          <button (click)="clearFilters()" class="btn-clear">
+            🗑️ Limpiar Filtros
+          </button>
+        </div>
+      </div>
+      
+      <!-- Información de filtros activos -->
+      <div *ngIf="filteredHistory.length !== patientHistory.length" class="filter-info">
+        Mostrando {{ filteredHistory.length }} de {{ patientHistory.length }} citas
+      </div>
+    </div>
+
+    <!-- ✅ NUEVA ESTRUCTURA: Sección de Citas con Header Fijo y Contenido Scrolleable -->
+    <div class="appointments-section">
+      <!-- Header fijo -->
+      <div class="appointments-header">
+        <h3>📅 Mis citas ({{ filteredHistory.length }})</h3>
+      </div>
+      
+      <!-- Contenido scrolleable -->
+      <div class="appointments-content" 
+           #appointmentsContent
+           (scroll)="onScroll($event)">
+        
+        <!-- Sin citas -->
+        <div *ngIf="filteredHistory.length === 0" class="no-appointments">
+          <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3 *ngIf="patientHistory.length === 0">No tienes citas registradas</h3>
+            <h3 *ngIf="patientHistory.length > 0">No se encontraron citas con los filtros aplicados</h3>
+            <p *ngIf="patientHistory.length === 0">¡Agenda tu primera cita desde el dashboard!</p>
+            <p *ngIf="patientHistory.length > 0">Intenta ajustar los filtros para ver más resultados.</p>
+            <button *ngIf="patientHistory.length > 0" (click)="clearFilters()" class="btn-primary">
+              Limpiar Filtros
+            </button>
+            <button *ngIf="patientHistory.length === 0" (click)="goToNewAppointment()" class="btn-primary">
+              Ir a Agendar Cita
+            </button>
+          </div>
+        </div>
+
+        <!-- Lista de citas -->
+        <div *ngIf="filteredHistory.length > 0" class="appointments-list">
+          <div *ngFor="let appointment of filteredHistory; let i = index" 
+               class="appointment-card"
+               [class.completed]="appointment.status === 'completed'"
+               [class.cancelled]="appointment.status === 'cancelled'"
+               [class.no-show]="appointment.status === 'no_show'"
+               [class.scheduled]="appointment.status === 'scheduled'"
+               [class.confirmed]="appointment.status === 'confirmed'">
+            
+            <!-- Header de la cita -->
+            <div class="appointment-header">
+              <div class="appointment-date">
+                <div class="date-main">{{ formatDate(appointment.date) }}</div>
+                <div class="time-main">🕐 {{ appointment.time }}</div>
+              </div>
+              <div class="appointment-status">
+                <span class="status-badge" 
+                      [style.background-color]="getStatusColor(appointment.status)">
+                  {{ getStatusText(appointment.status) }}
+                </span>
+                <span *ngIf="appointment.priority !== 'normal'" 
+                      class="priority-badge"
+                      [class.urgent]="appointment.priority === 'urgent'"
+                      [class.high]="appointment.priority === 'high'">
+                  {{ getPriorityText(appointment.priority) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Información del médico -->
+            <div class="appointment-doctor">
+              <div class="doctor-info">
+                <div class="doctor-name">👨‍⚕️/👩‍⚕️ Dr. {{ appointment.physician }}</div>
+                <div class="doctor-specialty">🏥 {{ appointment.physician_specialty }}</div>
+                <div class="appointment-location">📍 {{ appointment.location }}</div>
+              </div>
+            </div>
+
+            <!-- Detalles de la cita -->
+            <div class="appointment-details">
+              <div *ngIf="appointment.reason" class="detail-row">
+                <strong>📝 Motivo:</strong> {{ appointment.reason }}
+              </div>
+              <div class="detail-row">
+                <strong>⏱️ Duración:</strong> {{ appointment.duration }} minutos
+              </div>
+              <div class="detail-row">
+                <strong>📅 Agendada:</strong> {{ formatDateTime(appointment.created_at) }}
+              </div>
+            </div>
+
+            <!-- Notas médicas (solo para citas completadas) -->
+            <div *ngIf="appointment.status === 'completed' && appointment.medical_notes" 
+                 class="medical-notes">
+              <div class="notes-header">🩺 Notas Médicas:</div>
+              <div class="notes-content">{{ appointment.medical_notes }}</div>
+            </div>
+
+            <!-- Notas de preparación -->
+            <div *ngIf="appointment.preparation_notes" class="preparation-notes">
+              <div class="notes-header">⚠️ Instrucciones de preparación:</div>
+              <div class="notes-content">{{ appointment.preparation_notes }}</div>
+            </div>
+
+            <!-- Información de cancelación -->
+            <div *ngIf="appointment.status === 'cancelled'" class="cancellation-info">
+              <div class="cancellation-header">❌ Información de cancelación:</div>
+              <div *ngIf="appointment.cancellation_reason" class="cancellation-detail">
+                <strong>Motivo:</strong> {{ appointment.cancellation_reason }}
+              </div>
+              <div *ngIf="appointment.cancellation_details" class="cancellation-detail">
+                <strong>Detalles:</strong> {{ appointment.cancellation_details }}
+              </div>
+              <div *ngIf="appointment.cancelled_at" class="cancellation-detail">
+                <strong>Fecha de cancelación:</strong> {{ formatDateTime(appointment.cancelled_at) }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ NUEVO: Indicador de scroll cuando hay muchas citas -->
+        <div *ngIf="showScrollIndicator" class="scroll-indicator">
+          ↓ Desliza para ver más citas
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

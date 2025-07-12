@@ -4,6 +4,10 @@ const physicianController = require('../controllers/physician.controller');
 
 router.get('/', physicianController.getAllPhysicians);
 router.get('/email', physicianController.getPhysicianByEmail);
+router.get('/specialty', physicianController.getPhysiciansBySpecialty); // Nueva ruta para obtener médicos por especialidad
 router.post('/', physicianController.createPhysician);
+router.put('/:id', physicianController.updatePhysician); // Nueva ruta para actualización
+router.delete('/:id', physicianController.deletePhysician);
+router.get('/:id', physicianController.getPhysicianById); // Nueva ruta para obtener un médico por ID
 
 module.exports = router;

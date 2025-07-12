@@ -162,6 +162,9 @@ h1 {
 
 /* Responsive design */
 @media (max-width: 768px) {
+  .container {
+    position: absolute;
+  }
   .header {
     flex-direction: column;
     gap: 2vh;
