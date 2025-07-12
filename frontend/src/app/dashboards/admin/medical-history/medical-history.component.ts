@@ -80,7 +80,7 @@ export class MedicalHistoryComponent implements OnInit {
                 patientName:
                   `${patient.name} ${patient.paternalLastName} ${patient.maternalLastName}`.trim(),
                 physicianName:
-                  `Dr. ${physician.name} ${physician.paternalLastName}`.trim(),
+                  `Dr. ${(physician as any).name} ${(physician as any).paternalLastName}`.trim(),
               }))
             );
           });

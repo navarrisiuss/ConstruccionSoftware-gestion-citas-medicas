@@ -8,7 +8,7 @@
       <p><strong>ID:</strong> {{ assistantId }}</p>
       <p><strong>Rol:</strong> Asistente Médico</p>
     </div>
-    
+
     <!-- ✅ Selección de especialidad IGUAL que pacientes -->
     <div class="form-group">
       <label for="specialty">Especialidad:</label>
@@ -17,10 +17,11 @@
         name="specialty"
         id="specialty"
         (change)="onSpecialtyChange()"
-        required>
+        required
+      >
         <option value="">Seleccione una especialidad</option>
-        <option *ngFor="let spec of medicalSpecialties" [value]="spec">
-          {{ spec }} ({{ getPhysicianCount(spec) }} médicos)
+        <option *ngFor="let spec of medicalSpecialties" [value]="spec.label">
+          {{ spec.label }} ({{ getPhysicianCount(spec.label) }} médicos)
         </option>
       </select>
     </div>
@@ -34,21 +35,36 @@
         id="physician"
         [disabled]="!newAppt.specialty"
         (change)="onPhysicianSelectionChange()"
-        required>
+        required
+      >
         <option value="">
-          {{ !newAppt.specialty ? 'Primero seleccione una especialidad' : 'Seleccione un médico' }}
+          {{
+            !newAppt.specialty
+              ? 'Primero seleccione una especialidad'
+              : 'Seleccione un médico'
+          }}
         </option>
-        <option *ngFor="let physician of getFilteredPhysicians()" [value]="physician.id">
+        <option
+          *ngFor="let physician of getFilteredPhysicians()"
+          [value]="physician.id"
+        >
           Dr. {{ physician.fullName }}
         </option>
       </select>
 
       <!-- ✅ Mostrar información adicional IGUAL que pacientes -->
-      <small class="form-help" *ngIf="newAppt.specialty && getFilteredPhysicians().length > 0">
-        {{ getFilteredPhysicians().length }} médico(s) disponible(s) en {{ newAppt.specialty }}
+      <small
+        class="form-help"
+        *ngIf="newAppt.specialty && getFilteredPhysicians().length > 0"
+      >
+        {{ getFilteredPhysicians().length }} médico(s) disponible(s) en
+        {{ newAppt.specialty }}
       </small>
 
-      <small class="form-help error" *ngIf="newAppt.specialty && getFilteredPhysicians().length === 0">
+      <small
+        class="form-help error"
+        *ngIf="newAppt.specialty && getFilteredPhysicians().length === 0"
+      >
         No hay médicos disponibles para esta especialidad
       </small>
     </div>
@@ -56,30 +72,35 @@
     <!-- Búsqueda y selección de paciente -->
     <div class="form-group">
       <label for="searchPatient">Buscar Paciente:</label>
-      <input 
-        type="text" 
-        [(ngModel)]="searchPatient" 
-        name="searchPatient" 
+      <input
+        type="text"
+        [(ngModel)]="searchPatient"
+        name="searchPatient"
         id="searchPatient"
         placeholder="Buscar por nombre o RUT..."
-        (input)="onPatientSearch()">
+        (input)="onPatientSearch()"
+      />
     </div>
 
     <div class="form-group">
       <label for="patient">Paciente *:</label>
-      <select 
-        [(ngModel)]="newAppt.patient_id" 
-        name="patient_id" 
-        id="patient" 
+      <select
+        [(ngModel)]="newAppt.patient_id"
+        name="patient_id"
+        id="patient"
         (change)="onPatientSelectionChange()"
-        required>
+        required
+      >
         <option value="">Seleccione un paciente</option>
         <option *ngFor="let patient of filteredPatients" [value]="patient.id">
           {{ patient.fullName }} - {{ patient.rut }}
         </option>
       </select>
-      
-      <small class="form-help" *ngIf="filteredPatients.length === 0 && searchPatient">
+
+      <small
+        class="form-help"
+        *ngIf="filteredPatients.length === 0 && searchPatient"
+      >
         No se encontraron pacientes con ese criterio
       </small>
     </div>
@@ -89,8 +110,15 @@
       <div class="filter-card">
         <h4>🔍 Filtros Activos:</h4>
         <p>{{ getFilterInfo() }}</p>
-        <p><strong>Mostrando {{ appointments.length }}</strong> de {{ allAppointments.length }} citas</p>
-        <button type="button" class="clear-filters-btn" (click)="clearFilters()">
+        <p>
+          <strong>Mostrando {{ appointments.length }}</strong> de
+          {{ allAppointments.length }} citas
+        </p>
+        <button
+          type="button"
+          class="clear-filters-btn"
+          (click)="clearFilters()"
+        >
           🗑️ Limpiar Filtros
         </button>
       </div>
@@ -98,24 +126,37 @@
 
     <div class="form-group">
       <label for="date">Fecha *:</label>
-      <input type="date" [(ngModel)]="newAppt.date" name="date" id="date" required>
+      <input
+        type="date"
+        [(ngModel)]="newAppt.date"
+        name="date"
+        id="date"
+        required
+      />
     </div>
 
     <div class="form-group">
       <label for="time">Hora *:</label>
-      <input type="time" [(ngModel)]="newAppt.time" name="time" id="time" required>
+      <input
+        type="time"
+        [(ngModel)]="newAppt.time"
+        name="time"
+        id="time"
+        required
+      />
     </div>
 
     <div class="form-group">
       <label for="reason">Motivo de la Consulta:</label>
-      <textarea 
-        [(ngModel)]="newAppt.reason" 
-        name="reason" 
+      <textarea
+        [(ngModel)]="newAppt.reason"
+        name="reason"
         id="reason"
         placeholder="Motivo de la consulta (opcional)"
-        rows="3"></textarea>
+        rows="3"
+      ></textarea>
     </div>
-    
+
     <!-- ✅ NUEVOS CAMPOS -->
     <div class="form-group">
       <label for="priority">⚡ Prioridad:</label>
@@ -123,21 +164,25 @@
         [(ngModel)]="newAppt.priority"
         name="priority"
         id="priority"
-        class="form-select">
+        class="form-select"
+      >
         <option value="normal">Normal</option>
         <option value="high">Alta</option>
         <option value="urgent">Urgente</option>
       </select>
-      <small class="form-help">Seleccione "Urgente" solo en casos de emergencia</small>
+      <small class="form-help"
+        >Seleccione "Urgente" solo en casos de emergencia</small
+      >
     </div>
-    
+
     <div class="form-group">
       <label for="duration">⏱️ Duración (minutos):</label>
       <select
         [(ngModel)]="newAppt.duration"
         name="duration"
         id="duration"
-        class="form-select">
+        class="form-select"
+      >
         <option value="15">15 minutos</option>
         <option value="30" selected>30 minutos</option>
         <option value="45">45 minutos</option>
@@ -145,38 +190,55 @@
         <option value="90">90 minutos</option>
       </select>
     </div>
-    
+
     <div class="form-group">
-      <label for="preparation_notes">⚠️ Instrucciones de preparación (opcional):</label>
-      <textarea 
+      <label for="preparation_notes"
+        >⚠️ Instrucciones de preparación (opcional):</label
+      >
+      <textarea
         [(ngModel)]="newAppt.preparation_notes"
         name="preparation_notes"
         id="preparation_notes"
         placeholder="Instrucciones especiales para el paciente antes de la consulta..."
         rows="2"
-        class="form-textarea"></textarea>
+        class="form-textarea"
+      ></textarea>
     </div>
-    
+
     <div class="form-group">
-      <label for="administrative_notes">🏢 Notas administrativas (opcional):</label>
-      <textarea 
+      <label for="administrative_notes"
+        >🏢 Notas administrativas (opcional):</label
+      >
+      <textarea
         [(ngModel)]="newAppt.administrative_notes"
         name="administrative_notes"
         id="administrative_notes"
         placeholder="Notas internas para el equipo administrativo..."
         rows="2"
-        class="form-textarea"></textarea>
+        class="form-textarea"
+      ></textarea>
     </div>
 
     <div class="form-buttons">
       <button type="submit">Agendar Cita</button>
       <button type="button" (click)="goToAssistantDashboard()">Volver</button>
-      <button type="button" (click)="loadAllAppointments()" style="background: #6f42c1;">🔄 Recargar</button>
-      <button type="button" (click)="clearFilters()" style="background: #dc3545;" *ngIf="showFiltered">
+      <button
+        type="button"
+        (click)="loadAllAppointments()"
+        style="background: #6f42c1"
+      >
+        🔄 Recargar
+      </button>
+      <button
+        type="button"
+        (click)="clearFilters()"
+        style="background: #dc3545"
+        *ngIf="showFiltered"
+      >
         🗑️ Quitar Filtros
       </button>
     </div>
-  </form> 
+  </form>
 
   <div class="calendar-container">
     <h2>
@@ -201,25 +263,27 @@
       <div class="calendar-day-header">Vie</div>
       <div class="calendar-day-header">Sáb</div>
 
-      <div *ngFor="let calDay of calendarDays"
-           class="calendar-day"
-           [class.other-month]="calDay.isOtherMonth"
-           [class.today]="calDay.isToday"
-           [class.has-appointments]="calDay.appointments?.length > 0"
-           [class.assistant-view]="calDay.hasAppointments"
-           [class.clickable]="calDay.allAppointments?.length > 0"
-           (click)="showDayDetails(calDay)">
-
+      <div
+        *ngFor="let calDay of calendarDays"
+        class="calendar-day"
+        [class.other-month]="calDay.isOtherMonth"
+        [class.today]="calDay.isToday"
+        [class.has-appointments]="calDay.appointments?.length > 0"
+        [class.assistant-view]="calDay.hasAppointments"
+        [class.clickable]="calDay.allAppointments?.length > 0"
+        (click)="showDayDetails(calDay)"
+      >
         <span class="day-number">{{ calDay.day }}</span>
 
         <div *ngIf="calDay.appointments?.length > 0" class="appointments">
-          <div *ngFor="let apt of calDay.appointments"
-               class="appointment-item assistant-manageable"
-               [class.cancelled]="apt.status === 'cancelled'"
-               [class.completed]="apt.status === 'completed'"
-               [class.confirmed]="apt.status === 'confirmed'"
-               [class.no_show]="apt.status === 'no_show'">
-
+          <div
+            *ngFor="let apt of calDay.appointments"
+            class="appointment-item assistant-manageable"
+            [class.cancelled]="apt.status === 'cancelled'"
+            [class.completed]="apt.status === 'completed'"
+            [class.confirmed]="apt.status === 'confirmed'"
+            [class.no_show]="apt.status === 'no_show'"
+          >
             <div class="appointment-content">
               <div class="apt-time">{{ apt.time }}</div>
               <div class="apt-patient">{{ apt.patient }}</div>
@@ -229,7 +293,10 @@
           </div>
 
           <!-- Indicador de más citas -->
-          <div *ngIf="calDay.hasMoreAppointments" class="more-appointments-indicator">
+          <div
+            *ngIf="calDay.hasMoreAppointments"
+            class="more-appointments-indicator"
+          >
             <span class="more-text">
               +{{ calDay.totalAppointments - 2 }} más
             </span>
@@ -262,5 +329,6 @@
         <span class="legend-color no-show"></span>
         <span>No vinieron</span>
       </div>
+    </div>
   </div>
 </div>

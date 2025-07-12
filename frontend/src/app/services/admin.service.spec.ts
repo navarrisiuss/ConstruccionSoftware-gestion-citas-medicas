@@ -185,7 +185,7 @@ describe('AdminService', () => {
     });
 
     it('should update an appointment', () => {
-      const appointmentId = '1';
+      const appointmentId = 1; // Change to number
       const updatedAppointment = {
         patientId: '1',
         physicianId: '1',
@@ -206,7 +206,7 @@ describe('AdminService', () => {
     });
 
     it('should delete an appointment', () => {
-      const appointmentId = '1';
+      const appointmentId = 1; // Change to number
 
       service.deleteAppointment(appointmentId).subscribe((response: any) => {
         expect(response).toBeTruthy();

@@ -115,9 +115,7 @@ describe('AdminDashboardComponent', () => {
       { method: 'goToRegisterPhysician', route: '/register-physician' },
       { method: 'goToRegisterAssistant', route: '/register-assistant' },
       { method: 'goToManagePatients', route: '/manage-patients' },
-      { method: 'goToManageAppointments', route: '/manage-appointments' },
       { method: 'goToMedicalHistory', route: '/medical-history' },
-      { method: 'goToMedicalSchedule', route: '/medical-schedule' },
       { method: 'goToReports', route: '/reports' },
       { method: 'goToPhysiciansView', route: '/physicians-view' },
       { method: 'goToAssistantsView', route: '/assistants-view' },
@@ -128,6 +126,13 @@ describe('AdminDashboardComponent', () => {
         (component as any)[method]();
         expect(mockRouter.navigate).toHaveBeenCalledWith([route]);
       });
+    });
+
+    it('goToAdvancedAppointmentManager should navigate to /admin/appointment-manager', () => {
+      component.goToAdvancedAppointmentManager();
+      expect(mockRouter.navigate).toHaveBeenCalledWith([
+        '/admin/appointment-manager',
+      ]);
     });
   });
 });

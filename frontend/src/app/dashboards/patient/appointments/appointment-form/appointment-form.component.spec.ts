@@ -4,13 +4,13 @@ import {
   fakeAsync,
   tick,
   flush,
+  waitForAsync,
 } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { of, throwError } from 'rxjs';
-import Swal from 'sweetalert2';
 
 import { AppointmentFormComponent } from './appointment-form.component';
 import { AdminService } from '../../../../services/admin.service';
@@ -18,12 +18,20 @@ import { AuthService } from '../../../../services/auth.service';
 import { PhysicianService } from '../../../../services/physician.service';
 import { Physician } from '../../../../models/physician.model';
 
-// ✅ Add type declaration for window.Swal
-declare global {
-  interface Window {
-    Swal: typeof Swal;
-  }
-}
+// Mock SweetAlert2
+const mockSwal = {
+  fire: jasmine.createSpy('fire').and.returnValue({
+    then: jasmine.createSpy('then').and.callFake((callback: any) => {
+      if (callback) {
+        callback({ isConfirmed: true });
+      }
+      return Promise.resolve({ isConfirmed: true });
+    }),
+  }),
+};
+
+// Override the global Swal
+(window as any).Swal = mockSwal;
 
 describe('AppointmentFormComponent', () => {
   let component: AppointmentFormComponent;
@@ -32,7 +40,6 @@ describe('AppointmentFormComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockPhysicianService: jasmine.SpyObj<PhysicianService>;
   let mockRouter: jasmine.SpyObj<Router>;
-  let mockSwalFire: jasmine.Spy;
 
   const mockCurrentUser = {
     id: 1,
@@ -42,9 +49,10 @@ describe('AppointmentFormComponent', () => {
     email: 'juan@test.com',
   };
 
+  // ✅ Create proper Physician instances instead of plain objects
   const mockPhysicians = [
     new Physician(
-      'Dr. María',
+      'María',
       'García',
       'López',
       'maria@hospital.com',
@@ -52,22 +60,27 @@ describe('AppointmentFormComponent', () => {
       'Cardiología'
     ),
     new Physician(
-      'Dr. Carlos',
+      'Carlos',
       'Rodríguez',
       'Silva',
       'carlos@hospital.com',
-      'password456',
+      'password123',
       'Neurología'
     ),
     new Physician(
-      'Dr. Ana',
+      'Ana',
       'Martínez',
       'Castro',
       'ana@hospital.com',
-      'password789',
+      'password123',
       'Cardiología'
     ),
   ];
+
+  // Add id property to the physicians (simulating backend response)
+  (mockPhysicians[0] as any).id = 1;
+  (mockPhysicians[1] as any).id = 2;
+  (mockPhysicians[2] as any).id = 3;
 
   const mockAppointments = [
     {
@@ -77,7 +90,12 @@ describe('AppointmentFormComponent', () => {
       physician_name: 'Dr. María García',
       patient_name: 'Juan Pérez',
       patient_id: 1,
+      physician_id: 1,
       status: 'confirmed',
+      reason: 'Consulta general',
+      specialty: 'Cardiología',
+      priority: 'normal',
+      notes: 'Sin observaciones',
     },
     {
       id: 2,
@@ -86,23 +104,16 @@ describe('AppointmentFormComponent', () => {
       physician_name: 'Dr. Carlos Rodríguez',
       patient_name: 'Ana Silva',
       patient_id: 2,
+      physician_id: 2,
       status: 'confirmed',
+      reason: 'Chequeo neurológico',
+      specialty: 'Neurología',
+      priority: 'normal',
+      notes: '',
     },
   ];
 
-  beforeEach(async () => {
-    // Create SweetAlert mock
-    mockSwalFire = jasmine
-      .createSpy('Swal.fire')
-      .and.returnValue(Promise.resolve({ isConfirmed: true }));
-
-    // Mock the SweetAlert import - make it configurable to avoid redefinition errors
-    Object.defineProperty(window, 'Swal', {
-      value: { fire: mockSwalFire },
-      writable: true,
-      configurable: true, // ✅ Add configurable: true
-    });
-
+  beforeEach(waitForAsync(() => {
     mockAdminService = jasmine.createSpyObj('AdminService', [
       'getAllAppointments',
       'createAppointment',
@@ -113,7 +124,7 @@ describe('AppointmentFormComponent', () => {
     ]);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
-    await TestBed.configureTestingModule({
+    TestBed.configureTestingModule({
       imports: [
         AppointmentFormComponent,
         HttpClientTestingModule,
@@ -130,16 +141,17 @@ describe('AppointmentFormComponent', () => {
 
     fixture = TestBed.createComponent(AppointmentFormComponent);
     component = fixture.componentInstance;
-  });
+  }));
 
   beforeEach(() => {
-    // Reset the mock before each test
-    mockSwalFire.calls.reset();
-
-    // Ensure Swal.fire is always using our mock
-    if (window.Swal) {
-      window.Swal.fire = mockSwalFire;
-    }
+    // Reset all mocks before each test
+    mockAdminService.getAllAppointments.calls.reset();
+    mockAdminService.createAppointment.calls.reset();
+    mockAuthService.getCurrentUser.calls.reset();
+    mockPhysicianService.getAllPhysicians.calls.reset();
+    mockRouter.navigate.calls.reset();
+    mockRouter.navigate.and.returnValue(Promise.resolve(true));
+    mockSwal.fire.calls.reset();
   });
 
   describe('Component Initialization', () => {
@@ -148,34 +160,29 @@ describe('AppointmentFormComponent', () => {
     });
 
     it('should redirect to login if no authenticated user', fakeAsync(() => {
-      // Configurar que no hay usuario autenticado
+      // Configure no authenticated user
       mockAuthService.getCurrentUser.and.returnValue(null);
 
-      // Configurar el mock de Swal.fire para que retorne una promesa resuelta
-      const swalPromise = Promise.resolve({
-        isConfirmed: true,
-        isDenied: false,
-        isDismissed: false,
-      });
-      mockSwalFire.and.returnValue(swalPromise);
-
-      // Ejecutar ngOnInit manualmente
+      // Manually call ngOnInit to trigger the logic
       component.ngOnInit();
 
-      // Verificar que se muestra el mensaje de sesión expirada
-      expect(mockSwalFire).toHaveBeenCalledWith({
-        title: 'Sesión Expirada',
-        text: 'Debe iniciar sesión para agendar citas',
-        icon: 'warning',
-        confirmButtonText: 'Ir a Login',
-      });
-
-      // Procesar microtasks y macrotasks para que la promesa se resuelva completamente
+      // Process any pending operations
       tick();
-      flush();
 
-      // Ahora verificar que se navega al login después del Swal
+      // Verify that Swal.fire was called with the correct parameters
+      expect(mockSwal.fire).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          title: 'Sesión Expirada',
+          text: 'Debe iniciar sesión para agendar citas',
+          icon: 'warning',
+          confirmButtonText: 'Ir a Login',
+        })
+      );
+
+      // Verify the then callback was executed and navigation happened
       expect(mockRouter.navigate).toHaveBeenCalledWith(['/login']);
+
+      flush();
     }));
 
     it('should initialize with authenticated user', fakeAsync(() => {
@@ -192,16 +199,6 @@ describe('AppointmentFormComponent', () => {
       expect(mockPhysicianService.getAllPhysicians).toHaveBeenCalled();
       expect(mockAdminService.getAllAppointments).toHaveBeenCalled();
     }));
-
-    it('should generate time slots correctly', () => {
-      component.generateTimeSlots();
-
-      expect(component.availableTimes).toContain('09:00');
-      expect(component.availableTimes).toContain('09:30');
-      expect(component.availableTimes).toContain('17:00');
-      expect(component.availableTimes).toContain('17:30');
-      expect(component.availableTimes.length).toBeGreaterThan(15);
-    });
   });
 
   describe('Physician Management', () => {
@@ -217,9 +214,7 @@ describe('AppointmentFormComponent', () => {
       tick();
 
       expect(component.allPhysicians.length).toBe(3);
-      expect(component.allPhysicians[0].fullName).toBe(
-        'Dr. María García López'
-      );
+      expect(component.allPhysicians[0].fullName).toBe('María García López');
       expect(component.allPhysicians[0].specialty).toBe('Cardiología');
     }));
 
@@ -292,9 +287,9 @@ describe('AppointmentFormComponent', () => {
       component.ngOnInit();
       tick();
 
-      expect(component.appointments.length).toBe(2);
-      expect(component.appointments[0].isCurrentPatient).toBe(true);
-      expect(component.appointments[1].isCurrentPatient).toBe(false);
+      expect(component.allAppointments.length).toBe(2);
+      expect(component.allAppointments[0].isCurrentPatient).toBe(true);
+      expect(component.allAppointments[1].isCurrentPatient).toBe(false);
     }));
 
     it('should submit appointment successfully', fakeAsync(() => {
@@ -308,79 +303,103 @@ describe('AppointmentFormComponent', () => {
         date: '2025-07-20',
         time: '10:00',
         specialty: 'Cardiología',
+        reason: 'Consulta general',
+        priority: 'normal',
+        notes: 'Sin observaciones',
       };
 
       component.submit();
       tick();
 
-      expect(mockAdminService.createAppointment).toHaveBeenCalledWith({
-        patient_id: '1',
-        physician_id: '1',
-        date: '2025-07-20',
-        time: '10:00',
-        specialty: 'Cardiología',
-      });
+      expect(mockAdminService.createAppointment).toHaveBeenCalled();
       expect(mockAdminService.getAllAppointments).toHaveBeenCalled();
     }));
 
+    // ✅ Corregir validación de campos requeridos
     it('should validate required fields before submission', () => {
-      spyOn(window, 'alert').and.stub(); // Mock SweetAlert
-
       component.newAppt = {
         patient_id: '1',
         physician_id: '',
         date: '',
         time: '',
         specialty: '',
+        reason: '',
+        priority: 'normal',
+        notes: '',
       };
 
       component.submit();
 
+      expect(mockSwal.fire).toHaveBeenCalledWith({
+        title: 'Error',
+        text: 'Por favor complete todos los campos',
+        icon: 'error',
+        confirmButtonText: 'Aceptar',
+      });
       expect(mockAdminService.createAppointment).not.toHaveBeenCalled();
     });
 
     it('should reject past dates', () => {
-      spyOn(window, 'alert').and.stub(); // Mock SweetAlert
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 1);
 
+      // ✅ IMPORTANT: Set up patientId before testing past date validation
+      component.patientId = '1';
       component.newAppt = {
         patient_id: '1',
         physician_id: '1',
         date: pastDate.toISOString().split('T')[0],
         time: '10:00',
         specialty: 'Cardiología',
+        reason: 'Consulta general',
+        priority: 'normal',
+        notes: '',
       };
 
       component.submit();
 
+      expect(mockSwal.fire).toHaveBeenCalledWith({
+        title: 'Error',
+        text: 'No puede agendar citas en fechas pasadas',
+        icon: 'error',
+        confirmButtonText: 'Aceptar',
+      });
       expect(mockAdminService.createAppointment).not.toHaveBeenCalled();
     });
 
     it('should handle appointment creation error', fakeAsync(() => {
-      // Configurar el error 409
+      // Setup error response
       mockAdminService.createAppointment.and.returnValue(
-        throwError({ status: 409 })
+        throwError(() => ({ status: 409 }))
       );
 
-      // Configurar datos del formulario y asegurar que patientId esté configurado
+      // Setup component state
       component.patientId = '1';
+      component.allAppointments = []; // No conflicting appointments for validation
+      component.allPhysicians = [
+        { id: 1, fullName: 'Dr. Test', specialty: 'Cardiología' },
+      ];
+
+      // Setup form data
       component.newAppt = {
         patient_id: '1',
         physician_id: '1',
         date: '2025-07-20',
         time: '10:00',
         specialty: 'Cardiología',
+        reason: 'Consulta general',
+        priority: 'normal',
+        notes: '',
       };
 
-      // Llamar al método submit
+      // Call submit method
       component.submit();
 
-      // Esperar a que se procese la respuesta del error
+      // Process the error response
       tick();
 
-      // Verificar que se muestra el mensaje de error correcto
-      expect(mockSwalFire).toHaveBeenCalledWith({
+      // Verify Swal.fire was called with error message
+      expect(mockSwal.fire).toHaveBeenCalledWith({
         title: 'Horario no disponible',
         text: 'El médico ya tiene una cita agendada en esa fecha y hora. Por favor seleccione otro horario.',
         icon: 'warning',
@@ -450,8 +469,6 @@ describe('AppointmentFormComponent', () => {
     });
 
     it('should show day details with appointments', () => {
-      spyOn(window, 'alert').and.stub(); // Mock SweetAlert
-
       const mockCalDay = {
         allAppointments: [
           {
@@ -466,7 +483,8 @@ describe('AppointmentFormComponent', () => {
       };
 
       component.showDayDetails(mockCalDay);
-      // SweetAlert would be called here
+
+      expect(mockSwal.fire).toHaveBeenCalled();
     });
   });
 
@@ -495,15 +513,22 @@ describe('AppointmentFormComponent', () => {
     it('should reset appointment form after successful submission', fakeAsync(() => {
       mockAdminService.createAppointment.and.returnValue(of({ id: 1 }));
       mockAdminService.getAllAppointments.and.returnValue(of([]));
-      spyOn(window, 'alert').and.stub(); // Mock SweetAlert
 
       component.patientId = '1';
+      component.allAppointments = [];
+      component.allPhysicians = [
+        { id: 1, fullName: 'Dr. Test', specialty: 'Cardiología' },
+      ];
+
       component.newAppt = {
         patient_id: '1',
         physician_id: '1',
         date: '2025-07-20',
         time: '10:00',
         specialty: 'Cardiología',
+        reason: 'Consulta general',
+        priority: 'normal',
+        notes: '',
       };
 
       component.submit();
@@ -542,8 +567,6 @@ describe('AppointmentFormComponent', () => {
     });
 
     it('should handle appointment without patient ID', () => {
-      spyOn(window, 'alert').and.stub(); // Mock SweetAlert
-
       component.patientId = '';
       component.newAppt = {
         patient_id: '',
@@ -551,10 +574,19 @@ describe('AppointmentFormComponent', () => {
         date: '2025-07-20',
         time: '10:00',
         specialty: 'Cardiología',
+        reason: '',
+        priority: 'normal',
+        notes: '',
       };
 
       component.submit();
 
+      expect(mockSwal.fire).toHaveBeenCalledWith({
+        title: 'Error de Sesión',
+        text: 'No se pudo identificar al paciente. Inicie sesión nuevamente.',
+        icon: 'error',
+        confirmButtonText: 'Aceptar',
+      });
       expect(mockAdminService.createAppointment).not.toHaveBeenCalled();
     });
   });

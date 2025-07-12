@@ -1,71 +1,74 @@
-import {Routes} from '@angular/router';
-import {HomeComponent} from '../pages/home/home.component';
-import {LoginComponent} from '../pages/auth/login/login.component';
-import {AdminDashboardComponent} from '../dashboards/admin/admin-dashboard/admin-dashboard.component';
-import {PhysicianDashboardComponent} from '../dashboards/physician-dashboard/physician-dashboard.component';
-import {AssistantDashboardComponent} from '../dashboards/assitant/assistant-dashboard/assistant-dashboard.component';
-import {PatientDashboardComponent} from '../dashboards/patient/patient-dashboard/patient-dashboard.component';
-import {RegisterPhysicianComponent} from '../dashboards/admin/register-physician/register-physician.component';
-import {RegisterAssistantComponent} from '../dashboards/admin/register-assistant/register-assistant.component';
-import {RegisterPatientComponent} from '../dashboards/assitant/register-patient/register-patient.component';
-import {RegisterComponent} from '../pages/auth/register/register.component';
-import {AppointmentFormComponent} from '../dashboards/patient/appointments/appointment-form/appointment-form.component';
-import {ManagePatientsComponent} from '../dashboards/manage-patient/manage-patient.component';
-import {ManagePhysicianComponent} from '../dashboards/admin/manage-phsycian/manage-phsycian.component';
-import {ManageAssistantsComponent} from '../dashboards/admin/manage-assistan/manage-assistan.component';
+import { Routes } from '@angular/router';
+import { HomeComponent } from '../pages/home/home.component';
+import { LoginComponent } from '../pages/auth/login/login.component';
+import { AdminDashboardComponent } from '../dashboards/admin/admin-dashboard/admin-dashboard.component';
+import { PhysicianDashboardComponent } from '../dashboards/physician-dashboard/physician-dashboard.component';
+import { AssistantDashboardComponent } from '../dashboards/assitant/assistant-dashboard/assistant-dashboard.component';
+import { PatientDashboardComponent } from '../dashboards/patient/patient-dashboard/patient-dashboard.component';
+import { RegisterPhysicianComponent } from '../dashboards/admin/register-physician/register-physician.component';
+import { RegisterAssistantComponent } from '../dashboards/admin/register-assistant/register-assistant.component';
+import { RegisterPatientComponent } from '../dashboards/assitant/register-patient/register-patient.component';
+import { RegisterComponent } from '../pages/auth/register/register.component';
+import { AppointmentFormComponent } from '../dashboards/patient/appointments/appointment-form/appointment-form.component';
+import { ManagePatientsComponent } from '../dashboards/manage-patient/manage-patient.component';
+// import {ManagePhysicianComponent} from '../dashboards/admin/manage-phsycian/manage-phsycian.component';
+// import {ManageAssistantsComponent} from '../dashboards/admin/manage-assistan/manage-assistan.component';
 import { AppointmentCalendarFormComponent } from '../dashboards/physician-dashboard/appointment-calendar-form/appointment-calendar-form/appointment-calendar-form.component';
-import {HelpChatComponent} from '../pages/help-chat/help-chat.component';
+// import {HelpChatComponent} from '../pages/help-chat/help-chat.component';
 import { AppointmentFormAssistantComponent } from '../dashboards/assitant/appointment-form-assistant/appointment-form-assistant/appointment-form-assistant.component';
 import { AdminAppointmentManagerComponent } from '../dashboards/admin/admin-dashboard/appointment-manager/admin-appointment-manager/admin-appointment-manager.component';
-import {GenerateReportComponent} from '../dashboards/admin/generate-report/generate-report.component';
+import { GenerateReportComponent } from '../dashboards/admin/generate-report/generate-report.component';
 import { HistoryAppointmentsComponent } from '../dashboards/patient/history-appointments/history-appointments/history-appointments.component';
-import {MedicalHistoryComponent} from '../dashboards/admin/medical-history/medical-history.component';
-import {ClinicalHistoryComponent} from '../dashboards/physician-dashboard/clinical-history/clinical-history.component';
-
+import { MedicalHistoryComponent } from '../dashboards/admin/medical-history/medical-history.component';
+import { ClinicalHistoryComponent } from '../dashboards/physician-dashboard/clinical-history/clinical-history.component';
 
 export const routes: Routes = [
-  {path: '', component: HomeComponent},
-  {path: 'home', component: HomeComponent},
-  {path: 'login', component: LoginComponent},
-  {path: 'admin-dashboard', component: AdminDashboardComponent},
-  {path: 'physician-dashboard', component: PhysicianDashboardComponent},
-  {path: 'assistant-dashboard', component: AssistantDashboardComponent},
-  {path: 'patient-dashboard', component: PatientDashboardComponent},
-  {path: 'register-physician', component: RegisterPhysicianComponent},
-  {path: 'register-assistant', component: RegisterAssistantComponent},
-  {path: 'register-patient', component: RegisterPatientComponent},
-  {path: 'register', component: RegisterComponent},
-  {path: 'appointment-form', component: AppointmentFormComponent},
-
-  // Rutas para gestión de personal médico por admin
-  {path: 'admin/manage-physicians', component: ManagePhysicianComponent},
-  {path: 'admin/manage-assistants', component: ManageAssistantsComponent},
+  { path: '', component: HomeComponent },
+  { path: 'home', component: HomeComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'admin-dashboard', component: AdminDashboardComponent },
+  { path: 'physician-dashboard', component: PhysicianDashboardComponent },
+  { path: 'assistant-dashboard', component: AssistantDashboardComponent },
+  { path: 'patient-dashboard', component: PatientDashboardComponent },
+  { path: 'register-physician', component: RegisterPhysicianComponent },
+  { path: 'register-assistant', component: RegisterAssistantComponent },
+  { path: 'register-patient', component: RegisterPatientComponent },
+  { path: 'register', component: RegisterComponent },
+  { path: 'appointment-form', component: AppointmentFormComponent },
 
   // Rutas compartidas para gestión de pacientes
-  {path: 'manage-patients', component: ManagePatientsComponent},
-  {path: 'admin/manage-patients', component: ManagePatientsComponent},
-  {path: 'assistant/manage-patients', component: ManagePatientsComponent},
-  {path: 'physician/manage-patients', component: ManagePatientsComponent},
+  { path: 'manage-patients', component: ManagePatientsComponent },
+  { path: 'admin/manage-patients', component: ManagePatientsComponent },
+  { path: 'assistant/manage-patients', component: ManagePatientsComponent },
+  { path: 'physician/manage-patients', component: ManagePatientsComponent },
 
   // Otras rutas...
-  {path: 'admin/appointment-manager', component: AdminAppointmentManagerComponent},
-  {path: 'medical-history', component: MedicalHistoryComponent},
-  {path: 'admin/appointment-manager', component: AdminAppointmentManagerComponent},
-  {path: 'reports', component: GenerateReportComponent},
+  {
+    path: 'admin/appointment-manager',
+    component: AdminAppointmentManagerComponent,
+  },
+  { path: 'medical-history', component: MedicalHistoryComponent },
+  { path: 'reports', component: GenerateReportComponent },
 
   // Rutas para asistente
-  {path: 'assistant-manage-appointments', component: AppointmentFormAssistantComponent},
-  {path: 'assistant-schedule-appointment', component: AssistantDashboardComponent},
-  {path: 'assistant-reports', component: AssistantDashboardComponent},
+  {
+    path: 'assistant-manage-appointments',
+    component: AppointmentFormAssistantComponent,
+  },
+  {
+    path: 'assistant-schedule-appointment',
+    component: AssistantDashboardComponent,
+  },
+  { path: 'assistant-reports', component: AssistantDashboardComponent },
 
   // Rutas para médico
-  {path: 'physician-schedule', component: AppointmentCalendarFormComponent},
-  {path: 'physician-patients', component: PhysicianDashboardComponent},
-  {path: 'physician-medical-history', component: ClinicalHistoryComponent},
-
-
+  { path: 'physician-schedule', component: AppointmentCalendarFormComponent },
+  { path: 'physician-patients', component: PhysicianDashboardComponent },
+  { path: 'physician-medical-history', component: ClinicalHistoryComponent },
 
   // Rutas para paciente
-  {path: 'patient-appointment-history', component: HistoryAppointmentsComponent},
-  {path: 'patient-help-chat', component: HelpChatComponent}
+  {
+    path: 'patient-appointment-history',
+    component: HistoryAppointmentsComponent,
+  },
 ];

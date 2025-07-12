@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { ClinicalHistoryComponent } from './clinical-history.component';
 
@@ -8,9 +9,8 @@ describe('ClinicalHistoryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ClinicalHistoryComponent]
-    })
-    .compileComponents();
+      imports: [ClinicalHistoryComponent, HttpClientTestingModule],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ClinicalHistoryComponent);
     component = fixture.componentInstance;
