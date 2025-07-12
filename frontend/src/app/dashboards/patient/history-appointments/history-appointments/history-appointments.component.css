@@ -14,7 +14,6 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 2rem;
-    border-radius: 12px;
     margin-bottom: 2rem;
     box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
     /* ✅ NUEVO: Evitar que se encoja */

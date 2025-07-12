@@ -497,12 +497,6 @@ export class AppointmentCalendarFormComponent implements OnInit {
       }, 100);
     };
   
-    (window as any).viewMedicalRecord = (appointmentId: number) => {
-      Swal.close();
-      setTimeout(() => {
-        this.viewMedicalRecord(appointmentId);
-      }, 100);
-    };
   
     Swal.fire({
       title: `🩺 Mis Consultas del ${dateFormatted}`,
@@ -591,62 +585,7 @@ export class AppointmentCalendarFormComponent implements OnInit {
   }
   
   // ✅ NUEVO: Ver expediente médico del paciente
-  viewMedicalRecord(appointmentId: number) {
-    const appointment = this.appointments.find(apt => apt.id === appointmentId);
-    if (!appointment) return;
   
-    // Obtener historial de citas del paciente
-    const patientHistory = this.appointments.filter(apt => 
-      apt.patientId === appointment.patientId && apt.status === 'completed'
-    ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  
-    const historyHtml = patientHistory.length > 0 ? 
-      patientHistory.map(apt => `
-        <div style="background: #f8f9fa; padding: 0.75rem; border-radius: 4px; margin: 0.5rem 0; border-left: 3px solid #28a745;">
-          <div style="font-weight: bold;">📅 ${apt.date} - ${apt.time}</div>
-          ${apt.reason ? `<div><strong>Motivo:</strong> ${apt.reason}</div>` : ''}
-          ${apt.medical_notes ? `<div><strong>Notas:</strong> ${apt.medical_notes}</div>` : ''}
-        </div>
-      `).join('') : 
-      '<p style="color: #666; font-style: italic;">No hay consultas previas registradas</p>';
-  
-    Swal.fire({
-      title: `📋 Expediente Médico - ${appointment.patient}`,
-      html: `
-        <div style="text-align: left; max-height: 400px; overflow-y: auto;">
-          <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-            <h4 style="margin: 0 0 0.5rem 0; color: #1976d2;">ℹ️ Información del Paciente</h4>
-            <p><strong>Nombre:</strong> ${appointment.patient}</p>
-            ${appointment.patient_phone ? `<p><strong>Teléfono:</strong> ${appointment.patient_phone}</p>` : ''}
-            ${appointment.patient_email ? `<p><strong>Email:</strong> ${appointment.patient_email}</p>` : ''}
-          </div>
-          
-          <div style="background: #e8f5e8; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-            <h4 style="margin: 0 0 0.5rem 0; color: #388e3c;">🩺 Consulta Actual</h4>
-            <p><strong>Fecha:</strong> ${appointment.date} - ${appointment.time}</p>
-            <p><strong>Motivo:</strong> ${appointment.reason || 'No especificado'}</p>
-            <p><strong>Estado:</strong> ${appointment.status === 'completed' ? 'Completada' : 'En proceso'}</p>
-            ${appointment.medical_notes ? `<p><strong>Notas:</strong> ${appointment.medical_notes}</p>` : ''}
-          </div>
-          
-          <div>
-            <h4 style="margin: 0 0 0.5rem 0; color: #666;">📖 Historial de Consultas</h4>
-            ${historyHtml}
-          </div>
-        </div>
-      `,
-      width: '700px',
-      confirmButtonText: 'Cerrar',
-      confirmButtonColor: '#28a745',
-      showCancelButton: true,
-      cancelButtonText: 'Agregar Notas',
-      cancelButtonColor: '#6f42c1'
-    }).then((result) => {
-      if (result.dismiss === Swal.DismissReason.cancel) {
-        this.addMedicalNotes(appointmentId);
-      }
-    });
-  }
   
 
   updateAppointmentStatus(appointmentId: number, status: string) {
