@@ -249,7 +249,9 @@ describe('LoginComponent', () => {
 
       component.login();
 
-      expect(component.message).toBe('Error en el servidor.');
+      expect(component.message).toBe(
+        'Error en el servidor (undefined): Error desconocido'
+      );
     });
 
     it('should handle network timeout error', () => {
@@ -261,7 +263,9 @@ describe('LoginComponent', () => {
 
       component.login();
 
-      expect(component.message).toBe('Error en el servidor.');
+      expect(component.message).toBe(
+        'No se puede conectar al servidor. Verifique que el backend esté ejecutándose.'
+      );
     });
 
     it('should handle 401 unauthorized error', () => {
@@ -273,7 +277,9 @@ describe('LoginComponent', () => {
 
       component.login();
 
-      expect(component.message).toBe('Error en el servidor.');
+      expect(component.message).toBe(
+        'Error en el servidor (401): Error desconocido'
+      );
     });
   });
 
