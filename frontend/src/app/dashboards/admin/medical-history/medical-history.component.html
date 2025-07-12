@@ -1,1 +1,22 @@
-<p>medical-history works!</p>
+<h2>Historial Médico</h2>
+
+<table>
+  <thead>
+  <tr>
+    <th>Fecha</th>
+    <th>Hora</th>
+    <th>Paciente</th>
+    <th>Médico</th>
+    <th>Motivo</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let cita of appointments">
+    <td>{{ cita.formattedDate }}</td>
+    <td>{{ cita.formattedTime }}</td>
+    <td>{{ cita.patientName }}</td>
+    <td>{{ cita.physicianName }}</td>
+    <td>{{ cita.reason }}</td>
+  </tr>
+  </tbody>
+</table>

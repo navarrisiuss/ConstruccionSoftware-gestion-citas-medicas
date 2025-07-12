@@ -56,4 +56,8 @@ export class AppointmentsService {
     return this.http.get(`${this.baseUrl}/physician/${physicianId}/patient/${patientId}/status/${status}`);
   }
   
+
+  getAllAppointments(): Observable<any[]> {
+    return this.http.get<any[]>(this.baseUrl);
+  }
 }

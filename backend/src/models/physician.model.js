@@ -19,6 +19,11 @@ const Physician = {
     const [rows] = await db.query('SELECT * FROM physicians WHERE email = ?', [email]);
     return rows;
   },
+
+  getById: async (id) => {
+    const [rows] = await db.execute('SELECT * FROM physicians WHERE id = ?', [id]);
+    return rows[0]; // Si esperas un único médico
+  },
   
   create: async (physician) => {
     try {

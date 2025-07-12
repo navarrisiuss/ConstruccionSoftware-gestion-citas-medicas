@@ -28,6 +28,16 @@ exports.getAppointmentsByPhysician = async (req, res) => {
     }
 };
 
+exports.getAllAppointments = async (req, res) => {
+    try {
+        const appointments = await Appointment.getAll(); // tu modelo debe tener esto
+        res.json(appointments);
+    } catch (error) {
+        console.error('ERROR AL OBTENER TODAS LAS CITAS:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 exports.createAppointment = async (req, res) => {
     try {
         console.log('Datos recibidos:', req.body);
