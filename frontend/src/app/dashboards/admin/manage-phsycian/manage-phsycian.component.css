@@ -22,7 +22,6 @@
     background-color: rgba(0, 123, 255, 0.9); /* Color azul para admin */
     color: white;
     padding: 2vh 3vw;
-    border-radius: 1vw;
     margin-bottom: 2vh;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }

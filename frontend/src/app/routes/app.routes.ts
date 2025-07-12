@@ -19,7 +19,8 @@ import { AppointmentFormAssistantComponent } from '../dashboards/assitant/appoin
 import { AdminAppointmentManagerComponent } from '../dashboards/admin/admin-dashboard/appointment-manager/admin-appointment-manager/admin-appointment-manager.component';
 import {GenerateReportComponent} from '../dashboards/admin/generate-report/generate-report.component';
 import { HistoryAppointmentsComponent } from '../dashboards/patient/history-appointments/history-appointments/history-appointments.component';
-
+import {MedicalHistoryComponent} from '../dashboards/admin/medical-history/medical-history.component';
+import {ClinicalHistoryComponent} from '../dashboards/physician-dashboard/clinical-history/clinical-history.component';
 
 
 export const routes: Routes = [
@@ -48,7 +49,7 @@ export const routes: Routes = [
 
   // Otras rutas...
   {path: 'admin/appointment-manager', component: AdminAppointmentManagerComponent},
-  {path: 'medical-history', component: AdminDashboardComponent},
+  {path: 'medical-history', component: MedicalHistoryComponent},
   {path: 'admin/appointment-manager', component: AdminAppointmentManagerComponent},
   {path: 'reports', component: GenerateReportComponent},
 
@@ -60,7 +61,8 @@ export const routes: Routes = [
   // Rutas para médico
   {path: 'physician-schedule', component: AppointmentCalendarFormComponent},
   {path: 'physician-patients', component: PhysicianDashboardComponent},
-  {path: 'physician-medical-history', component: PhysicianDashboardComponent},
+  {path: 'physician-medical-history', component: ClinicalHistoryComponent},
+
 
 
   // Rutas para paciente

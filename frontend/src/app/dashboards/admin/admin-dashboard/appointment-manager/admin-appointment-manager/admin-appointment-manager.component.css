@@ -1,7 +1,6 @@
 .admin-appointment-container {
     min-height: 100vh;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 1rem;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
   
@@ -9,7 +8,6 @@
   .admin-header {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     display: flex;
@@ -83,14 +81,16 @@
   
   /* ============ CONTROLES DE VISTA ============ */
   .view-controls {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
+    justify-content: space-between;
     margin-bottom: 1.5rem;
+    gap: 2rem; /* Espacio entre elementos */
   }
   
   .view-buttons {
-    display: flex;
+    grid-column: 1;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 8px;
     padding: 0.25rem;
@@ -115,22 +115,20 @@
   }
   
   .action-buttons {
-    display: flex;
-    gap: 0.75rem;
+    grid-column: 3;
+    justify-self: end;
+    margin-right: 1.0rem; /* Alejarlos del borde derecho */
+    margin-left: 0;
   }
   
-  .btn-export, .btn-refresh {
+  .btn-refresh {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
     transition: all 0.2s ease;
-  }
-  
-  .btn-export {
-    background: #38a169;
-    color: white;
+    
   }
   
   .btn-refresh {
@@ -138,7 +136,7 @@
     color: white;
   }
   
-  .btn-export:hover, .btn-refresh:hover {
+  .btn-refresh:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
@@ -147,7 +145,7 @@
   .main-content {
     display: grid;
     grid-template-columns: 350px 1fr;
-    gap: 1.5rem;
+    gap: 1rem;
     /* ✅ REDUCIR la altura máxima para evitar desbordamiento */
     height: calc(100vh - 350px); /* Aumentado de 300px a 350px */
     max-height: 800px; /* ✅ NUEVO: Altura máxima fija */
@@ -157,7 +155,7 @@
   .left-panel {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0.5rem;
     max-height: 100%;
     overflow-y: auto;
     /* ✅ NUEVO: Scroll más suave */
@@ -170,7 +168,6 @@
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     padding: 1.5rem;
-    border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
   
@@ -279,7 +276,6 @@
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     padding: 1.5rem;
-    border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
   

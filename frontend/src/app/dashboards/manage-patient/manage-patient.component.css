@@ -10,7 +10,7 @@
   top: 0;
   left: 0;
   margin: 0;
-  padding: 2vh 0vw;
+  padding: 1vh 0vw;
   overflow-y: auto;
 }
 
@@ -20,7 +20,7 @@
   justify-content: space-between;
   align-items: center;
   color: white;
-  padding: 2vh 2vw;
+  padding: 3vh 2vw;
   border-radius: 1vw;
   margin-bottom: 2vh;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -225,6 +225,311 @@
   background-color: #dc3545;
 }
 
+.btn-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto de onda al hacer clic */
+.btn-state::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: width 0.6s, height 0.6s;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+.btn-state:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-state > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Botón desactivar (para pacientes activos) */
+.btn-deactivate {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  color: white;
+  border: 2px solid transparent;
+}
+
+.btn-deactivate:hover {
+  background: linear-gradient(135deg, #ff5252, #e53e3e);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.btn-deactivate:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+/* Botón reactivar (para pacientes inactivos) */
+.btn-reactivate {
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  color: white;
+  border: 2px solid transparent;
+}
+
+.btn-reactivate:hover {
+  background: linear-gradient(135deg, #26d0ce, #2fb398);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+}
+
+.btn-reactivate:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(78, 205, 196, 0.3);
+}
+
+/* Iconos dentro de los botones */
+.btn-state i {
+  font-size: 1rem;
+  filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.3));
+}
+
+/* Variante con contorno (opcional) */
+.btn-state-outline {
+  background: transparent;
+  border: 2px solid;
+}
+
+.btn-deactivate-outline {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+.btn-deactivate-outline:hover {
+  background: #ff6b6b;
+  color: white;
+}
+
+.btn-reactivate-outline {
+  border-color: #4ecdc4;
+  color: #4ecdc4;
+}
+
+.btn-reactivate-outline:hover {
+  background: #4ecdc4;
+  color: white;
+}
+
+/* Mejoras para los badges de estado */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 2px solid;
+  transition: all 0.3s ease;
+}
+
+.badge-success {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  color: #155724;
+  border-color: #28a745;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+.badge-warning {
+  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+  color: #856404;
+  border-color: #ffc107;
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+}
+
+.badge i {
+  font-size: 0.9rem;
+  filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.1));
+}
+
+/* Animación de pulso para estados importantes */
+.badge-warning {
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(255, 193, 7, 0.4);
+  }
+}
+
+/* Contenedor de acciones mejorado */
+.actions-cell {
+  text-align: center;
+  white-space: nowrap;
+  padding: 1rem 0.5rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Botones de acción estándar mejorados */
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-action::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: width 0.4s, height 0.4s;
+  transform: translate(-50%, -50%);
+}
+
+.btn-action:active::before {
+  width: 100px;
+  height: 100px;
+}
+
+.btn-action.view {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+}
+
+.btn-action.view:hover {
+  background: linear-gradient(135deg, #138496, #117a8b);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.btn-action.edit {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+}
+
+.btn-action.edit:hover {
+  background: linear-gradient(135deg, #20c997, #17a2b8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+/* Tooltips mejorados */
+.btn-action[title], .btn-state[title] {
+  position: relative;
+}
+
+.btn-action[title]:hover::after, .btn-state[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  animation: tooltip-appear 0.3s ease;
+}
+
+.btn-action[title]:hover::before, .btn-state[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 115%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+}
+
+@keyframes tooltip-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Responsive para botones */
+@media (max-width: 768px) {
+  .btn-state {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  
+  .btn-action {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Estados disabled */
+.btn-state:disabled, .btn-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-state:disabled:hover, .btn-action:disabled:hover {
+  transform: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
 /* Sin resultados */
 .no-results {
   text-align: center;

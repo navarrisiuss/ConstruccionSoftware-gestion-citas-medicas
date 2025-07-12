@@ -1,88 +1,148 @@
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Contenedor principal del login */
 .login-container {
   text-align: center;
   background-image: url('/assets/7.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: #fff;
-  box-shadow: 0 4vw 10vh rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
   height: 100vh;
-  width: 50vw;
+  width: 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   position: fixed;
   top: 0;
   right: 0;
   margin: 0;
-  padding: 0;
+  padding: 20px;
+  overflow: hidden;
+  /* ✅ Animación del contenedor */
+  animation: fadeInRight 0.8s ease-out;
 }
 
 .login-image {
   height: 100vh;
-  width: 50vw;
+  width: 50%;
   position: fixed;
   background-image: url('/assets/8.png');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   top: 0;
   left: 0;
   margin: 0;
   padding: 0;
+  /* ✅ Animación de la imagen */
+  animation: fadeInLeft 0.8s ease-out;
 }
 
+/* Título principal */
 h2 {
-  font-size: 2.5rem;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
   background-color: #096775;
-  width: 20vw;
-  height: 7vh;
-  border-radius: 2vw;
+  width: clamp(280px, 25vw, 400px);
+  height: clamp(60px, 8vh, 90px);
+  border-radius: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2vw 5vh rgba(0, 0, 0, 0.3);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
   color: #fff;
-  text-shadow: 1vh 1vw 2vw rgba(0, 0, 0, 0.5);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   font-family: 'Arial', sans-serif;
-  margin: 0 auto;
-  padding: 1vh;
-  margin-bottom: 6vh;
+  margin: 0 auto 30px auto;
+  padding: 15px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  /* ✅ Animación del título */
+  animation: slideInDown 0.6s ease-out;
+  animation-delay: 0.2s;
+  animation-fill-mode: both;
 }
 
+/* Formulario */
+form {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* ✅ Animación del formulario */
+  animation: slideInUp 0.6s ease-out;
+  animation-delay: 0.4s;
+  animation-fill-mode: both;
+}
+
+/* Grupos de formulario */
 .form-group {
-  margin: 0 auto;
-  margin-bottom: 3vh;
+  margin: 0 auto 20px auto;
   display: flex;
   flex-direction: column;
   background-color: #096775;
-  border-radius: 2vw;
-  width: 30vw;
-  padding: 1vh 1vw;
+  border-radius: 20px;
+  width: clamp(300px, 35vw, 450px);
+  padding: clamp(15px, 2vh, 25px) clamp(15px, 2vw, 25px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  /* ✅ Solo transiciones para hover, no animaciones de entrada */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* ✅ Opacidad inicial para animación escalonada */
+  opacity: 0;
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+/* ✅ Animaciones escalonadas para cada form-group */
+.form-group:nth-child(1) {
+  animation-delay: 0.6s;
+}
+
+.form-group:nth-child(2) {
+  animation-delay: 0.8s;
+}
+
+.form-group:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
 }
 
 label {
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   font-weight: bold;
   text-align: left;
   color: #ffffff;
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
 }
 
 input {
-  padding: 10px;
-  font-size: 14px;
-  border: 1px solid #000708;
-  border-radius: 1vw;
+  padding: clamp(10px, 1.5vh, 15px);
+  font-size: clamp(0.9rem, 1.5vw, 1rem);
+  border: 2px solid transparent;
+  border-radius: 15px;
   width: 100%;
   box-sizing: border-box;
   background-color: #ffffff;
   color: #096775;
   transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 input:focus {
   background-color: #ffffff;
   border-color: #007bff;
   outline: none;
-  box-shadow: 0 0 1vh rgba(9, 103, 117, 0.5);
+  box-shadow: 0 0 15px rgba(9, 103, 117, 0.5);
   transform: scale(1.02);
 }
 
@@ -101,24 +161,33 @@ input:disabled {
 .button-group {
   display: flex;
   flex-direction: column;
-  gap: 1vh;
-  margin-top: 3vh;
+  gap: clamp(12px, 2vh, 20px);
+  margin-top: clamp(20px, 4vh, 30px);
   align-items: center;
+  width: 100%;
+  max-width: 400px;
+  /* ✅ Animación de los botones */
+  opacity: 0;
+  animation: slideInUp 0.6s ease-out forwards;
+  animation-delay: 1s;
 }
 
 button {
-  width: 45%;
-  padding: 2vh;
-  font-size: 16px;
+  width: clamp(200px, 30vw, 300px);
+  padding: clamp(12px, 2vh, 18px);
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
   color: #fff;
   background-color: #096775;
   border: none;
-  border-radius: 3vh;
+  border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: bold;
   position: relative;
   overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 button[type="button"] {
@@ -127,8 +196,12 @@ button[type="button"] {
 
 button:hover:not(:disabled) {
   background-color: #138496;
-  transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+  transform: translateY(0) scale(0.98);
 }
 
 button:disabled {
@@ -163,22 +236,34 @@ button.loading::after {
 
 /* Sección de ayuda */
 .help-section {
-  margin-top: 2vh;
+  margin-top: clamp(15px, 3vh, 25px);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  /* ✅ Animación de la sección de ayuda */
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out forwards;
+  animation-delay: 1.2s;
 }
 
 .help-button {
   background: transparent !important;
   border: 2px solid #ffffff !important;
   color: #ffffff !important;
-  font-size: 0.9rem !important;
-  padding: 1vh 2vw !important;
+  font-size: clamp(0.8rem, 1.2vw, 0.9rem) !important;
+  padding: clamp(8px, 1.5vh, 12px) clamp(15px, 2vw, 25px) !important;
   width: auto !important;
-  border-radius: 2vh !important;
+  border-radius: 20px !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  min-width: clamp(160px, 20vw, 200px);
+  transition: all 0.3s ease !important;
 }
 
 .help-button:hover:not(:disabled) {
   background-color: rgba(255, 255, 255, 0.1) !important;
-  transform: scale(1.02) !important;
+  transform: translateY(-1px) scale(1.02) !important;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Efectos hover mejorados */
@@ -197,48 +282,22 @@ button:hover::before {
   left: 100%;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .login-container {
-    width: 100vw;
-    position: relative;
-  }
-  
-  .login-image {
-    display: none;
-  }
-  
-  h2 {
-    width: 60vw;
-    font-size: 2rem;
-  }
-  
-  .form-group {
-    width: 80vw;
-  }
-  
-  button {
-    width: 80%;
-  }
-}
-
-/* Animaciones */
-.form-group {
-  animation: slideInRight 0.6s ease-out;
-}
-
-h2 {
-  animation: slideInDown 0.6s ease-out;
-}
-
-.button-group {
-  animation: slideInUp 0.6s ease-out;
-}
-
-@keyframes slideInRight {
+/* ✅ KEYFRAMES CORREGIDOS */
+@keyframes fadeInRight {
   from {
     opacity: 0;
-    transform: translateX(30px);
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
   }
   to {
     opacity: 1;
@@ -266,4 +325,367 @@ h2 {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ✅ MEDIA QUERIES MEJORADAS */
+
+/* Para pantallas muy grandes */
+@media screen and (min-width: 1920px) {
+  
+  h2 {
+    font-size: 2.8rem;
+    width: 450px;
+    height: 100px;
+  }
+  
+  .form-group {
+    width: 500px;
+    padding: 25px 30px;
+  }
+  
+  button {
+    width: 350px;
+    font-size: 1.2rem;
+    padding: 20px;
+  }
+}
+
+/* Para laptops estándar */
+@media screen and (max-width: 1600px) and (min-width: 1200px) {
+  .login-container, .login-image {
+    min-width: 600px;
+    max-width: 800px;
+  }
+  
+  h2 {
+    font-size: 2.2rem;
+    width: 350px;
+    height: 80px;
+  }
+  
+  .form-group {
+    width: 400px;
+    padding: 20px 25px;
+  }
+  
+  button {
+    width: 280px;
+  }
+}
+
+/* Para tablets en landscape */
+@media screen and (max-width: 1199px) and (min-width: 768px) {
+  .login-container {
+    width: 55%;
+    min-width: 450px;
+    max-width: 600px;
+    padding: 15px;
+  }
+  
+  .login-image {
+    width: 45%;
+    min-width: 450px;
+    max-width: 600px;
+  }
+  
+  h2 {
+    font-size: 2rem;
+    width: 300px;
+    height: 70px;
+    margin-bottom: 25px;
+  }
+  
+  .form-group {
+    width: 350px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  
+  button {
+    width: 250px;
+    font-size: 1rem;
+    padding: 15px;
+  }
+  
+  .help-button {
+    min-width: 180px !important;
+  }
+}
+
+/* ✅ Para móviles y pantallas pequeñas */
+@media screen and (max-width: 930px) {
+  /* ✅ Desactivar animaciones complejas en móviles para mejor rendimiento */
+  .login-container {
+    animation: none;
+    opacity: 1;
+  }
+  
+  .login-image {
+    animation: none;
+    opacity: 1;
+  }
+  
+  h2 {
+    animation: none;
+    opacity: 1;
+  }
+  
+  form {
+    animation: none;
+    opacity: 1;
+  }
+  
+  .form-group {
+    animation: none;
+    opacity: 1;
+  }
+  
+  .button-group {
+    animation: none;
+    opacity: 1;
+  }
+  
+  .help-section {
+    animation: none;
+    opacity: 1;
+  }
+
+  .login-container {
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+    position: fixed;
+    min-width: unset;
+    max-width: unset;
+    top: 0;
+    right: 0;
+    padding: 20px 15px;
+    background-size: cover;
+    justify-content: flex-start;
+    padding-top: 50px;
+  }
+
+  .login-image {
+    display: none;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    width: 90%;
+    max-width: 300px;
+    height: 60px;
+    margin: 20px auto 30px auto;
+    border-radius: 20px;
+  }
+
+  form {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .form-group {
+    width: 95%;
+    max-width: 350px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+  }
+
+  input {
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+
+  .button-group {
+    gap: 15px;
+    margin-top: 25px;
+    max-width: 350px;
+  }
+
+  button {
+    width: 80%;
+    max-width: 280px;
+    font-size: 1rem;
+    padding: 15px 20px;
+    border-radius: 20px;
+  }
+
+  .help-section {
+    margin-top: 20px;
+  }
+
+  .help-button {
+    width: 70% !important;
+    max-width: 250px !important;
+    font-size: 0.9rem !important;
+    padding: 12px 15px !important;
+    min-width: unset !important;
+  }
+}
+
+/* ✅ Para pantallas muy pequeñas */
+@media screen and (max-width: 480px) {
+  .login-container {
+    padding: 15px 10px;
+    padding-top: 40px;
+  }
+  
+  h2 {
+    font-size: 1.6rem;
+    width: 95%;
+    max-width: 280px;
+    height: 55px;
+  }
+  
+  .form-group {
+    width: 98%;
+    max-width: 320px;
+    padding: 12px;
+  }
+  
+  input {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+  
+  button {
+    width: 90%;
+    max-width: 250px;
+    font-size: 0.9rem;
+    padding: 12px 18px;
+  }
+  
+  .help-button {
+    width: 85% !important;
+    max-width: 220px !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* ✅ Para pantallas horizontales pequeñas */
+@media screen and (max-height: 600px) and (orientation: landscape) {
+  /* ✅ Desactivar animaciones en landscape para mejor UX */
+  * {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+  
+  .login-container {
+    justify-content: flex-start;
+    padding-top: 20px;
+  }
+  
+  h2 {
+    margin-bottom: 15px;
+    height: 50px;
+    font-size: 1.6rem;
+  }
+  
+  .form-group {
+    margin-bottom: 12px;
+    padding: 12px 15px;
+  }
+  
+  input {
+    padding: 8px;
+  }
+  
+  .button-group {
+    gap: 8px;
+    margin-top: 15px;
+  }
+  
+  button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+  
+  .help-section {
+    margin-top: 10px;
+  }
+}
+
+/* ✅ Prevenir zoom en elementos específicos */
+@supports (zoom: 1) {
+  .login-container, .login-image, h2, .form-group, button {
+    zoom: 1;
+  }
+}
+
+/* ✅ Para densidad de píxeles alta (Retina, etc.) */
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+  h2, label, input, button {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* ✅ Estados de accesibilidad */
+button:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+input:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* ✅ Mejoras de contraste para accesibilidad */
+@media (prefers-contrast: high) {
+  .form-group {
+    background-color: #064a54;
+  }
+  
+  button {
+    background-color: #064a54;
+  }
+  
+  input {
+    border: 2px solid #333;
+  }
+}
+
+/* ✅ Respeto a las preferencias de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
+  
+  .login-container, .login-image, h2, form, .form-group, .button-group, .help-section {
+    opacity: 1 !important;
+  }
+}
+
+/* ✅ Fallback para navegadores que no soportan clamp */
+@supports not (font-size: clamp(1rem, 2vw, 2rem)) {
+  h2 { font-size: 2.2rem; width: 320px; height: 75px; }
+  .form-group { width: 380px; padding: 18px 22px; }
+  button { width: 260px; font-size: 1rem; padding: 15px; }
+  input { padding: 12px; font-size: 0.95rem; }
+  label { font-size: 1rem; }
 }
