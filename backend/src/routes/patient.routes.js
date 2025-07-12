@@ -8,5 +8,6 @@ router.get('/check-rut', patientController.checkRutExists); // Nueva ruta
 router.get('/search', patientController.searchPatientByEmail); // Ruta para obtener pacientes por correo electrónico
 router.post('/', patientController.createPatient);
 router.put('/:id', patientController.updatePatient); // Nueva ruta
+router.get('/:id', patientController.getPatientById);
 
 module.exports = router;

@@ -1,0 +1,24 @@
+<h2>Historial Clínico del Médico</h2>
+
+<table>
+  <thead>
+  <tr>
+    <th>Paciente</th>
+    <th>Fecha</th>
+    <th>Hora</th>
+    <th>Motivo</th>
+    <th>Estado</th>
+    <th>Prioridad</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let appointment of appointments">
+    <td>{{ appointment.patientFullName }}</td>
+    <td>{{ appointment.date }}</td>
+    <td>{{ appointment.time }}</td>
+    <td>{{ appointment.reason }}</td>
+    <td>{{ appointment.status }}</td>
+    <td>{{ appointment.priority}}</td>
+  </tr>
+  </tbody>
+</table>
