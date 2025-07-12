@@ -59,7 +59,6 @@ export class ManagePatientsComponent implements OnInit {
   loadPatients() {
     this.isLoading = true;
     
-    // Mostrar loading
     Swal.fire({
       title: 'Cargando Pacientes...',
       text: 'Por favor espera',
@@ -70,8 +69,11 @@ export class ManagePatientsComponent implements OnInit {
         Swal.showLoading();
       }
     });
-
-    this.patientService.getAllPatients().subscribe({
+  
+    // ✅ Cargar todos los pacientes (activos e inactivos para admin)
+    const includeInactive = this.userRole === 'admin';
+    
+    this.patientService.getAllPatients(includeInactive).subscribe({
       next: (patients) => {
         this.patients = patients;
         this.filteredPatients = [...patients];
@@ -219,35 +221,243 @@ export class ManagePatientsComponent implements OnInit {
     if (this.userRole !== 'admin') {
       Swal.fire({
         title: 'Acceso Denegado',
-        text: 'Solo los administradores pueden eliminar pacientes.',
+        text: 'Solo los administradores pueden desactivar pacientes.',
         icon: 'warning',
         confirmButtonText: 'Entendido',
         confirmButtonColor: '#ffc107'
       });
       return;
     }
-
+  
+    // ✅ CORREGIR: Verificar estado usando active (0 = inactivo, 1 = activo)
+    if (patient.active === 0 || patient.active === false) {
+      this.showInactivePatientOptions(patient);
+      return;
+    }
+  
     Swal.fire({
-      title: '¿Estás seguro?',
+      title: '¿Desactivar paciente?',
       html: `
-        <p>¿Deseas eliminar al paciente <strong>${patient.name} ${patient.paternalLastName}</strong>?</p>
-        <p style="color: #dc3545; font-size: 0.9rem;">Esta acción no se puede deshacer.</p>
+        <p>¿Deseas desactivar al paciente <strong>${patient.name} ${patient.paternalLastName}</strong>?</p>
+        <p style="color: #856404; font-size: 0.9rem;">
+          <i class="fas fa-info-circle"></i> El paciente será desactivado pero mantendrá su historial médico.
+        </p>
+        <p style="color: #6c757d; font-size: 0.8rem;">
+          <strong>✅ Ventajas:</strong> Se puede reactivar en cualquier momento y conserva todas las citas médicas.
+        </p>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonColor: '#ffc107',
+      denyButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: '🔒 Desactivar',
+      denyButtonText: '🗑️ Eliminar Permanente',
+      cancelButtonText: '❌ Cancelar',
+      allowOutsideClick: false,
+      allowEscapeKey: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.deactivatePatient(patient);
+      } else if (result.isDenied) {
+        this.permanentDeletePatient(patient);
+      }
+    });
+  }
+  
+  // ✅ NUEVO: Opciones para pacientes inactivos
+  private showInactivePatientOptions(patient: any) {
+    Swal.fire({
+      title: 'Paciente Inactivo',
+      html: `
+        <p>El paciente <strong>${patient.name} ${patient.paternalLastName}</strong> está desactivado.</p>
+        <p style="color: #6c757d; font-size: 0.9rem;">¿Qué acción deseas realizar?</p>
+      `,
+      icon: 'info',
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonColor: '#28a745',
+      denyButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: '✅ Reactivar',
+      denyButtonText: '🗑️ Eliminar Permanente',
+      cancelButtonText: '❌ Cancelar',
+      allowOutsideClick: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.reactivatePatient(patient);
+      } else if (result.isDenied) {
+        this.permanentDeletePatient(patient);
+      }
+    });
+  }
+  
+  // ✅ NUEVO: Desactivar paciente
+  private deactivatePatient(patient: any) {
+    Swal.fire({
+      title: 'Desactivando paciente...',
+      text: 'Por favor espera',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
+    this.patientService.deactivatePatient(patient.id.toString()).subscribe({
+      next: (response) => {
+        console.log('Paciente desactivado exitosamente:', response);
+        Swal.fire({
+          title: 'Paciente Desactivado',
+          text: `${patient.name} ${patient.paternalLastName} ha sido desactivado exitosamente.`,
+          icon: 'success',
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#28a745',
+          timer: 3000,
+          timerProgressBar: true
+        });
+        this.loadPatients();
+      },
+      error: (error) => {
+        console.error('Error desactivando paciente:', error);
+        
+        let errorMessage = 'No se pudo desactivar el paciente.';
+        if (error.status === 400) {
+          errorMessage = 'El paciente ya está desactivado.';
+        }
+        
+        Swal.fire({
+          title: 'Error al Desactivar',
+          text: errorMessage,
+          icon: 'error',
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    });
+  }
+  
+  // ✅ NUEVO: Reactivar paciente
+  private reactivatePatient(patient: any) {
+    Swal.fire({
+      title: 'Reactivando paciente...',
+      text: 'Por favor espera',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
+    this.patientService.reactivatePatient(patient.id.toString()).subscribe({
+      next: (response) => {
+        console.log('Paciente reactivado exitosamente:', response);
+        Swal.fire({
+          title: 'Paciente Reactivado',
+          text: `${patient.name} ${patient.paternalLastName} ha sido reactivado exitosamente.`,
+          icon: 'success',
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#28a745',
+          timer: 3000,
+          timerProgressBar: true
+        });
+        this.loadPatients();
+      },
+      error: (error) => {
+        console.error('Error reactivando paciente:', error);
+        
+        let errorMessage = 'No se pudo reactivar el paciente.';
+        if (error.status === 400) {
+          errorMessage = 'El paciente ya está activo.';
+        }
+        
+        Swal.fire({
+          title: 'Error al Reactivar',
+          text: errorMessage,
+          icon: 'error',
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    });
+  }
+  
+  // ✅ NUEVO: Eliminación permanente (solo casos extremos)
+  private permanentDeletePatient(patient: any) {
+    Swal.fire({
+      title: '⚠️ ELIMINACIÓN PERMANENTE',
+      html: `
+        <p><strong>¿Estás absolutamente seguro?</strong></p>
+        <p>Esto eliminará permanentemente a <strong>${patient.name} ${patient.paternalLastName}</strong> del sistema.</p>
+        <p style="color: #dc3545; font-size: 0.9rem;">
+          <strong>⚠️ ADVERTENCIA:</strong> Esta acción NO se puede deshacer.
+        </p>
+        <p style="color: #6c757d; font-size: 0.8rem;">
+          <strong>Nota:</strong> Si el paciente tiene historial médico, se recomienda mantenerlo desactivado.
+        </p>
       `,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#dc3545',
       cancelButtonColor: '#6c757d',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      confirmButtonText: '🗑️ Eliminar Permanentemente',
+      cancelButtonText: '❌ Cancelar',
+      allowOutsideClick: false,
+      allowEscapeKey: false
     }).then((result) => {
       if (result.isConfirmed) {
-        // Aquí implementarías la eliminación cuando tengas el endpoint
+        this.executePermanentDelete(patient);
+      }
+    });
+  }
+  
+  // ✅ NUEVO: Ejecutar eliminación permanente
+  private executePermanentDelete(patient: any) {
+    Swal.fire({
+      title: 'Eliminando permanentemente...',
+      text: 'Por favor espera',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
+    this.patientService.deletePatient(patient.id.toString()).subscribe({
+      next: (response) => {
+        console.log('Paciente eliminado permanentemente:', response);
         Swal.fire({
-          title: 'Función no disponible',
-          text: 'La eliminación de pacientes aún no está implementada por seguridad.',
-          icon: 'info',
+          title: 'Paciente Eliminado',
+          text: `${patient.name} ${patient.paternalLastName} ha sido eliminado permanentemente del sistema.`,
+          icon: 'success',
           confirmButtonText: 'Entendido',
-          confirmButtonColor: this.getThemeColor()
+          confirmButtonColor: '#28a745',
+          timer: 3000,
+          timerProgressBar: true
+        });
+        this.loadPatients();
+      },
+      error: (error) => {
+        console.error('Error eliminando paciente permanentemente:', error);
+        
+        let errorMessage = 'No se pudo eliminar el paciente permanentemente.';
+        
+        if (error.status === 400) {
+          errorMessage = error.error.message || 'Debe desactivar el paciente primero.';
+        } else if (error.status === 409) {
+          errorMessage = 'El paciente tiene historial médico asociado. Se recomienda mantenerlo desactivado.';
+        }
+        
+        Swal.fire({
+          title: 'Error al Eliminar',
+          text: errorMessage,
+          icon: 'error',
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#dc3545'
         });
       }
     });

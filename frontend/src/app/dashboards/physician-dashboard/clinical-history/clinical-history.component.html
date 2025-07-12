@@ -29,7 +29,7 @@
         <select [(ngModel)]="priorityFilter" (change)="filterAppointments()" class="filter-select">
           <option value="">Todas las prioridades</option>
           <option value="high">Alta</option>
-          <option value="medium">Media</option>
+          <option value="normal">Normal</option>
           <option value="low">Baja</option>
         </select>
       </div>
@@ -183,13 +183,6 @@
                         (click)="viewAppointmentDetails(appointment)"
                         title="Ver detalles ">👁️
                   <i class="fas fa-eye "></i>
-                </button>
-                <button class="btn-action btn-notes" 
-                        (click)="viewNotes(appointment)"
-                        title="Ver notas médicas"
-                        *ngIf="appointment.status === 'completed'">
-                        AAAAAAAAAAAAAAAAAAAAA
-                  <i class="fas fa-file-medical"></i>
                 </button>
                 <button class="btn-action btn-edit" 
                         (click)="editAppointment(appointment)"

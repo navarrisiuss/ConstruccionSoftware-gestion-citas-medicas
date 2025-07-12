@@ -15,37 +15,45 @@ export class PatientService {
     return this.http.post<Patient>(this.apiUrl, patient);
   }
 
-  // Nuevo método para obtener todos los pacientes
-  getAllPatients(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+  //Permitir incluir pacientes inactivos
+  getAllPatients(includeInactive: boolean = false): Observable<any[]> {
+    const params = includeInactive ? '?includeInactive=true' : '';
+    return this.http.get<any[]>(`${this.apiUrl}${params}`);
   }
 
-  // Método para verificar RUT
-  checkRutExists(rut: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/check-rut?rut=${rut}`);
+  checkRutExists(rut: string, includeInactive: boolean = false): Observable<any> {
+    const params = includeInactive ? `&includeInactive=true` : '';
+    return this.http.get<any>(`${this.apiUrl}/check-rut?rut=${rut}${params}`);
   }
 
-  // Método para verificar correo electrónico
   checkEmailExists(email: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/check-email?email=${email}`);
   }
 
-  // Método para actualizar paciente
   updatePatient(id: string, patient: Patient): Observable<Patient> {
     return this.http.put<Patient>(`${this.apiUrl}/${id}`, patient);
   }
 
-  // Método para obtener paciente por ID
-  getPatientById(id: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  getPatientById(id: string, includeInactive: boolean = false): Observable<any> {
+    const params = includeInactive ? '?includeInactive=true' : '';
+    return this.http.get<any>(`${this.apiUrl}/${id}${params}`);
   }
 
-  // Método para eliminar paciente (para implementar después)
+  //esactivar paciente (soft delete)
+  deactivatePatient(id: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/deactivate`, {});
+  }
+
+  //Reactivar paciente
+  reactivatePatient(id: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/reactivate`, {});
+  }
+
+  //eliminación permanente (solo admin)
   deletePatient(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/delete?${id}`);
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
-  // Método para buscar pacientes por correo electrónico
   searchPatientsByEmail(email: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/search?email=${email}`);
   }

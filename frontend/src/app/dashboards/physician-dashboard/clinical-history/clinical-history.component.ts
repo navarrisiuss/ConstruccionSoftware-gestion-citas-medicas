@@ -259,48 +259,6 @@ export class ClinicalHistoryComponent implements OnInit {
     
   }
 
-  viewNotes(appointment: any): void {
-    console.log('Ver notas médicas:', appointment);
-    // Implementar vista de notas médicas
-    Swal.fire({
-      title: 'Notas Médicas',
-      html: `
-        <div class="medical-notes" style="text-align: left;">
-          <div class="patient-info" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <h4 style="margin-top: 0; color: #495057;">Información del Paciente</h4>
-            <div><strong>Paciente:</strong> ${appointment.patientFullName}</div>
-            <div><strong>Fecha de Cita:</strong> ${appointment.date}</div>
-            <div><strong>Hora:</strong> ${appointment.time}</div>
-          </div>
-          
-          <div class="notes-section">
-            <h4 style="color: #495057; margin-bottom: 15px;">Notas Médicas</h4>
-            <div class="notes-content" style="background: white; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; min-height: 200px; max-height: 300px; overflow-y: auto;">
-              ${appointment.notes ? appointment.notes : '<em style="color: #6c757d;">No hay notas médicas registradas para esta cita.</em>'}
-            </div>
-          </div>
-          
-          ${appointment.status === 'completed' ? `
-            <div class="additional-info" style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px;">
-              <h5 style="margin-top: 0; color: #0056b3;">Información Adicional</h5>
-              <div><strong>Motivo de Consulta:</strong> ${appointment.reason}</div>
-              <div><strong>Estado:</strong> ${this.getStatusText(appointment.status)}</div>
-              <div><strong>Prioridad:</strong> ${this.getPriorityText(appointment.priority)}</div>
-            </div>
-          ` : ''}
-        </div>
-      `,
-      width: '700px',
-      showCloseButton: true,
-      showConfirmButton: true,
-      confirmButtonText: 'Cerrar',
-      confirmButtonColor: '#3085d6',
-      customClass: {
-        popup: 'medical-notes-modal',
-        htmlContainer: 'medical-notes-container'
-      }
-    });
-  }
 
   editAppointment(appointment: any): void {
     console.log('Editar cita:', appointment);
@@ -369,7 +327,7 @@ export class ClinicalHistoryComponent implements OnInit {
         const reason = (document.getElementById('editReason') as HTMLTextAreaElement).value;
         const notes = (document.getElementById('editNotes') as HTMLTextAreaElement).value;
 
-        if (!date || !time || !reason.trim()) {
+        if (!date || !time ) {
           Swal.showValidationMessage('Por favor complete todos los campos obligatorios');
           return false;
         }
