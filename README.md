@@ -49,8 +49,15 @@ npm run install-all
             phone VARCHAR(20),
             address TEXT,
             gender ENUM('M', 'F', 'Otro') NOT NULL,
+            active BOOLEAN DEFAULT TRUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            
+            -- Índices para optimización
+            INDEX idx_active (active),
+            INDEX idx_email (email),
+            INDEX idx_rut (rut),
+            INDEX idx_created_at (created_at)
         );
 
         Tabla de Médicos:
@@ -162,11 +169,13 @@ npm run install-all
             ('Patricia', 'Hernández', 'Morales', 'patricia.hernandez@mediconnect.com', 'medico123', 'Ginecología', 'MC005', '+56912345682');
 
         Pacientes de ejemplo:
-            INSERT INTO patients (name, paternalLastName, maternalLastName, email, password, rut, birthDate, phone, address, gender) VALUES
-            ('Pedro', 'Silva', 'Contreras', 'pedro.silva@email.com', 'paciente123', '12345678-9', '1990-05-15', '+56912345683', 'Av. Principal 123', 'M'),
-            ('Laura', 'Morales', 'Vega', 'laura.morales@email.com', 'paciente123', '87654321-0', '1985-08-22', '+56912345684', 'Calle Secundaria 456', 'F'),
-            ('Roberto', 'Jiménez', 'Castro', 'roberto.jimenez@email.com', 'paciente123', '11223344-5', '1975-12-03', '+56912345685', 'Pasaje Los Álamos 789', 'M'),
-            ('Carmen', 'Vargas', 'Rojas', 'carmen.vargas@email.com', 'paciente123', '55667788-1', '1992-03-18', '+56912345686', 'Av. Las Flores 321', 'F');
+            INSERT INTO patients (name, paternalLastName, maternalLastName, email, password, rut, birthDate, phone, address, gender, active) VALUES
+            ('Pedro', 'Silva', 'Contreras', 'pedro.silva@email.com', 'paciente123', '12345678-9', '1990-05-15', '+56912345683', 'Av. Principal 123', 'M', TRUE),
+            ('Laura', 'Morales', 'Vega', 'laura.morales@email.com', 'paciente123', '87654321-0', '1985-08-22', '+56912345684', 'Calle Secundaria 456', 'F', TRUE),
+            ('Roberto', 'Jiménez', 'Castro', 'roberto.jimenez@email.com', 'paciente123', '11223344-5', '1975-12-03', '+56912345685', 'Pasaje Los Álamos 789', 'M', TRUE),
+            ('Carmen', 'Vargas', 'Rojas', 'carmen.vargas@email.com', 'paciente123', '55667788-1', '1992-03-18', '+56912345686', 'Av. Las Flores 321', 'F', TRUE),
+            -- Ejemplo de paciente inactivo para pruebas
+            ('Paciente', 'Inactivo', 'Prueba', 'inactivo@email.com', 'paciente123', '99887766-4', '1980-01-01', '+56912345689', 'Dirección de Prueba', 'M', FALSE);
 
         Asistente de ejemplo:
             INSERT INTO assistants (name, paternalLastName, maternalLastName, email, password, phone) VALUES
@@ -252,21 +261,25 @@ npm run frontend
 - ✅ Actualizar información personal
 - ✅ Ver especialidades disponibles
 
-## 🏥 Asistentes
-
-- ✅ Gestionar citas de todos los pacientes
-- ✅ Ver calendario completo
-- ✅ Agendar citas en nombre de pacientes
-- ✅ Manejar confirmaciones y cancelaciones
-- ✅ Agregar notas administrativas
-
 ## 👑 Administradores
 
 - ✅ Gestión completa de usuarios
+- ✅ **Activar/Desactivar pacientes (soft delete)**
+- ✅ **Ver pacientes activos e inactivos**
+- ✅ **Eliminación permanente (casos extremos)**
 - ✅ Estadísticas del sistema
 - ✅ Administrar médicos y especialidades
 - ✅ Control total de citas
 - ✅ Configuración del sistema
+
+## 🏥 Asistentes
+
+- ✅ Gestionar citas de pacientes activos
+- ✅ Ver calendario completo
+- ✅ Agendar citas en nombre de pacientes
+- ✅ **Verificar estado de pacientes**
+- ✅ Manejar confirmaciones y cancelaciones
+- ✅ Agregar notas administrativas
 
 ## Desarrollo con Angular
 
@@ -305,11 +318,15 @@ Los archivos compilados se almacenarán en el directorio frontend/dist/
 
 ### 🧑‍🤝‍🧑 Pacientes
 
-- `GET /api/patients` - Obtener todos los pacientes
+- `GET /api/patients` - Obtener todos los pacientes activos
+- `GET /api/patients?includeInactive=true` - Obtener todos los pacientes (activos e inactivos)
 - `POST /api/patients` - Registrar nuevo paciente
 - `PUT /api/patients/:id` - Actualizar paciente
-- `DELETE /api/patients/:id` - Eliminar paciente
-
+- `PATCH /api/patients/:id/deactivate` - Desactivar paciente (soft delete)
+- `PATCH /api/patients/:id/reactivate` - Reactivar paciente
+- `DELETE /api/patients/:id` - Eliminación permanente (solo admin, pacientes sin historial)
+- `GET /api/patients/check-rut?rut=:rut&includeInactive=true` - Verificar RUT incluyendo inactivos
+- `GET /api/patients/:id?includeInactive=true` - Obtener paciente por ID incluyendo inactivos
 ---
 
 ### 👨‍⚕️ Médicos
@@ -358,6 +375,21 @@ Pruebas Unitarias (Frontend)
 cd frontend
 ng test
 ```
+## 🔒 Consideraciones de Seguridad y Datos
+
+### 📋 Gestión de Estados de Pacientes
+
+- **Soft Delete**: Los pacientes se desactivan en lugar de eliminarse permanentemente
+- **Preservación de Historial**: Mantiene integridad de datos médicos históricos
+- **Reversibilidad**: Los pacientes inactivos pueden reactivarse en cualquier momento
+- **Eliminación Permanente**: Solo disponible para administradores y pacientes sin historial médico
+
+### 🛡️ Políticas de Retención de Datos
+
+- **Pacientes Activos**: Acceso completo a todas las funcionalidades
+- **Pacientes Inactivos**: Preserva historial médico, bloquea nuevas citas
+- **Datos Protegidos**: RUT, email y información médica se mantienen seguros
+- **Auditoría**: Timestamps de creación y actualización para trazabilidad
 
 # 📚 Recursos Adicionales
 
@@ -371,10 +403,94 @@ ng test
 
 # 📝 Notas de Versión
 
-### v1.0.0
+### v1.2.0 - Gestión Avanzada de Pacientes y Citas 
+
+#### 🆕 Nuevas Funcionalidades
+
+**🧑‍🤝‍🧑 Gestión Avanzada de Pacientes:**
+- ✅ **Sistema de Soft Delete** - Desactivación de pacientes en lugar de eliminación
+- ✅ **Reactivación de Pacientes** - Los pacientes inactivos pueden reactivarse
+- ✅ **Filtros por Estado** - Ver pacientes activos e inactivos por separado
+- ✅ **Eliminación Permanente Controlada** - Solo para administradores y casos especiales
+- ✅ **Preservación de Historial** - Mantiene integridad de datos médicos
+
+**📅 Mejoras en Gestión de Citas:**
+- ✅ **Edición de Citas Médicas** - Modificar citas existentes preservando el estado
+- ✅ **Formateo Automático de Fechas** - Conversión automática entre formatos DD/MM/YYYY y YYYY-MM-DD
+- ✅ **Validaciones Mejoradas** - Prevención de citas en fechas pasadas
+- ✅ **Estados de Cita Avanzados** - Mejor manejo de estados y transiciones
+- ✅ **Notas Administrativas** - Sistema de notas para asistentes y administradores
+
+**🎨 Mejoras en Interfaz de Usuario:**
+- ✅ **Botones de Estado Modernos** - Diseño profesional con gradientes y efectos
+- ✅ **Indicadores Visuales** - Estados claros para pacientes activos/inactivos
+- ✅ **Tooltips Informativos** - Ayuda contextual en todos los botones
+- ✅ **Animaciones Suaves** - Efectos de transición y hover mejorados
+- ✅ **Responsive Design Mejorado** - Adaptación perfecta a dispositivos móviles
+
+**🔒 Seguridad y Auditoría:**
+- ✅ **Timestamps de Auditoría** - Registro de creación y actualización
+- ✅ **Validación de Permisos** - Control de acceso por rol de usuario
+- ✅ **Manejo de Errores Robusto** - Mensajes específicos y informativos
+- ✅ **Logging Detallado** - Seguimiento de todas las operaciones
+
+#### 🔧 Mejoras Técnicas
+
+**Backend:**
+- ✅ **Nuevos Endpoints** - `/deactivate`, `/reactivate` para gestión de estados
+- ✅ **Queries Optimizadas** - Índices mejorados para rendimiento
+- ✅ **Validaciones de Negocio** - Reglas de negocio más estrictas
+- ✅ **Manejo de Estados** - Gestión consistente de active/inactive
+
+**Frontend:**
+- ✅ **Componentes Reutilizables** - Mejor arquitectura de componentes
+- ✅ **Servicios Mejorados** - PatientService con nuevos métodos
+- ✅ **Loading Indicators** - Feedback visual durante operaciones
+- ✅ **Modales Informativos** - SweetAlert2 con información detallada
+
+**Base de Datos:**
+- ✅ **Migración de Esquema** - Soporte para columna `active` en tabla patients
+- ✅ **Compatibilidad** - Funciona con bases de datos existentes
+- ✅ **Índices Optimizados** - Mejor rendimiento en consultas por estado
+
+#### 🛠️ Correcciones de Bugs
+
+- ✅ **Formato de Fecha en Edición** - Corregido problema de carga de fechas en modales
+- ✅ **Error 404 en Eliminación** - Solucionado endpoint incorrecto
+- ✅ **Validación de Tipos** - Corregidos errores de TypeScript
+- ✅ **Estado de Citas** - Preservación correcta del estado al editar
+- ✅ **Responsive en Móviles** - Ajustes de diseño para pantallas pequeñas
+
+### v1.1.3 - Sistema Base 
 
 - ✅ Sistema completo de gestión de citas
 - ✅ Cuatro roles de usuario implementados
 - ✅ Chatbot IA integrado
 - ✅ Diseño responsive completo
 - ✅ API RESTful completa
+
+---
+
+### v1.1.2 - Funcionalidades Médicas 
+- ✅ Calendario médico interactivo
+- ✅ Gestión de notas médicas
+- ✅ Sistema de prioridades en citas
+- ✅ Reportes y estadísticas
+
+---
+
+### v1.1.1 - Funcionalidades Base 
+
+- ✅ Sistema de autenticación
+- ✅ CRUD básico de pacientes y médicos
+- ✅ Gestión básica de citas
+- ✅ Dashboard por roles
+
+---
+
+### v1.0.0 - Lanzamiento Inicial 
+
+- ✅ Arquitectura frontend/backend separada
+- ✅ Base de datos MySQL
+- ✅ Estructura de proyecto Angular + Node.js
+- ✅ Configuración inicial
