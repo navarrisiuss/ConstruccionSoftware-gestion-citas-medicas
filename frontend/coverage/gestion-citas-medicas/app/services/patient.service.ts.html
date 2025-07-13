@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">25% </span>
+                <span class="strong">62.5% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>4/16</span>
+                <span class='fraction'>10/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">44.44% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>4/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">18.18% </span>
+                <span class="strong">54.54% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>2/11</span>
+                <span class='fraction'>6/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">25% </span>
+                <span class="strong">62.5% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>4/16</span>
+                <span class='fraction'>10/16</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -131,31 +131,18 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -164,8 +151,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -176,6 +171,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -199,9 +199,9 @@ export class PatientService {
   }
 &nbsp;
   //Permitir incluir pacientes inactivos
-<span class="fstat-no" title="function not covered" >  getAllPatients(</span>includeInactive: boolean = <span class="branch-0 cbranch-no" title="branch not covered" >false)</span>: Observable&lt;any[]&gt; {
-    const params = <span class="cstat-no" title="statement not covered" >includeInactive ? '?includeInactive=true' : '';</span>
-<span class="cstat-no" title="statement not covered" >    return this.http.get&lt;any[]&gt;(`${this.apiUrl}${params}`);</span>
+  getAllPatients(includeInactive: boolean = false): Observable&lt;any[]&gt; {
+    const params = includeInactive ? <span class="branch-0 cbranch-no" title="branch not covered" >'?includeInactive=true' </span>: '';
+    return this.http.get&lt;any[]&gt;(`${this.apiUrl}${params}`);
   }
 &nbsp;
 <span class="fstat-no" title="function not covered" >  checkRutExists(</span>rut: string, includeInactive: boolean = <span class="branch-0 cbranch-no" title="branch not covered" >false)</span>: Observable&lt;any&gt; {
@@ -213,13 +213,13 @@ export class PatientService {
 <span class="cstat-no" title="statement not covered" >    return this.http.get&lt;any&gt;(`${this.apiUrl}/check-email?email=${email}`);</span>
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  updatePatient(</span>id: string, patient: Patient): Observable&lt;Patient&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.http.put&lt;Patient&gt;(`${this.apiUrl}/${id}`, patient);</span>
+  updatePatient(id: string, patient: Patient): Observable&lt;Patient&gt; {
+    return this.http.put&lt;Patient&gt;(`${this.apiUrl}/${id}`, patient);
   }
 &nbsp;
-<span class="fstat-no" title="function not covered" >  getPatientById(</span>id: string, includeInactive: boolean = <span class="branch-0 cbranch-no" title="branch not covered" >false)</span>: Observable&lt;any&gt; {
-    const params = <span class="cstat-no" title="statement not covered" >includeInactive ? '?includeInactive=true' : '';</span>
-<span class="cstat-no" title="statement not covered" >    return this.http.get&lt;any&gt;(`${this.apiUrl}/${id}${params}`);</span>
+  getPatientById(id: string, includeInactive: boolean = false): Observable&lt;any&gt; {
+    const params = includeInactive ? <span class="branch-0 cbranch-no" title="branch not covered" >'?includeInactive=true' </span>: '';
+    return this.http.get&lt;any&gt;(`${this.apiUrl}/${id}${params}`);
   }
 &nbsp;
   //esactivar paciente (soft delete)
@@ -233,8 +233,8 @@ export class PatientService {
   }
 &nbsp;
   //eliminación permanente (solo admin)
-<span class="fstat-no" title="function not covered" >  deletePatient(</span>id: string): Observable&lt;any&gt; {
-<span class="cstat-no" title="statement not covered" >    return this.http.delete&lt;any&gt;(`${this.apiUrl}/${id}`);</span>
+  deletePatient(id: string): Observable&lt;any&gt; {
+    return this.http.delete&lt;any&gt;(`${this.apiUrl}/${id}`);
   }
 &nbsp;
 <span class="fstat-no" title="function not covered" >  searchPatientsByEmail(</span>email: string): Observable&lt;any[]&gt; {
@@ -247,7 +247,7 @@ export class PatientService {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-07-13T01:09:36.560Z
+                at 2025-07-13T03:31:15.493Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
