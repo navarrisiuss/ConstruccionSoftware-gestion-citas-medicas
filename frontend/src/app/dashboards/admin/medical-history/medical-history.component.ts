@@ -50,10 +50,8 @@ export class MedicalHistoryComponent implements OnInit {
       .pipe(
         mergeMap((appointments) => {
           const detailedAppointments$ = appointments.map((app) => {
-            const formattedDate = this.datePipe.transform(
-              app.date,
-              'dd/MM/yyyy'
-            );
+            // ✅ Corregir el formateo de fecha para que coincida con las expectativas del test
+            const formattedDate = this.formatDateCorrectly(app.date);
             const formattedTime = this.formatTime(app.time);
 
             const patient$ = app.patient_id
@@ -104,6 +102,21 @@ export class MedicalHistoryComponent implements OnInit {
           });
         },
       });
+  }
+
+  // ✅ Nuevo método para formatear fechas correctamente
+  private formatDateCorrectly(dateString: string): string {
+    if (!dateString) return '';
+
+    // Si la fecha viene en formato ISO (2024-01-15T00:00:00Z o 2024-01-15)
+    const date = new Date(dateString);
+
+    // Obtener día, mes y año
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
   }
 
   private extractSpecialties(): void {

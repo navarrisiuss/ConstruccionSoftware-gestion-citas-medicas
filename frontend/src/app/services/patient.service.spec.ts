@@ -11,6 +11,7 @@ describe('PatientService', () => {
   let service: PatientService;
   let httpMock: HttpTestingController;
   let mockPatient: Patient;
+  const apiUrl = 'http://localhost:3000/api/patients';
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -27,9 +28,9 @@ describe('PatientService', () => {
       'juan@test.com',
       'password123',
       '12345678-9',
-      new Date('1990-01-01'),
-      '56912345678',
-      'Av. Principal 123',
+      new Date('1980-01-01'),
+      '+56912345678',
+      'Calle Falsa 123',
       Gender.Male
     );
   });
@@ -59,7 +60,7 @@ describe('PatientService', () => {
         );
       });
 
-      const req = httpMock.expectOne('http://localhost:3000/api/patients');
+      const req = httpMock.expectOne(apiUrl);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(mockPatient);
       req.flush(mockResponse);
@@ -73,26 +74,123 @@ describe('PatientService', () => {
         },
       });
 
-      const req = httpMock.expectOne('http://localhost:3000/api/patients');
+      const req = httpMock.expectOne(apiUrl);
       req.flush(
         { message: 'Invalid data' },
         { status: 400, statusText: 'Bad Request' }
       );
     });
+  });
 
-    it('should handle server error during registration', () => {
-      service.registerPatient(mockPatient).subscribe({
+  describe('getAllPatients', () => {
+    it('should get all active patients by default', () => {
+      const mockPatients = [
+        { id: '1', name: 'Juan', email: 'juan@test.com', active: true },
+        { id: '2', name: 'María', email: 'maria@test.com', active: true },
+      ];
+
+      service.getAllPatients().subscribe((patients) => {
+        expect(patients).toEqual(jasmine.arrayContaining(mockPatients));
+        expect(patients.length).toBe(2);
+      });
+
+      const req = httpMock.expectOne(apiUrl);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockPatients);
+    });
+  });
+
+  describe('getPatientById', () => {
+    it('should get patient by ID', () => {
+      const patientId = '1';
+      const mockResponse = {
+        id: patientId,
+        name: 'Juan',
+        email: 'juan@test.com',
+      };
+
+      service.getPatientById(patientId).subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/${patientId}`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+
+    it('should handle patient not found error', () => {
+      const patientId = '999';
+
+      service.getPatientById(patientId).subscribe({
         next: () => fail('should have failed'),
-        error: (error: any) => {
-          expect(error.status).toBe(500);
+        error: (error) => {
+          expect(error.status).toBe(404);
         },
       });
 
-      const req = httpMock.expectOne('http://localhost:3000/api/patients');
+      const req = httpMock.expectOne(`${apiUrl}/${patientId}`);
       req.flush(
-        { message: 'Internal server error' },
-        { status: 500, statusText: 'Internal Server Error' }
+        { message: 'Patient not found' },
+        { status: 404, statusText: 'Not Found' }
       );
+    });
+  });
+
+  describe('updatePatient', () => {
+    it('should update patient successfully', () => {
+      const patientId = '1';
+      const updatedPatient = new Patient(
+        'Juan Updated',
+        'Pérez',
+        'González',
+        'juan@test.com',
+        'password123',
+        '12345678-9',
+        new Date('1980-01-01'),
+        '+56912345678',
+        'Calle Falsa 123',
+        Gender.Male
+      );
+      const mockResponse = {
+        id: patientId,
+        name: 'Juan Updated',
+        email: 'juan@test.com',
+        paternalLastName: 'Pérez',
+        maternalLastName: 'González',
+        rut: '12345678-9',
+        phone: '+56912345678',
+        address: 'Calle Falsa 123',
+        gender: Gender.Male,
+      };
+
+      service.updatePatient(patientId, updatedPatient).subscribe((response) => {
+        expect(response).toEqual(
+          jasmine.objectContaining({
+            id: patientId,
+            name: 'Juan Updated',
+          })
+        );
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/${patientId}`);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual(updatedPatient);
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('deletePatient', () => {
+    it('should delete patient permanently', () => {
+      const patientId = '1';
+      const mockResponse = { message: 'Patient deleted permanently' };
+
+      service.deletePatient(patientId).subscribe((response) => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/${patientId}`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(mockResponse);
     });
   });
 });

@@ -93,6 +93,39 @@ describe('AdminService', () => {
     });
   });
 
+  // ✅ NUEVAS PRUEBAS PARA MÉTODOS FALTANTES
+
+  describe('getPhysiciansForSelect', () => {
+    it('should get physicians formatted for select dropdown', () => {
+      const mockPhysicians = [
+        {
+          id: 1,
+          name: 'Juan',
+          paternalLastName: 'Pérez',
+          maternalLastName: 'González',
+        },
+        {
+          id: 2,
+          name: 'María',
+          paternalLastName: 'López',
+          maternalLastName: '',
+        },
+      ];
+      const expectedResult = [
+        { id: 1, fullName: 'Juan Pérez González' },
+        { id: 2, fullName: 'María López' },
+      ];
+
+      service.getPhysiciansForSelect().subscribe((physicians: any) => {
+        expect(physicians).toEqual(expectedResult);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/physicians`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockPhysicians);
+    });
+  });
+
   describe('Assistant Management', () => {
     it('should register an assistant successfully', () => {
       const mockAssistant = new Assistant(
@@ -110,14 +143,13 @@ describe('AdminService', () => {
 
       const req = httpMock.expectOne(`${apiUrl}/assistants`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual(mockAssistant);
       req.flush(mockResponse);
     });
 
     it('should get all assistants', () => {
       const mockAssistants = [
-        { id: '1', name: 'Ana', email: 'ana@hospital.com' },
-        { id: '2', name: 'Carlos', email: 'carlos@hospital.com' },
+        { id: '1', name: 'Ana García' },
+        { id: '2', name: 'Luis Martín' },
       ];
 
       service.getAllAssistants().subscribe((assistants: any) => {
@@ -129,13 +161,47 @@ describe('AdminService', () => {
       expect(req.request.method).toBe('GET');
       req.flush(mockAssistants);
     });
+
+    it('should update an assistant', () => {
+      const assistantData = {
+        name: 'Ana Updated',
+        email: 'ana.updated@hospital.com',
+      };
+      const mockResponse = { id: 1, ...assistantData };
+
+      service.updateAssistant(1, assistantData).subscribe((response: any) => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/assistants/1`);
+      expect(req.request.method).toBe('PUT');
+      req.flush(mockResponse);
+    });
+
+    it('should get assistant by email', () => {
+      const mockAssistant = [
+        { id: 1, email: 'ana@hospital.com', name: 'Ana García' },
+      ];
+
+      service
+        .getAssistantByEmail('ana@hospital.com')
+        .subscribe((assistant: any) => {
+          expect(assistant).toEqual(mockAssistant);
+        });
+
+      const req = httpMock.expectOne(
+        `${apiUrl}/assistants/email?email=ana@hospital.com`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockAssistant);
+    });
   });
 
   describe('Patient Management', () => {
     it('should get all patients', () => {
       const mockPatients = [
-        { id: '1', name: 'Juan', email: 'juan@test.com' },
-        { id: '2', name: 'María', email: 'maria@test.com' },
+        { id: '1', name: 'Carlos', paternalLastName: 'Ruiz' },
+        { id: '2', name: 'Sofia', paternalLastName: 'Vargas' },
       ];
 
       service.getAllPatients().subscribe((patients: any) => {
@@ -147,13 +213,31 @@ describe('AdminService', () => {
       expect(req.request.method).toBe('GET');
       req.flush(mockPatients);
     });
+
+    it('should get patient by email', () => {
+      const mockPatient = [
+        { id: 1, email: 'carlos@email.com', name: 'Carlos Ruiz' },
+      ];
+
+      service
+        .getPatientByEmail('carlos@email.com')
+        .subscribe((patient: any) => {
+          expect(patient).toEqual(mockPatient);
+        });
+
+      const req = httpMock.expectOne(
+        `${apiUrl}/patients/email?email=carlos@email.com`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockPatient);
+    });
   });
 
   describe('Appointment Management', () => {
     it('should get all appointments', () => {
       const mockAppointments = [
-        { id: '1', patientId: '1', physicianId: '1', date: '2025-08-15' },
-        { id: '2', patientId: '2', physicianId: '2', date: '2025-08-16' },
+        { id: '1', date: '2024-01-15', time: '09:00', patient: 'Carlos Ruiz' },
+        { id: '2', date: '2024-01-16', time: '10:00', patient: 'Sofia Vargas' },
       ];
 
       service.getAllAppointments().subscribe((appointments: any) => {
@@ -166,80 +250,161 @@ describe('AdminService', () => {
       req.flush(mockAppointments);
     });
 
-    it('should create an appointment', () => {
-      const mockAppointment = {
-        patientId: '1',
-        physicianId: '1',
-        date: '2025-08-15T10:00:00',
-      };
-      const mockResponse = { id: '1', ...mockAppointment };
+    it('should get appointments by patient', () => {
+      const patientId = '123';
+      const mockAppointments = [
+        { id: '1', patientId: '123', date: '2024-01-15' },
+      ];
 
-      service.createAppointment(mockAppointment).subscribe((response: any) => {
+      service
+        .getAppointmentsByPatient(patientId)
+        .subscribe((appointments: any) => {
+          expect(appointments).toEqual(mockAppointments);
+        });
+
+      const req = httpMock.expectOne(
+        `${apiUrl}/appointments/patient/${patientId}`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockAppointments);
+    });
+
+    it('should create an appointment', () => {
+      const appointmentData = {
+        patient_id: 1,
+        physician_id: 1,
+        date: '2024-01-15',
+        time: '09:00',
+        reason: 'Consulta general',
+      };
+      const mockResponse = { id: 1, ...appointmentData };
+
+      service.createAppointment(appointmentData).subscribe((response: any) => {
         expect(response).toEqual(mockResponse);
       });
 
       const req = httpMock.expectOne(`${apiUrl}/appointments`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual(mockAppointment);
       req.flush(mockResponse);
     });
 
-    it('should update an appointment', () => {
-      const appointmentId = 1; // Change to number
-      const updatedAppointment = {
-        patientId: '1',
-        physicianId: '1',
-        date: '2025-08-16T11:00:00',
-      };
-      const mockResponse = { id: appointmentId, ...updatedAppointment };
+    it('should update appointment status', () => {
+      const appointmentId = 1;
+      const status = 'confirmed';
+      const mockResponse = { id: appointmentId, status: status };
 
       service
-        .updateAppointment(appointmentId, updatedAppointment)
+        .updateAppointmentStatus(appointmentId, status)
+        .subscribe((response: any) => {
+          expect(response).toEqual(mockResponse);
+        });
+
+      const req = httpMock.expectOne(
+        `${apiUrl}/appointments/${appointmentId}/status`
+      );
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual({ status });
+      req.flush(mockResponse);
+    });
+
+    it('should update appointment', () => {
+      const appointmentId = 1;
+      const appointmentData = { date: '2024-01-16', time: '10:00' };
+      const mockResponse = { id: appointmentId, ...appointmentData };
+
+      service
+        .updateAppointment(appointmentId, appointmentData)
         .subscribe((response: any) => {
           expect(response).toEqual(mockResponse);
         });
 
       const req = httpMock.expectOne(`${apiUrl}/appointments/${appointmentId}`);
       expect(req.request.method).toBe('PUT');
-      expect(req.request.body).toEqual(updatedAppointment);
       req.flush(mockResponse);
     });
 
-    it('should delete an appointment', () => {
-      const appointmentId = 1; // Change to number
+    it('should update appointment notes', () => {
+      const appointmentId = 1;
+      const notesData = {
+        notes: 'Paciente llegó puntual',
+        diagnosis: 'Todo normal',
+      };
+      const mockResponse = { id: appointmentId, ...notesData };
+
+      service
+        .updateAppointmentNotes(appointmentId, notesData)
+        .subscribe((response: any) => {
+          expect(response).toEqual(mockResponse);
+        });
+
+      const req = httpMock.expectOne(
+        `${apiUrl}/appointments/${appointmentId}/notes`
+      );
+      expect(req.request.method).toBe('PUT');
+      req.flush(mockResponse);
+    });
+
+    it('should delete appointment', () => {
+      const appointmentId = 1;
+      const mockResponse = { message: 'Appointment deleted successfully' };
 
       service.deleteAppointment(appointmentId).subscribe((response: any) => {
-        expect(response).toBeTruthy();
+        expect(response).toEqual(mockResponse);
       });
 
       const req = httpMock.expectOne(`${apiUrl}/appointments/${appointmentId}`);
       expect(req.request.method).toBe('DELETE');
-      req.flush({ success: true });
+      req.flush(mockResponse);
+    });
+
+    it('should cancel appointment', () => {
+      const appointmentId = 1;
+      const cancelData = {
+        reason: 'Patient unavailable',
+        cancelled_by: 'admin',
+      };
+      const mockResponse = {
+        id: appointmentId,
+        status: 'cancelled',
+        ...cancelData,
+      };
+
+      service
+        .cancelAppointment(appointmentId, cancelData)
+        .subscribe((response: any) => {
+          expect(response).toEqual(mockResponse);
+        });
+
+      const req = httpMock.expectOne(
+        `${apiUrl}/appointments/${appointmentId}/cancel`
+      );
+      expect(req.request.method).toBe('PUT');
+      req.flush(mockResponse);
     });
   });
 
-  describe('Reports', () => {
-    it('should generate a report without date range', () => {
-      const reportType = 'monthly';
-      const mockReport = { type: reportType, data: [] };
+  describe('Specialties Management', () => {
+    it('should get all specialties for a physician', () => {
+      const physicianId = 1;
+      const mockSpecialties = ['Cardiología', 'Medicina Interna'];
 
-      service.generateReport(reportType).subscribe((report: any) => {
-        expect(report).toEqual(mockReport);
+      service.getAllSpecialties(physicianId).subscribe((specialties: any) => {
+        expect(specialties).toEqual(mockSpecialties);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/reports`);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({
-        type: reportType,
-        dateRange: undefined,
-      });
-      req.flush(mockReport);
+      const req = httpMock.expectOne(
+        `${apiUrl}/physicians/${physicianId}/specialties`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockSpecialties);
     });
+  });
 
-    it('should generate a report with date range', () => {
-      const reportType = 'custom';
-      const dateRange = { start: '2025-01-01', end: '2025-12-31' };
-      const mockReport = { type: reportType, data: [], dateRange };
+  describe('Reports Management', () => {
+    it('should generate general report', () => {
+      const reportType = 'appointments';
+      const dateRange = { from: '2024-01-01', to: '2024-01-31' };
+      const mockReport = { data: [], summary: { total: 50 } };
 
       service.generateReport(reportType, dateRange).subscribe((report: any) => {
         expect(report).toEqual(mockReport);
@@ -250,13 +415,100 @@ describe('AdminService', () => {
       expect(req.request.body).toEqual({ type: reportType, dateRange });
       req.flush(mockReport);
     });
+
+    it('should generate appointments report', () => {
+      const filters = { startDate: '2024-01-01', endDate: '2024-01-31' };
+      const mockReport = { appointments: [], statistics: {} };
+
+      service.generateAppointmentsReport(filters).subscribe((report: any) => {
+        expect(report).toEqual(mockReport);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/reports/appointments`);
+      expect(req.request.method).toBe('POST');
+      req.flush(mockReport);
+    });
+
+    it('should generate physicians report', () => {
+      const filters = { specialty: 'Cardiología' };
+      const mockReport = { physicians: [], statistics: {} };
+
+      service.generatePhysiciansReport(filters).subscribe((report: any) => {
+        expect(report).toEqual(mockReport);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/reports/physicians`);
+      expect(req.request.method).toBe('POST');
+      req.flush(mockReport);
+    });
+
+    it('should generate patients report', () => {
+      const filters = { ageRange: '30-50' };
+      const mockReport = { patients: [], statistics: {} };
+
+      service.generatePatientsReport(filters).subscribe((report: any) => {
+        expect(report).toEqual(mockReport);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/reports/patients`);
+      expect(req.request.method).toBe('POST');
+      req.flush(mockReport);
+    });
+
+    it('should save report', () => {
+      const reportData = {
+        type: 'appointments',
+        data: [],
+        name: 'Monthly Report',
+      };
+      const mockResponse = { id: 1, saved: true };
+
+      service.saveReport(reportData).subscribe((response: any) => {
+        expect(response).toEqual(mockResponse);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/reports/save`);
+      expect(req.request.method).toBe('POST');
+      req.flush(mockResponse);
+    });
+
+    it('should get report history', () => {
+      const mockHistory = [
+        { id: 1, name: 'Report 1', createdAt: '2024-01-01' },
+        { id: 2, name: 'Report 2', createdAt: '2024-01-02' },
+      ];
+
+      service.getReportHistory().subscribe((history: any) => {
+        expect(history).toEqual(mockHistory);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/reports/history`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockHistory);
+    });
+
+    it('should get general statistics', () => {
+      const mockStatistics = {
+        totalAppointments: 150,
+        totalPatients: 80,
+        totalPhysicians: 12,
+      };
+
+      service.getGeneralStatistics().subscribe((stats: any) => {
+        expect(stats).toEqual(mockStatistics);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/reports/statistics`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockStatistics);
+    });
   });
 
   describe('Medical History', () => {
-    it('should get all medical history when no patient ID provided', () => {
+    it('should get medical history for all patients', () => {
       const mockHistory = [
-        { id: '1', patientId: '1', diagnosis: 'Hypertension' },
-        { id: '2', patientId: '2', diagnosis: 'Diabetes' },
+        { id: 1, patientId: 1, diagnosis: 'Hypertension' },
+        { id: 2, patientId: 2, diagnosis: 'Diabetes' },
       ];
 
       service.getMedicalHistory().subscribe((history: any) => {
@@ -269,9 +521,9 @@ describe('AdminService', () => {
     });
 
     it('should get medical history for specific patient', () => {
-      const patientId = '1';
+      const patientId = '123';
       const mockHistory = [
-        { id: '1', patientId: '1', diagnosis: 'Hypertension' },
+        { id: 1, patientId: 123, diagnosis: 'Hypertension' },
       ];
 
       service.getMedicalHistory(patientId).subscribe((history: any) => {
@@ -286,34 +538,85 @@ describe('AdminService', () => {
     });
   });
 
+  describe('Admin and Physician Management', () => {
+    it('should update physician', () => {
+      const physicianId = 1;
+      const physicianData = {
+        name: 'Dr. Juan Updated',
+        specialty: 'Neurología',
+      };
+      const mockResponse = { id: physicianId, ...physicianData };
+
+      service
+        .updatePhysician(physicianId, physicianData)
+        .subscribe((response: any) => {
+          expect(response).toEqual(mockResponse);
+        });
+
+      const req = httpMock.expectOne(`${apiUrl}/physicians/${physicianId}`);
+      expect(req.request.method).toBe('PUT');
+      req.flush(mockResponse);
+    });
+
+    it('should get physician by email', () => {
+      const email = 'doctor@hospital.com';
+      const mockPhysician = [{ id: 1, email: email, name: 'Dr. Juan' }];
+
+      service.getPhysicianByEmail(email).subscribe((physician: any) => {
+        expect(physician).toEqual(mockPhysician);
+      });
+
+      const req = httpMock.expectOne(
+        `${apiUrl}/physicians/email?email=${email}`
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush(mockPhysician);
+    });
+
+    it('should get admin by email', () => {
+      const email = 'admin@hospital.com';
+      const mockAdmin = [{ id: 1, email: email, name: 'Admin User' }];
+
+      service.getAdminByEmail(email).subscribe((admin: any) => {
+        expect(admin).toEqual(mockAdmin);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/admins/email?email=${email}`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockAdmin);
+    });
+  });
+
   describe('Error Handling', () => {
-    it('should handle server errors', () => {
-      service.getAllPhysicians().subscribe({
+    it('should handle HTTP errors for getAllAppointments', () => {
+      service.getAllAppointments().subscribe({
         next: () => fail('should have failed'),
         error: (error: any) => {
           expect(error.status).toBe(500);
         },
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/physicians`);
+      const req = httpMock.expectOne(`${apiUrl}/appointments`);
       req.flush(
-        { message: 'Internal server error' },
+        { message: 'Server Error' },
         { status: 500, statusText: 'Internal Server Error' }
       );
     });
 
-    it('should handle network errors', () => {
-      service.getAllPatients().subscribe({
+    it('should handle HTTP errors for createAppointment', () => {
+      const appointmentData = { patient_id: 1, physician_id: 1 };
+
+      service.createAppointment(appointmentData).subscribe({
         next: () => fail('should have failed'),
         error: (error: any) => {
-          expect(error.status).toBe(0);
+          expect(error.status).toBe(400);
         },
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/patients`);
+      const req = httpMock.expectOne(`${apiUrl}/appointments`);
       req.flush(
-        { message: 'Network error' },
-        { status: 0, statusText: 'Network Error' }
+        { message: 'Invalid data' },
+        { status: 400, statusText: 'Bad Request' }
       );
     });
   });

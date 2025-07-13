@@ -1,34 +1,28 @@
-import {Component, OnInit} from '@angular/core';
-import {AppointmentsService} from '../../../services/appointments.service';
-import {AuthService} from '../../../services/auth.service';
-import {PatientService} from '../../../services/patient.service';
-import {NgForOf, NgClass, NgIf, SlicePipe} from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { AppointmentsService } from '../../../services/appointments.service';
+import { AuthService } from '../../../services/auth.service';
+import { PatientService } from '../../../services/patient.service';
+import { NgForOf, NgClass, NgIf, SlicePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-clinical-history',
   templateUrl: './clinical-history.component.html',
-  imports: [
-    NgForOf,
-    NgClass,
-    NgIf,
-    SlicePipe,
-    FormsModule
-  ],
-  styleUrls: ['./clinical-history.component.css']
+  imports: [NgForOf, NgClass, NgIf, SlicePipe, FormsModule],
+  styleUrls: ['./clinical-history.component.css'],
 })
 export class ClinicalHistoryComponent implements OnInit {
   appointments: any[] = [];
   filteredAppointments: any[] = [];
   physicianId!: number;
-  
+
   // Filtros
   searchTerm: string = '';
   statusFilter: string = '';
   priorityFilter: string = '';
-  
+
   // Ordenamiento
   sortField: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -50,57 +44,70 @@ export class ClinicalHistoryComponent implements OnInit {
     }
   }
 
-
   goToPhysicianDashboard(): void {
     this.router.navigate(['/physician-dashboard']);
   }
 
   loadAppointmentsByPhysician(): void {
-    this.appointmentsService.getAppointmentsByPhysician(this.physicianId).subscribe({
-      next: (data) => {
-        const formattedAppointments = data.map((appointment: any) => {
-          return {
-            ...appointment,
-            date: this.formatDate(appointment.date),
-            time: this.formatTime(appointment.time),
-            patientFullName: ''
-          };
-        });
-
-        this.appointments = formattedAppointments;
-        this.filteredAppointments = [...this.appointments];
-
-        this.appointments.forEach((appointment, index) => {
-          this.patientService.getPatientById(appointment.patient_id).subscribe({
-            next: (patientData) => {
-              const fullName = `${patientData.name} ${patientData.paternalLastName} ${patientData.maternalLastName}`;
-              this.appointments[index].patientFullName = fullName;
-              this.filteredAppointments = [...this.appointments];
-            },
-            error: (error) => {
-              console.error(`Error al obtener paciente con ID ${appointment.patient_id}:`, error);
-              this.appointments[index].patientFullName = 'Paciente no encontrado';
-              this.filteredAppointments = [...this.appointments];
-            }
+    this.appointmentsService
+      .getAppointmentsByPhysician(this.physicianId)
+      .subscribe({
+        next: (data) => {
+          const formattedAppointments = data.map((appointment: any) => {
+            return {
+              ...appointment,
+              date: this.formatDate(appointment.date),
+              time: this.formatTime(appointment.time),
+              patientFullName: '',
+            };
           });
-        });
-      },
-      error: (error) => {
-        console.error('Error al obtener citas:', error);
-      }
-    });
+
+          this.appointments = formattedAppointments;
+          this.filteredAppointments = [...this.appointments];
+
+          this.appointments.forEach((appointment, index) => {
+            this.patientService
+              .getPatientById(appointment.patient_id.toString())
+              .subscribe({
+                next: (patientData) => {
+                  const fullName = `${patientData.name} ${patientData.paternalLastName} ${patientData.maternalLastName}`;
+                  this.appointments[index].patientFullName = fullName;
+                  this.filteredAppointments = [...this.appointments];
+                },
+                error: (error) => {
+                  console.error(
+                    `Error al obtener paciente con ID ${appointment.patient_id}:`,
+                    error
+                  );
+                  this.appointments[index].patientFullName =
+                    'Paciente no encontrado';
+                  this.filteredAppointments = [...this.appointments];
+                },
+              });
+          });
+        },
+        error: (error) => {
+          console.error('Error al obtener citas:', error);
+        },
+      });
   }
 
   // Filtros y búsqueda
   filterAppointments(): void {
-    this.filteredAppointments = this.appointments.filter(appointment => {
-      const matchesSearch = !this.searchTerm || 
-        appointment.patientFullName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        appointment.reason.toLowerCase().includes(this.searchTerm.toLowerCase());
-      
-      const matchesStatus = !this.statusFilter || appointment.status === this.statusFilter;
-      const matchesPriority = !this.priorityFilter || appointment.priority === this.priorityFilter;
-      
+    this.filteredAppointments = this.appointments.filter((appointment) => {
+      const patientName = appointment.patientFullName || '';
+      const reason = appointment.reason || '';
+
+      const matchesSearch =
+        !this.searchTerm ||
+        patientName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        reason.toLowerCase().includes(this.searchTerm.toLowerCase());
+
+      const matchesStatus =
+        !this.statusFilter || appointment.status === this.statusFilter;
+      const matchesPriority =
+        !this.priorityFilter || appointment.priority === this.priorityFilter;
+
       return matchesSearch && matchesStatus && matchesPriority;
     });
   }
@@ -124,12 +131,12 @@ export class ClinicalHistoryComponent implements OnInit {
     this.filteredAppointments.sort((a, b) => {
       let aValue = a[field];
       let bValue = b[field];
-      
+
       if (field === 'date') {
         aValue = new Date(a.date.split('/').reverse().join('-'));
         bValue = new Date(b.date.split('/').reverse().join('-'));
       }
-      
+
       if (aValue < bValue) return this.sortDirection === 'asc' ? -1 : 1;
       if (aValue > bValue) return this.sortDirection === 'asc' ? 1 : -1;
       return 0;
@@ -138,24 +145,30 @@ export class ClinicalHistoryComponent implements OnInit {
 
   // Estadísticas
   getCompletedCount(): number {
-    return this.appointments.filter(apt => apt.status === 'completed').length;
+    return this.appointments.filter((apt) => apt.status === 'completed').length;
   }
 
   getHighPriorityCount(): number {
-    return this.appointments.filter(apt => apt.priority === 'high').length;
+    return this.appointments.filter((apt) => apt.priority === 'high').length;
   }
 
   getUniquePatients(): number {
-    const uniquePatients = new Set(this.appointments.map(apt => apt.patient_id));
+    const uniquePatients = new Set(
+      this.appointments.map((apt) => apt.patient_id)
+    );
     return uniquePatients.size;
   }
 
   // Utilidades de formato
   private formatDate(dateString: string): string {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
+    // Ajustar por zona horaria para evitar problemas con fechas
+    const adjustedDate = new Date(
+      date.getTime() + date.getTimezoneOffset() * 60000
+    );
+    const day = String(adjustedDate.getDate()).padStart(2, '0');
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, '0');
+    const year = adjustedDate.getFullYear();
     return `${day}/${month}/${year}`;
   }
 
@@ -174,50 +187,76 @@ export class ClinicalHistoryComponent implements OnInit {
   // Métodos para iconos y texto
   getStatusIcon(status: string): string {
     switch (status) {
-      case 'completed': return 'fas fa-check-circle';
-      case 'cancelled': return 'fas fa-times-circle';
-      case 'scheduled': return 'fas fa-clock';
-      default: return 'fas fa-question-circle';
+      case 'completed':
+        return 'fas fa-check-circle';
+      case 'cancelled':
+        return 'fas fa-times-circle';
+      case 'scheduled':
+        return 'fas fa-clock';
+      default:
+        return 'fas fa-question-circle';
     }
   }
 
   getStatusText(status: string): string {
     switch (status) {
-      case 'completed': return 'Completada';
-      case 'cancelled': return 'Cancelada';
-      case 'scheduled': return 'Programada';
-      default: return status;
+      case 'completed':
+        return 'Completada';
+      case 'cancelled':
+        return 'Cancelada';
+      case 'scheduled':
+        return 'Programada';
+      default:
+        return status;
     }
   }
 
   getPriorityIcon(priority: string): string {
     switch (priority) {
-      case 'high': return 'fas fa-exclamation-triangle';
-      case 'medium': return 'fas fa-minus-circle';
-      case 'low': return 'fas fa-chevron-down';
-      default: return 'fas fa-circle';
+      case 'high':
+        return 'fas fa-exclamation-triangle';
+      case 'medium':
+        return 'fas fa-minus-circle';
+      case 'low':
+        return 'fas fa-chevron-down';
+      default:
+        return 'fas fa-circle';
     }
   }
 
   getPriorityText(priority: string): string {
     switch (priority) {
-      case 'high': return 'Alta';
-      case 'medium': return 'Media';
-      case 'low': return 'Baja';
-      default: return priority;
+      case 'high':
+        return 'Alta';
+      case 'medium':
+        return 'Media';
+      case 'low':
+        return 'Baja';
+      default:
+        return priority;
     }
   }
 
   // Acciones
   viewAppointmentDetails(appointment: any): void {
     console.log('Ver detalles de cita:', appointment);
+
+    // Verificar que el appointment y patientFullName existan
+    if (!appointment) {
+      console.error('No se proporcionó información de la cita');
+      return;
+    }
+
+    const patientName =
+      appointment.patientFullName || 'Información del paciente no disponible';
+
     // Implementar modal swal.fire
     Swal.fire({
       title: 'Detalles de la Cita',
       html: `
       <div class="appointment-details" style="text-align: left;">
         <div class="detail-row">
-        <strong>Paciente:</strong> ${appointment.patientFullName}
+        <strong>Paciente:</strong> ${patientName}
         </div>
         <div class="detail-row">
         <strong>Fecha:</strong> ${appointment.date} (${this.getDayOfWeek(appointment.date)})
@@ -240,45 +279,57 @@ export class ClinicalHistoryComponent implements OnInit {
         </span>
         </div>
         <div class="detail-row">
-        <strong>Motivo:</strong> ${appointment.reason}
+        <strong>Motivo:</strong> ${appointment.reason || 'No especificado'}
         </div>
-        ${appointment.notes ? `
+        ${
+          appointment.notes
+            ? `
         <div class="detail-row">
           <strong>Notas:</strong> ${appointment.notes}
         </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
       `,
       width: '600px',
       confirmButtonText: 'Cerrar',
       confirmButtonColor: '#3085d6',
       customClass: {
-      popup: 'appointment-modal'
-      }
+        popup: 'appointment-modal',
+      },
     });
-    
   }
-
 
   editAppointment(appointment: any): void {
     console.log('Editar cita:', appointment);
+
+    // Verificar que el appointment y patientFullName existan
+    if (!appointment) {
+      console.error('No se proporcionó información de la cita');
+      return;
+    }
+
+    const patientName =
+      appointment.patientFullName || 'Información del paciente no disponible';
+
     // Implementar edición de cita
     Swal.fire({
       title: 'Editar Cita',
       html: `
         <div class="edit-appointment-form" style="text-align: left;">
           <div class="patient-info" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <h4 style="margin-top: 0; color: #495057;">Paciente: ${appointment.patientFullName}</h4>
+            <h4 style="margin-top: 0; color: #495057;">Paciente: ${patientName}</h4>
           </div>
           
           <div class="form-group" style="margin-bottom: 15px;">
             <label style="display: block; margin-bottom: 5px; font-weight: bold;">Fecha:</label>
-            <input type="date" id="editDate" class="swal2-input" value="${appointment.date.split('/').reverse().join('-')}" style="width: 100%; margin: 0;">
+            <input type="date" id="editDate" class="swal2-input" value="${appointment.date ? appointment.date.split('/').reverse().join('-') : ''}" style="width: 100%; margin: 0;">
           </div>
           
           <div class="form-group" style="margin-bottom: 15px;">
             <label style="display: block; margin-bottom: 5px; font-weight: bold;">Hora:</label>
-            <input type="time" id="editTime" class="swal2-input" value="${appointment.time}" style="width: 100%; margin: 0;">
+            <input type="time" id="editTime" class="swal2-input" value="${appointment.time || ''}" style="width: 100%; margin: 0;">
           </div>
           
           <div class="form-group" style="margin-bottom: 15px;">
@@ -301,7 +352,7 @@ export class ClinicalHistoryComponent implements OnInit {
           
           <div class="form-group" style="margin-bottom: 15px;">
             <label style="display: block; margin-bottom: 5px; font-weight: bold;">Motivo:</label>
-            <textarea id="editReason" class="swal2-textarea" placeholder="Motivo de la cita" style="width: 100%; margin: 0; min-height: 80px;">${appointment.reason}</textarea>
+            <textarea id="editReason" class="swal2-textarea" placeholder="Motivo de la cita" style="width: 100%; margin: 0; min-height: 80px;">${appointment.reason || ''}</textarea>
           </div>
           
           <div class="form-group" style="margin-bottom: 15px;">
@@ -317,18 +368,30 @@ export class ClinicalHistoryComponent implements OnInit {
       confirmButtonColor: '#28a745',
       cancelButtonColor: '#dc3545',
       customClass: {
-        popup: 'edit-appointment-modal'
+        popup: 'edit-appointment-modal',
       },
       preConfirm: () => {
-        const date = (document.getElementById('editDate') as HTMLInputElement).value;
-        const time = (document.getElementById('editTime') as HTMLInputElement).value;
-        const status = (document.getElementById('editStatus') as HTMLSelectElement).value;
-        const priority = (document.getElementById('editPriority') as HTMLSelectElement).value;
-        const reason = (document.getElementById('editReason') as HTMLTextAreaElement).value;
-        const notes = (document.getElementById('editNotes') as HTMLTextAreaElement).value;
+        const date = (document.getElementById('editDate') as HTMLInputElement)
+          .value;
+        const time = (document.getElementById('editTime') as HTMLInputElement)
+          .value;
+        const status = (
+          document.getElementById('editStatus') as HTMLSelectElement
+        ).value;
+        const priority = (
+          document.getElementById('editPriority') as HTMLSelectElement
+        ).value;
+        const reason = (
+          document.getElementById('editReason') as HTMLTextAreaElement
+        ).value;
+        const notes = (
+          document.getElementById('editNotes') as HTMLTextAreaElement
+        ).value;
 
-        if (!date || !time ) {
-          Swal.showValidationMessage('Por favor complete todos los campos obligatorios');
+        if (!date || !time) {
+          Swal.showValidationMessage(
+            'Por favor complete todos los campos obligatorios'
+          );
           return false;
         }
 
@@ -338,9 +401,9 @@ export class ClinicalHistoryComponent implements OnInit {
           status: status,
           priority: priority,
           reason: reason.trim(),
-          notes: notes.trim()
+          notes: notes.trim(),
         };
-      }
+      },
     }).then((result) => {
       if (result.isConfirmed && result.value) {
         const updatedData = {
@@ -350,31 +413,32 @@ export class ClinicalHistoryComponent implements OnInit {
           status: result.value.status,
           priority: result.value.priority,
           reason: result.value.reason,
-          notes: result.value.notes
+          notes: result.value.notes,
         };
 
-        this.appointmentsService.updateAppointment(appointment.id, updatedData).subscribe({
-          next: (response) => {
-            Swal.fire({
-              icon: 'success',
-              title: '¡Éxito!',
-              text: 'La cita ha sido actualizada correctamente',
-              confirmButtonColor: '#3085d6'
-            });
-            this.loadAppointmentsByPhysician();
-          },
-          error: (error: any) => {
-            console.error('Error al actualizar la cita:', error);
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: 'No se pudo actualizar la cita. Por favor intente nuevamente.',
-              confirmButtonColor: '#3085d6'
-            });
-          }
-        });
+        this.appointmentsService
+          .updateAppointment(appointment.id, updatedData)
+          .subscribe({
+            next: (response) => {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'La cita ha sido actualizada correctamente',
+                confirmButtonColor: '#3085d6',
+              });
+              this.loadAppointmentsByPhysician();
+            },
+            error: (error: any) => {
+              console.error('Error al actualizar la cita:', error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo actualizar la cita. Por favor intente nuevamente.',
+                confirmButtonColor: '#3085d6',
+              });
+            },
+          });
       }
     });
   }
-
 }

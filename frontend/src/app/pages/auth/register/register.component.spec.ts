@@ -9,12 +9,19 @@ import { PatientService } from '../../../services/patient.service';
 import { Patient } from '../../../models/patient.model';
 import { Gender } from '../../../models/gender.enum';
 
+// Mock Swal globally
+declare const global: any;
+let mockSwal: any;
+
+// Mock services
 let mockPatientService: jasmine.SpyObj<PatientService>;
 let mockRouter: jasmine.SpyObj<Router>;
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
+  let mockPatientService: jasmine.SpyObj<PatientService>;
+  let mockRouter: jasmine.SpyObj<Router>;
 
   beforeEach(waitForAsync(() => {
     mockPatientService = jasmine.createSpyObj('PatientService', [

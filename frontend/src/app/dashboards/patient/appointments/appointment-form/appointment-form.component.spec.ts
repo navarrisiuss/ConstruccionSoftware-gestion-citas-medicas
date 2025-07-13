@@ -1,15 +1,15 @@
 import {
   ComponentFixture,
   TestBed,
+  waitForAsync,
   fakeAsync,
   tick,
   flush,
-  waitForAsync,
 } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { AppointmentFormComponent } from './appointment-form.component';
@@ -19,7 +19,7 @@ import { PhysicianService } from '../../../../services/physician.service';
 import { Physician } from '../../../../models/physician.model';
 
 // Mock SweetAlert2
-const mockSwal = {
+const mockSwalGlobal = {
   fire: jasmine.createSpy('fire').and.returnValue({
     then: jasmine.createSpy('then').and.callFake((callback: any) => {
       if (callback) {
@@ -30,9 +30,6 @@ const mockSwal = {
   }),
 };
 
-// Override the global Swal
-(window as any).Swal = mockSwal;
-
 describe('AppointmentFormComponent', () => {
   let component: AppointmentFormComponent;
   let fixture: ComponentFixture<AppointmentFormComponent>;
@@ -40,6 +37,7 @@ describe('AppointmentFormComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
   let mockPhysicianService: jasmine.SpyObj<PhysicianService>;
   let mockRouter: jasmine.SpyObj<Router>;
+  let mockSwal: any;
 
   const mockCurrentUser = {
     id: 1,
@@ -124,6 +122,10 @@ describe('AppointmentFormComponent', () => {
     ]);
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
+    // Override the global Swal in the test setup
+    (window as any).Swal = mockSwalGlobal;
+    mockSwal = mockSwalGlobal; // Assign to local variable for easier access
+
     TestBed.configureTestingModule({
       imports: [
         AppointmentFormComponent,
@@ -141,9 +143,7 @@ describe('AppointmentFormComponent', () => {
 
     fixture = TestBed.createComponent(AppointmentFormComponent);
     component = fixture.componentInstance;
-  }));
 
-  beforeEach(() => {
     // Reset all mocks before each test
     mockAdminService.getAllAppointments.calls.reset();
     mockAdminService.createAppointment.calls.reset();
@@ -151,8 +151,8 @@ describe('AppointmentFormComponent', () => {
     mockPhysicianService.getAllPhysicians.calls.reset();
     mockRouter.navigate.calls.reset();
     mockRouter.navigate.and.returnValue(Promise.resolve(true));
-    mockSwal.fire.calls.reset();
-  });
+    mockSwalGlobal.fire.calls.reset();
+  }));
 
   describe('Component Initialization', () => {
     it('should create component', () => {

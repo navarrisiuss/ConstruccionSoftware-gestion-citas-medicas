@@ -7,7 +7,7 @@ import { Assistant } from '../models/assistant.model';
 import { map } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AdminService {
   private apiUrl = 'http://localhost:3000/api';
@@ -24,16 +24,17 @@ export class AdminService {
   }
 
   getPhysiciansForSelect(): Observable<{ id: number; fullName: string }[]> {
-       return this.http.get<any[]>(`${this.apiUrl}/physicians`)
-         .pipe(
-           map((list: any[]) =>
-             list.map(p => ({
-               id: p.id,
-               fullName: `${p.name} ${p.paternalLastName} ${p.maternalLastName}`
-             }))
-           )
-         );
-    }
+    return this.http.get<any[]>(`${this.apiUrl}/physicians`).pipe(
+      map((list: any[]) =>
+        list.map((p) => ({
+          id: p.id,
+          fullName: [p.name, p.paternalLastName, p.maternalLastName]
+            .filter((part) => part && part.trim().length > 0)
+            .join(' '),
+        }))
+      )
+    );
+  }
 
   // Gestión de asistentes
   registerAssistant(assistant: Assistant): Observable<Assistant> {
@@ -56,7 +57,9 @@ export class AdminService {
   }
 
   getAppointmentsByPatient(patientId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/appointments/patient/${patientId}`);
+    return this.http.get<any[]>(
+      `${this.apiUrl}/appointments/patient/${patientId}`
+    );
   }
 
   //Crear una cita
@@ -64,16 +67,34 @@ export class AdminService {
     console.log('AdminService: enviando cita al servidor:', appointment);
     return this.http.post<any>(`${this.apiUrl}/appointments`, appointment);
   }
-  updateAppointmentStatus(appointmentId: number, status: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/appointments/${appointmentId}/status`, { status });
+  updateAppointmentStatus(
+    appointmentId: number,
+    status: string
+  ): Observable<any> {
+    return this.http.put(
+      `${this.apiUrl}/appointments/${appointmentId}/status`,
+      { status }
+    );
   }
 
-  updateAppointment(appointmentId: number, appointmentData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/appointments/${appointmentId}`, appointmentData);
+  updateAppointment(
+    appointmentId: number,
+    appointmentData: any
+  ): Observable<any> {
+    return this.http.put(
+      `${this.apiUrl}/appointments/${appointmentId}`,
+      appointmentData
+    );
   }
 
-  updateAppointmentNotes(appointmentId: number, notesData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/appointments/${appointmentId}/notes`, notesData);
+  updateAppointmentNotes(
+    appointmentId: number,
+    notesData: any
+  ): Observable<any> {
+    return this.http.put(
+      `${this.apiUrl}/appointments/${appointmentId}/notes`,
+      notesData
+    );
   }
   //Metodo para eliminar una cita
   deleteAppointment(appointmentId: number): Observable<any> {
@@ -82,17 +103,25 @@ export class AdminService {
 
   //Metodo para obtener todas las especialidades de un medico
   getAllSpecialties(physicianId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/physicians/${physicianId}/specialties`);
+    return this.http.get<any[]>(
+      `${this.apiUrl}/physicians/${physicianId}/specialties`
+    );
   }
-  
+
   // ✅ Cancelar cita con detalles
   cancelAppointment(appointmentId: number, cancelData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/appointments/${appointmentId}/cancel`, cancelData);
+    return this.http.put(
+      `${this.apiUrl}/appointments/${appointmentId}/cancel`,
+      cancelData
+    );
   }
 
   // Reportes
   generateReport(reportType: string, dateRange?: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/reports`, { type: reportType, dateRange });
+    return this.http.post<any>(`${this.apiUrl}/reports`, {
+      type: reportType,
+      dateRange,
+    });
   }
 
   generateAppointmentsReport(filters: any): Observable<any> {
@@ -121,9 +150,9 @@ export class AdminService {
 
   // Historiales médicos
   getMedicalHistory(patientId?: string): Observable<any[]> {
-    const url = patientId ?
-      `${this.apiUrl}/medical-history?patientId=${patientId}` :
-      `${this.apiUrl}/medical-history`;
+    const url = patientId
+      ? `${this.apiUrl}/medical-history?patientId=${patientId}`
+      : `${this.apiUrl}/medical-history`;
     return this.http.get<any[]>(url);
   }
 
@@ -132,14 +161,18 @@ export class AdminService {
   }
 
   getAssistantByEmail(email: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/assistants/email?email=${email}`);
+    return this.http.get<any[]>(
+      `${this.apiUrl}/assistants/email?email=${email}`
+    );
   }
   updatePhysician(id: number, physicianData: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/physicians/${id}`, physicianData);
   }
 
   getPhysicianByEmail(email: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/physicians/email?email=${email}`);
+    return this.http.get<any[]>(
+      `${this.apiUrl}/physicians/email?email=${email}`
+    );
   }
 
   getAdminByEmail(email: string): Observable<Admin[]> {
