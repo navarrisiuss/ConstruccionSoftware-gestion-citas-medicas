@@ -1,19 +1,18 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AppointmentFormAssistantComponent } from './appointment-form-assistant.component';
 
 describe('AppointmentFormAssistantComponent', () => {
   let component: AppointmentFormAssistantComponent;
   let fixture: ComponentFixture<AppointmentFormAssistantComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ AppointmentFormAssistantComponent ]
-    })
-    .compileComponents();
+      imports: [AppointmentFormAssistantComponent , HttpClientTestingModule],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

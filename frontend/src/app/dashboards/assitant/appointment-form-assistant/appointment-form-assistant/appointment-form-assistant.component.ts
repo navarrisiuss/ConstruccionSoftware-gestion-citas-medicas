@@ -141,12 +141,19 @@ export class AppointmentFormAssistantComponent implements OnInit {
         next: (list: any[]) => {
           console.log('Pacientes desde el servidor:', list);
           
-          this.patients = list.map(p => ({
-            id: p.id,
-            fullName: `${p.name} ${p.paternalLastName} ${p.maternalLastName}`,
-            rut: p.rut,
-            email: p.email
-          }));
+          this.patients = list.map(p => {
+            // 👇 Pega estos console.log aquí
+            console.log(`--- PASO 2: DATOS RECIBIDOS (COMPONENTE) --- name: [${p.name}], paternal: [${p.paternalLastName}], maternal: [${p.maternalLastName}]`);
+            const finalName = [p.name, p.paternalLastName, p.maternalLastName].filter(Boolean).join(' ');
+            console.log(`--- PASO 2.1: NOMBRE CONSTRUIDO --- "'${finalName}'"`);
+            
+            return {
+              id: p.id,
+              fullName: finalName,
+              rut: p.rut,
+              email: p.email
+            };
+          });
 
           this.filteredPatients = [...this.patients];
           console.log('Pacientes procesados:', this.patients);

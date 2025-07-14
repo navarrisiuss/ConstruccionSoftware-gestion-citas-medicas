@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ClinicalHistoryComponent } from './clinical-history.component';
 
 describe('ClinicalHistoryComponent', () => {
@@ -8,7 +8,7 @@ describe('ClinicalHistoryComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ClinicalHistoryComponent]
+      imports: [ClinicalHistoryComponent , HttpClientTestingModule],
     })
     .compileComponents();
 
