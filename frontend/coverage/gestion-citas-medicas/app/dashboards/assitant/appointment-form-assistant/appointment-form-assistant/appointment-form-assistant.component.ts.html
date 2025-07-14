@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">9.54% </span>
+                <span class="strong">9.22% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>38/398</span>
+                <span class='fraction'>37/401</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.66% </span>
+                <span class="strong">4.71% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>6/106</span>
+                <span class='fraction'>5/106</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">10.24% </span>
+                <span class="strong">9.86% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>38/371</span>
+                <span class='fraction'>37/375</span>
             </div>
         
             
@@ -1468,7 +1468,14 @@
 <a name='L1403'></a><a href='#L1403'>1403</a>
 <a name='L1404'></a><a href='#L1404'>1404</a>
 <a name='L1405'></a><a href='#L1405'>1405</a>
-<a name='L1406'></a><a href='#L1406'>1406</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L1406'></a><a href='#L1406'>1406</a>
+<a name='L1407'></a><a href='#L1407'>1407</a>
+<a name='L1408'></a><a href='#L1408'>1408</a>
+<a name='L1409'></a><a href='#L1409'>1409</a>
+<a name='L1410'></a><a href='#L1410'>1410</a>
+<a name='L1411'></a><a href='#L1411'>1411</a>
+<a name='L1412'></a><a href='#L1412'>1412</a>
+<a name='L1413'></a><a href='#L1413'>1413</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1600,7 +1607,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1612,6 +1619,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -3004,8 +3018,8 @@ export class AppointmentFormAssistantComponent implements OnInit {
         text: 'Debe iniciar sesión para gestionar citas',
         icon: 'warning',
         confirmButtonText: 'Ir a Login'
-      }).then(() =&gt; {
-        this.router.navigate(['/login']);
+      }).then(<span class="fstat-no" title="function not covered" >() =</span>&gt; {
+<span class="cstat-no" title="statement not covered" >        this.router.navigate(['/login']);</span>
       });
     }
   }
@@ -3016,12 +3030,19 @@ export class AppointmentFormAssistantComponent implements OnInit {
         next: <span class="fstat-no" title="function not covered" >(l</span>ist: any[]) =&gt; {
 <span class="cstat-no" title="statement not covered" >          console.log('Pacientes desde el servidor:', list);</span>
           
-<span class="cstat-no" title="statement not covered" >          this.patients = list.map(<span class="fstat-no" title="function not covered" >p </span>=&gt; (<span class="cstat-no" title="statement not covered" >{</span></span>
-            id: p.id,
-            fullName: `${p.name} ${p.paternalLastName} ${p.maternalLastName}`,
-            rut: p.rut,
-            email: p.email
-          }));
+<span class="cstat-no" title="statement not covered" >          this.patients = list.map(<span class="fstat-no" title="function not covered" >p </span>=&gt; {</span>
+            // 👇 Pega estos console.log aquí
+<span class="cstat-no" title="statement not covered" >            console.log(`--- PASO 2: DATOS RECIBIDOS (COMPONENTE) --- name: [${p.name}], paternal: [${p.paternalLastName}], maternal: [${p.maternalLastName}]`);</span>
+            const finalName = <span class="cstat-no" title="statement not covered" >[p.name, p.paternalLastName, p.maternalLastName].filter(Boolean).join(' ');</span>
+<span class="cstat-no" title="statement not covered" >            console.log(`--- PASO 2.1: NOMBRE CONSTRUIDO --- "'${finalName}'"`);</span>
+            
+<span class="cstat-no" title="statement not covered" >            return {</span>
+              id: p.id,
+              fullName: finalName,
+              rut: p.rut,
+              email: p.email
+            };
+          });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >          this.filteredPatients = [...this.patients];</span>
 <span class="cstat-no" title="statement not covered" >          console.log('Pacientes procesados:', this.patients);</span>
@@ -4285,7 +4306,7 @@ export class AppointmentFormAssistantComponent implements OnInit {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-07-14T01:53:38.301Z
+                at 2025-07-14T02:28:02.767Z
             </div>
         <script src="../../../../../prettify.js"></script>
         <script>
