@@ -1,19 +1,18 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AdminAppointmentManagerComponent } from './admin-appointment-manager.component';
 
 describe('AdminAppointmentManagerComponent', () => {
   let component: AdminAppointmentManagerComponent;
   let fixture: ComponentFixture<AdminAppointmentManagerComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ AdminAppointmentManagerComponent ]
-    })
-    .compileComponents();
+      imports: [AdminAppointmentManagerComponent , HttpClientTestingModule],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

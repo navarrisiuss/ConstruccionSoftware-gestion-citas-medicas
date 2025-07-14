@@ -24,16 +24,17 @@ export class AdminService {
   }
 
   getPhysiciansForSelect(): Observable<{ id: number; fullName: string }[]> {
-       return this.http.get<any[]>(`${this.apiUrl}/physicians`)
-         .pipe(
-           map((list: any[]) =>
-             list.map(p => ({
-               id: p.id,
-               fullName: `${p.name} ${p.paternalLastName} ${p.maternalLastName}`
-             }))
-           )
-         );
-    }
+    return this.http.get<any[]>(`${this.apiUrl}/physicians`)
+      .pipe(
+        map((list: any[]) =>
+          list.map(p => ({
+            id: p.id,
+            // 👇 LÍNEA CORREGIDA
+            fullName: [p.name, p.paternalLastName, p.maternalLastName].filter(Boolean).join(' ')
+          }))
+        )
+      );
+  }
 
   // Gestión de asistentes
   registerAssistant(assistant: Assistant): Observable<Assistant> {
